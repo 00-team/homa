@@ -3,6 +3,7 @@ SPACER="======================================"
 EG="🔷"
 
 cd /thora/
+export $(head -n 1 .secrets.env | xargs) # DATABASE_URL
 
 OLD_COMMIT=$(git rev-parse HEAD)
 
@@ -28,33 +29,34 @@ if check_diff "config/*.service"; then
     echo $SPACER
 fi
 
+cd web
 if [ ! -f web/main.db ] || check_diff "web/migrations/*"; then
     echo "$EG setup the web database"
-    export $(head -n 1 web/.secrets.env | xargs)
-    cd web ; cargo sqlx database setup ; cd ..
+    cargo sqlx database setup
     echo $SPACER
 fi
 
+if check_diff "web/src/* web/Cargo.toml"; then
+    echo "$EG cargo build web"
+    cargo build -r
+    systemctl restart thora.web
+    echo $SPACER
+fi
+
+cd ../bot
 if [ ! -f bot/main.db ] || check_diff "bot/migrations/*"; then
     echo "$EG setup the bot database"
-    export $(head -n 1 bot/.secrets.env | xargs)
-    cd bot ; cargo sqlx database setup ; cd ..
+    cargo sqlx database setup
     echo $SPACER
 fi
 
-if check_diff "bot/*"; then
+if check_diff "bot/src/* bot/Cargo.toml"; then
     echo "$EG cargo build bot"
-    cargo build -r -p bot
+    cargo build -r
     systemctl restart thora.bot
     echo $SPACER
 fi
 
-if check_diff "web/*"; then
-    echo "$EG cargo build bot"
-    cargo build -r -p web
-    systemctl restart thora.web
-    echo $SPACER
-fi
 
 echo "Deploy is Done! ✅"
 
