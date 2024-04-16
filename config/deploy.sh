@@ -30,13 +30,13 @@ if check_diff "config/*.service"; then
 fi
 
 cd web
-if [ ! -f web/main.db ] || check_diff "web/migrations/*"; then
+if [ ! -f web/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the web database"
     cargo sqlx database setup
     echo $SPACER
 fi
 
-if check_diff "web/src/* web/Cargo.toml"; then
+if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build web"
     cargo build -r
     systemctl restart thora.web
@@ -44,13 +44,13 @@ if check_diff "web/src/* web/Cargo.toml"; then
 fi
 
 cd ../bot
-if [ ! -f bot/main.db ] || check_diff "bot/migrations/*"; then
+if [ ! -f bot/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the bot database"
     cargo sqlx database setup
     echo $SPACER
 fi
 
-if check_diff "bot/src/* bot/Cargo.toml"; then
+if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build bot"
     cargo build -r
     systemctl restart thora.bot

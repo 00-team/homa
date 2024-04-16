@@ -78,16 +78,16 @@ async fn main() -> anyhow::Result<()> {
                 .filter_command::<Command>()
                 .endpoint(handle_commands),
         );
-        // .branch(dptree::case![State::Menu].endpoint(menu))
-        // .branch(
-        //     dptree::case![State::AddRecord { id }]
-        //         .branch(
-        //             dptree::entry()
-        //                 .filter_command::<RecordCommand>()
-        //                 .endpoint(record_commands),
-        //         )
-        //         .endpoint(add_record),
-        // );
+    // .branch(dptree::case![State::Menu].endpoint(menu))
+    // .branch(
+    //     dptree::case![State::AddRecord { id }]
+    //         .branch(
+    //             dptree::entry()
+    //                 .filter_command::<RecordCommand>()
+    //                 .endpoint(record_commands),
+    //         )
+    //         .endpoint(add_record),
+    // );
 
     Dispatcher::builder(bot, handler)
         .dependencies(dptree::deps![storage, pool])
@@ -107,8 +107,7 @@ async fn handle_commands(
 ) -> HR {
     match cmd {
         Command::Start(arg) => {
-bot.send_message(msg.chat.id, "hi")
-                .await?;
+            bot.send_message(msg.chat.id, "hi from thora").await?;
             // let arg = parse_start_args(&arg);
             // match arg {
             //     StartArg::Record { id, slug: _ } => {
@@ -123,7 +122,7 @@ bot.send_message(msg.chat.id, "hi")
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
                 .await?;
-        },
+        }
         // Command::NewRecord => new_record(bot, dlg, pool, msg).await?,
         // Command::GetRecord { id } => get_record(bot, pool, id, msg).await?,
         // Command::ListRecord => list_record(bot, pool, msg).await?,
