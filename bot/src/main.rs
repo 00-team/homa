@@ -11,11 +11,13 @@ use teloxide::dispatching::dialogue::serializer::Json;
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use teloxide::prelude::*;
-use teloxide::types::ParseMode::MarkdownV2;
-use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
+// use teloxide::types::ParseMode::MarkdownV2;
+// use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use teloxide::utils::command::BotCommands;
 
 mod config;
+mod tools;
+
 use config::config;
 
 type Dialogue = dialogue::Dialogue<State, ErasedStorage<State>>;
@@ -107,7 +109,8 @@ async fn handle_commands(
 ) -> HR {
     match cmd {
         Command::Start(arg) => {
-            bot.send_message(msg.chat.id, "hi from thora 🤡").await?;
+            let arg = tools::parse_start_args(&arg);
+            bot.send_message(msg.chat.id, format!("arg: {arg:#?}")).await?;
             // let arg = parse_start_args(&arg);
             // match arg {
             //     StartArg::Record { id, slug: _ } => {
@@ -131,32 +134,4 @@ async fn handle_commands(
     Ok(())
 }
 
-#[derive(Debug)]
-enum StartArg {
-    Record { id: i64, slug: String },
-    None,
-}
 
-fn parse_start_args(arg: &str) -> StartArg {
-    let mut value = arg.split("-");
-    match value.nth(0) {
-        None => StartArg::None,
-        Some(key) => match key {
-            "record" => {
-                if let Some(id) = value.nth(0) {
-                    if let Ok(id) = id.parse::<i64>() {
-                        if let Some(slug) = value.nth(0) {
-                            return StartArg::Record {
-                                id,
-                                slug: slug.to_owned(),
-                            };
-                        }
-                    }
-                }
-
-                StartArg::None
-            }
-            _ => StartArg::None,
-        },
-    }
-}
