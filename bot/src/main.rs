@@ -6,13 +6,13 @@ use sqlx::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::sync::Arc;
-use teloxide::dispatching::dialogue;
+use teloxide::dispatching::dialogue::{self, GetChatId};
 use teloxide::dispatching::dialogue::serializer::Json;
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use teloxide::prelude::*;
 // use teloxide::types::ParseMode::MarkdownV2;
-// use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
+use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use teloxide::utils::command::BotCommands;
 
 mod config;
@@ -73,13 +73,18 @@ async fn main() -> anyhow::Result<()> {
             .await?
             .erase();
 
-    let handler = Update::filter_message()
-        .enter_dialogue::<Message, ErasedStorage<State>, State>()
+    let handler = dptree::entry()
         .branch(
-            dptree::entry()
-                .filter_command::<Command>()
-                .endpoint(handle_commands),
-        );
+            Update::filter_message()
+                .enter_dialogue::<Message, ErasedStorage<State>, State>()
+                .branch(
+                    dptree::entry()
+                        .filter_command::<Command>()
+                        .endpoint(handle_commands),
+                ),
+        )
+        .branch(Update::filter_callback_query().endpoint(cbq));
+
     // .branch(dptree::case![State::Menu].endpoint(menu))
     // .branch(
     //     dptree::case![State::AddRecord { id }]
@@ -110,7 +115,16 @@ async fn handle_commands(
     match cmd {
         Command::Start(arg) => {
             let arg = tools::parse_start_args(&arg);
-            bot.send_message(msg.chat.id, format!("arg: {arg:#?}")).await?;
+            let keyboard: Vec<Vec<InlineKeyboardButton>> =
+                vec![vec![InlineKeyboardButton::callback(
+                    "Tutorial 📖",
+                    "tutorial",
+                )]];
+            bot.send_message(msg.chat.id, "متن استارت")
+                .reply_markup(InlineKeyboardMarkup::new(keyboard))
+                .await?;
+            bot.send_message(msg.chat.id, format!("arg: {arg:#?}"))
+                .await?;
             // let arg = parse_start_args(&arg);
             // match arg {
             //     StartArg::Record { id, slug: _ } => {
@@ -125,10 +139,20 @@ async fn handle_commands(
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
                 .await?;
-        }
-        // Command::NewRecord => new_record(bot, dlg, pool, msg).await?,
-        // Command::GetRecord { id } => get_record(bot, pool, id, msg).await?,
-        // Command::ListRecord => list_record(bot, pool, msg).await?,
+        } // Command::NewRecord => new_record(bot, dlg, pool, msg).await?,
+          // Command::GetRecord { id } => get_record(bot, pool, id, msg).await?,
+          // Command::ListRecord => list_record(bot, pool, msg).await?,
+    }
+
+    Ok(())
+}
+
+
+async fn cbq(bot: Bot, q: CallbackQuery) -> HR {
+    bot.answer_callback_query(q.id.clone()).await?;
+    if let Some(msg) = &q.message {
+        bot.send_message(msg.chat.id, format!("{q:#?}")).await?;
+        bot.send_message(msg.chat.id, "hi this is gg").await?;
     }
 
     Ok(())
