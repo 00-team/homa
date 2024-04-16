@@ -107,7 +107,7 @@ async fn handle_commands(
 ) -> HR {
     match cmd {
         Command::Start(arg) => {
-            bot.send_message(msg.chat.id, "hi from thora").await?;
+            bot.send_message(msg.chat.id, "hi from thora 🤡").await?;
             // let arg = parse_start_args(&arg);
             // match arg {
             //     StartArg::Record { id, slug: _ } => {
