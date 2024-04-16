@@ -1,0 +1,16 @@
+[Unit]
+Description=Thora Web
+After=syslog.target
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/thora/web/
+EnvironmentFile=/thora/.secrets.env
+ExecStart=/thora/target/release/web
+KillSignal=SIGQUIT
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
