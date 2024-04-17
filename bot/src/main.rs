@@ -148,6 +148,8 @@ async fn handle_commands(
                 )],
                 [InlineKeyboardButton::callback("Buy 💰", KeyData::Buy)],
                 [InlineKeyboardButton::callback("Rent 💳", KeyData::Rent)],
+                [InlineKeyboardButton::callback("Iran", KeyData::Country(12))],
+                [InlineKeyboardButton::callback("USA", KeyData::Country(33))],
             ];
             let keyboard = [
                 [KeyboardButton::new("Buy 💰"), KeyboardButton::new("Rent 💳")],
