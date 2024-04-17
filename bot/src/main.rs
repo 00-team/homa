@@ -1,8 +1,6 @@
 use sqlx::SqlitePool;
 use std::env;
-use std::error::Error;
 use std::sync::Arc;
-use teloxide::dispatching::dialogue;
 use teloxide::dispatching::dialogue::serializer::Json;
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
@@ -15,67 +13,11 @@ use teloxide::utils::command::BotCommands;
 
 mod config;
 mod tools;
+mod types;
+mod state;
 
 use config::config;
-
-type Dialogue = dialogue::Dialogue<State, ErasedStorage<State>>;
-type HR = Result<(), Box<dyn Error + Send + Sync>>;
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub enum KeyData {
-    Unknown,
-    Tutorial,
-    Buy,
-    Rent,
-    Country(i64),
-}
-
-impl From<KeyData> for String {
-    fn from(value: KeyData) -> Self {
-        serde_json::to_string(&value).unwrap()
-    }
-}
-
-impl From<String> for KeyData {
-    fn from(value: String) -> Self {
-        serde_json::from_str(&value).unwrap_or(KeyData::Unknown)
-    }
-}
-
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
-pub enum PurchaseKind {
-    #[default]
-    Buy,
-    Rent,
-}
-
-#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
-pub enum State {
-    #[default]
-    Start,
-    Tutorial,
-    SelectService {
-        purchase_kind: PurchaseKind,
-    },
-    SelectCountry {
-        purchase_kind: PurchaseKind,
-        service: i64,
-    },
-    Confirm {
-        purchase_kind: PurchaseKind,
-        service: i64,
-        country: i64,
-    },
-}
-
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "snake_case")]
-pub enum Command {
-    Start(String),
-    Help,
-    /// user info
-    MyInfo,
-}
+use types::*;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -133,7 +75,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn handle_commands(
-    bot: Bot, dlg: Dialogue, pool: &SqlitePool, msg: Message, cmd: Command,
+    bot: Bot, chit: ChitChat, pool: &SqlitePool, msg: Message, cmd: Command,
 ) -> HR {
     match cmd {
         Command::Start(arg) => {
@@ -148,8 +90,6 @@ async fn handle_commands(
                 )],
                 [InlineKeyboardButton::callback("Buy 💰", KeyData::Buy)],
                 [InlineKeyboardButton::callback("Rent 💳", KeyData::Rent)],
-                [InlineKeyboardButton::callback("Iran", KeyData::Country(12))],
-                [InlineKeyboardButton::callback("USA", KeyData::Country(33))],
             ];
             let keyboard = [
                 [KeyboardButton::new("Buy 💰"), KeyboardButton::new("Rent 💳")],
@@ -189,7 +129,7 @@ async fn handle_commands(
 }
 
 async fn cbq(
-    bot: Bot, dlg: Dialogue, pool: &SqlitePool, q: CallbackQuery,
+    bot: Bot, chit: ChitChat, pool: &SqlitePool, q: CallbackQuery,
 ) -> HR {
     bot.answer_callback_query(q.id).await?;
     if q.message.is_none() || q.data.is_none() {
@@ -200,7 +140,34 @@ async fn cbq(
     let data = q.data.unwrap();
     let key: KeyData = data.into();
 
-    bot.send_message(msg.chat.id, format!("key: {:?}", key)).await?;
+    let state = chit.get_or_default().await?;
+    match state {
+        State::Start => {
+            match key {
+                KeyData::Buy => chit.update(State::SelectService { purchase_kind: PurchaseKind::Buy }).await?,
+                KeyData::Rent => chit.update(State::SelectService { purchase_kind: PurchaseKind::Rent }).await?,
+                _ => ()
+            }
+        },
+        _ => ()
+    }
+
+    // match key {
+    //     KeyData::Rent => match state {
+    //         State::Start => {
+    //             dlg.update(State::SelectService {
+    //                 purchase_kind: PurchaseKind::Rent,
+    //             })
+    //             .await?
+    //         }
+    //         _ => (),
+    //     },
+    //     KeyData::Buy => {}
+    //     KeyData::Country(id) => {}
+    //     _ => {}
+    // }
+    //
+    // bot.send_message(msg.chat.id, format!("key: {:?}", key)).await?;
 
     Ok(())
 }
