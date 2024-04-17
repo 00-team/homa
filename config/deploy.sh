@@ -22,10 +22,6 @@ function check_diff {
     fi
 }
 
-echo "🧹 removing the teloxide database"
-rm -rf /thora/bot/teloxide.db
-echo $SPACER
-
 if check_diff "config/*.service"; then
     echo "$EG reload the services"
     cp config/*.service /etc/systemd/system/ --force
@@ -57,6 +53,13 @@ fi
 if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build bot"
     cargo build -r
+    echo $SPACER
+
+    echo "🧹 removing the teloxide database"
+    rm -rf /thora/bot/teloxide.db
+    echo $SPACER
+
+    echo "🔥 restart thora bot"
     systemctl restart thora.bot
     echo $SPACER
 fi
