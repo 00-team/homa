@@ -138,9 +138,9 @@ async fn handle_commands(
             bot.send_message(msg.chat.id, KeyData::Rent).await?;
 
             let inline = [
-                [InlineKeyboardButton::callback("Tutorial 📖", "tutorial")],
-                [InlineKeyboardButton::callback("Buy Virtual Number", "buy")],
-                [InlineKeyboardButton::callback("Rent Virtual Number", "rent")],
+                [InlineKeyboardButton::callback("Tutorial 📖", KeyData::Tutorial)],
+                [InlineKeyboardButton::callback("Buy Virtual Number", KeyData::Buy)],
+                [InlineKeyboardButton::callback("Rent Virtual Number", KeyData::Rent)],
             ];
             let keyboard =
                 [[KeyboardButton::new("Hi")], [KeyboardButton::new("2")]];
