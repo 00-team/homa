@@ -23,9 +23,11 @@ type HR = Result<(), Box<dyn Error + Send + Sync>>;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub enum KeyData {
+    Unknown,
     Tutorial,
     Buy,
     Rent,
+    Country(i64),
 }
 
 impl From<KeyData> for String {
