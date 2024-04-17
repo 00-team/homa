@@ -31,7 +31,8 @@ function send_message {
 
 function check_status {
     systemctl status $1 --no-pager --no-legend > /dev/null
-    send_message "$1 status: $($? == 0 ? ✅ : ❌)"
+    [[ $? = 0 ]] && e="✅" || e="❌"
+    send_message "$1 status: $e"
 }
 
 if check_diff "config/*.service"; then
@@ -45,7 +46,8 @@ cd web
 if [ ! -f web/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the web database"
     cargo sqlx database setup
-    send_message "web db setup: $($? == 0 ? ✅ : ❌)"
+    [[ $? = 0 ]] && e="✅" || e="❌"
+    send_message "web db setup: $e"
     echo $SPACER
 fi
 
@@ -62,7 +64,8 @@ cd ../bot
 if [ ! -f bot/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the bot database"
     cargo sqlx database setup
-    send_message "bot db setup: $($? == 0 ? ✅ : ❌)"
+    [[ $? = 0 ]] && e="✅" || e="❌"
+    send_message "bot db setup: $e"
     echo $SPACER
 fi
 
@@ -83,6 +86,6 @@ if check_diff "src/* Cargo.toml"; then
 fi
 
 
-send_message "🌩"
+send_message "Done: 🌩"
 echo "Deploy is Done! ✅"
 
