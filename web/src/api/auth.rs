@@ -1,4 +1,5 @@
 use actix_multipart::form::MultipartForm;
+use actix_web::error::{self, ErrorBadRequest};
 use actix_web::web::{Data, Json, Query};
 use actix_web::{
     delete, get, patch, post, put, HttpResponse, Responder, Scope,
@@ -115,10 +116,12 @@ pub struct LoginTelQuery {
     hash: String,
 }
 
+type Response<T> = Result<T, error::Error>;
+
 #[get("/login-telegram/")]
 async fn login_telegram(
     q: Query<LoginTelQuery>, state: Data<AppState>,
-) -> impl Responder {
+) -> Response<String> {
     let msg = format!(
         "auth_date={}\nfirst_name={}\nid={}\nphoto_url={}\nusername={}",
         q.auth_date, q.first_name, q.id, q.photo_url, q.username,
@@ -128,11 +131,11 @@ async fn login_telegram(
     mac.update(msg.as_bytes());
     let result = mac.finalize();
 
-    HttpResponse::Ok().body(format!(
-        "{q:#?}\n\n{}\n{}",
-        q.hash,
-        hex::encode(result.into_bytes())
-    ))
+    if hex::encode(result.into_bytes()) != q.hash {
+        return Err(ErrorBadRequest("invalid login credentials ❌"));
+    }
+
+    Ok(format!("{q:#?}"))
 }
 
 pub fn router() -> Scope {
