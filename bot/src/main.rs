@@ -185,10 +185,7 @@ async fn cbq(bot: Bot, dlg: Dialogue, pool: &SqlitePool, q: CallbackQuery) -> HR
 
     let msg = q.message.unwrap();
     let data = q.data.unwrap();
-    let key: KeyData = match serde_json::from_str(&data) {
-        Ok(v) => v,
-        Err(_) => return Ok(()),
-    };
+    let key: KeyData = data.into();
 
     bot.send_message(msg.chat.id, format!("key: {:?}", key)).await?;
 
