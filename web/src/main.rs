@@ -14,6 +14,7 @@ use actix_web::{
 use sqlx::{Pool, Sqlite, SqlitePool};
 
 mod api;
+mod config;
 
 pub struct AppState {
     pub sql: Pool<Sqlite>,
