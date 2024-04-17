@@ -3,10 +3,13 @@ use actix_web::web::{Data, Json, Query};
 use actix_web::{
     delete, get, patch, post, put, HttpResponse, Responder, Scope,
 };
+use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
+use sha2::Sha256;
 // use sha2::{Digest, Sha512};
 use utoipa::{OpenApi, ToSchema};
 
+use crate::config::config;
 // use crate::api::verification::verify;
 // use crate::config::Config;
 // use crate::docs::UpdatePaths;
@@ -19,6 +22,8 @@ use utoipa::{OpenApi, ToSchema};
 //     CutOff,
 // };
 use crate::AppState;
+
+type Hmac256 = Hmac::<Sha256>;
 
 // #[derive(OpenApi)]
 // #[openapi(
@@ -102,19 +107,32 @@ use crate::AppState;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginTelQuery {
-    id: i64,
-    first_name: String,
-    username: String,
-    photo_url: String,
     auth_date: u64,
+    first_name: String,
+    id: i64,
+    photo_url: String,
+    username: String,
     hash: String,
 }
 
 #[get("/login-telegram")]
 async fn login_telegram(
-    query: Query<LoginTelQuery>, state: Data<AppState>,
+    q: Query<LoginTelQuery>, state: Data<AppState>,
 ) -> impl Responder {
-    HttpResponse::Ok().body(format!("{query:#?}"))
+    let msg = format!(
+        "auth_date={}\nfirst_name={}\nid={}\nphoto_url={}\nusername={}",
+        q.auth_date, q.first_name, q.id, q.photo_url, q.username,
+    );
+
+    let mut mac = Hmac256::new_from_slice(&config().bot_token_hash).unwrap();
+    mac.update(msg.as_bytes());
+    let result = mac.finalize();
+
+    HttpResponse::Ok().body(format!(
+        "{q:#?}\n\n{}\n{}",
+        q.hash,
+        hex::encode(result.into_bytes())
+    ))
 }
 
 pub fn router() -> Scope {
