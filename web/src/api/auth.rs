@@ -119,9 +119,7 @@ pub struct LoginTelQuery {
 type Response<T> = Result<T, error::Error>;
 
 #[get("/login-telegram/")]
-async fn login_telegram(
-    q: Query<LoginTelQuery>, state: Data<AppState>,
-) -> Response<String> {
+async fn login_telegram(q: Query<LoginTelQuery>) -> Response<String> {
     let msg = format!(
         "auth_date={}\nfirst_name={}\nid={}\nphoto_url={}\nusername={}",
         q.auth_date, q.first_name, q.id, q.photo_url, q.username,
