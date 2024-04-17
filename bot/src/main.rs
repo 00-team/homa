@@ -108,7 +108,7 @@ async fn main() -> anyhow::Result<()> {
         )
         .branch(
             Update::filter_callback_query()
-                .enter_dialogue::<Message, ErasedStorage<State>, State>()
+                .enter_dialogue::<Update, ErasedStorage<State>, State>()
                 .endpoint(cbq),
         );
 
