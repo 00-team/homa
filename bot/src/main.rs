@@ -6,13 +6,13 @@ use sqlx::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::sync::Arc;
-use teloxide::dispatching::dialogue::{self, GetChatId};
 use teloxide::dispatching::dialogue::serializer::Json;
+use teloxide::dispatching::dialogue::{self, GetChatId};
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use teloxide::prelude::*;
 // use teloxide::types::ParseMode::MarkdownV2;
-use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
+use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup};
 use teloxide::utils::command::BotCommands;
 
 mod config;
@@ -115,16 +115,21 @@ async fn handle_commands(
     match cmd {
         Command::Start(arg) => {
             let arg = tools::parse_start_args(&arg);
-            let keyboard: Vec<Vec<InlineKeyboardButton>> =
-                vec![vec![InlineKeyboardButton::callback(
-                    "Tutorial 📖",
-                    "tutorial",
-                )]];
+            let inline = [
+                [InlineKeyboardButton::callback("Tutorial 📖", "tutorial")],
+                [InlineKeyboardButton::callback("Buy Virtual Number", "buy")],
+                [InlineKeyboardButton::callback(
+                    "Rent Virtual Number",
+                    "rent",
+                )],
+            ];
+            let keyboard = [[KeyboardButton::new("Hi")], [KeyboardButton::new("2")]];
+
             bot.send_message(msg.chat.id, "متن استارت")
-                .reply_markup(InlineKeyboardMarkup::new(keyboard))
+                .reply_markup(InlineKeyboardMarkup::new(inline))
+                .reply_markup(KeyboardMarkup::new(keyboard))
                 .await?;
-            bot.send_message(msg.chat.id, format!("arg: {arg:#?}"))
-                .await?;
+
             // let arg = parse_start_args(&arg);
             // match arg {
             //     StartArg::Record { id, slug: _ } => {
@@ -147,7 +152,6 @@ async fn handle_commands(
     Ok(())
 }
 
-
 async fn cbq(bot: Bot, q: CallbackQuery) -> HR {
     bot.answer_callback_query(q.id.clone()).await?;
     if let Some(msg) = &q.message {
@@ -157,5 +161,3 @@ async fn cbq(bot: Bot, q: CallbackQuery) -> HR {
 
     Ok(())
 }
-
-
