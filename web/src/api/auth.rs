@@ -102,10 +102,15 @@ use crate::AppState;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginTelQuery {
-    hash: String
+    id: i64,
+    first_name: String,
+    username: String,
+    photo_url: String,
+    auth_date: u64,
+    hash: String,
 }
 
-#[get("/login-telegram/")]
+#[get("/login-telegram")]
 async fn login_telegram(
     query: Query<LoginTelQuery>, state: Data<AppState>,
 ) -> impl Responder {
