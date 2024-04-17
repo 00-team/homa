@@ -22,6 +22,10 @@ function check_diff {
     fi
 }
 
+echo "🧹 removing the teloxide database"
+rm -rf /thora/bot/teloxide.db
+echo $SPACER
+
 if check_diff "config/*.service"; then
     echo "$EG reload the services"
     cp config/*.service /etc/systemd/system/ --force
