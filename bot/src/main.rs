@@ -130,7 +130,7 @@ async fn handle_commands(
             let keyboard = [[InlineKeyboardButton::login(
                 "🪪 Login",
                 LoginUrl {
-                    url: Url::parse("https://thora.dozar.bid/login-telegram")?,
+                    url: Url::parse("https://thora.dozar.bid/api/auth/login-telegram/")?,
                     forward_text: Some("test".to_string()),
                     bot_username: None,
                     request_write_access: Some(true),
