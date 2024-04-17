@@ -23,7 +23,7 @@ use crate::config::config;
 // };
 use crate::AppState;
 
-type Hmac256 = Hmac::<Sha256>;
+type Hmac256 = Hmac<Sha256>;
 
 // #[derive(OpenApi)]
 // #[openapi(
@@ -115,7 +115,7 @@ pub struct LoginTelQuery {
     hash: String,
 }
 
-#[get("/login-telegram")]
+#[get("/login-telegram/")]
 async fn login_telegram(
     q: Query<LoginTelQuery>, state: Data<AppState>,
 ) -> impl Responder {
