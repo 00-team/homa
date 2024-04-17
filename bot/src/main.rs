@@ -177,7 +177,7 @@ async fn handle_commands(
     Ok(())
 }
 
-async fn cbq(bot: Bot, dlg: Dialogue, q: CallbackQuery) -> HR {
+async fn cbq(bot: Bot, dlg: Dialogue, pool: &SqlitePool, q: CallbackQuery) -> HR {
     bot.answer_callback_query(q.id).await?;
     if q.message.is_none() || q.data.is_none() {
         return Ok(());
