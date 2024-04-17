@@ -97,15 +97,20 @@ async fn main() -> anyhow::Result<()> {
             .erase();
 
     let handler = dptree::entry()
-        .enter_dialogue::<Message, ErasedStorage<State>, State>()
         .branch(
-            Update::filter_message().branch(
-                dptree::entry()
-                    .filter_command::<Command>()
-                    .endpoint(handle_commands),
-            ),
+            Update::filter_message()
+                .enter_dialogue::<Message, ErasedStorage<State>, State>()
+                .branch(
+                    dptree::entry()
+                        .filter_command::<Command>()
+                        .endpoint(handle_commands),
+                ),
         )
-        .branch(Update::filter_callback_query().endpoint(cbq));
+        .branch(
+            Update::filter_callback_query()
+                .enter_dialogue::<Message, ErasedStorage<State>, State>()
+                .endpoint(cbq),
+        );
 
     // .branch(dptree::case![State::Menu].endpoint(menu))
     // .branch(
