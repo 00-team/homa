@@ -1,18 +1,16 @@
-use indoc::{formatdoc, indoc};
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
-use reqwest;
 use sqlx::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::sync::Arc;
+use teloxide::dispatching::dialogue;
 use teloxide::dispatching::dialogue::serializer::Json;
-use teloxide::dispatching::dialogue::{self, GetChatId};
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use teloxide::prelude::*;
 // use teloxide::types::ParseMode::MarkdownV2;
-use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup};
+use teloxide::types::{
+    InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup,
+};
 use teloxide::utils::command::BotCommands;
 
 mod config;
@@ -23,12 +21,42 @@ use config::config;
 type Dialogue = dialogue::Dialogue<State, ErasedStorage<State>>;
 type HR = Result<(), Box<dyn Error + Send + Sync>>;
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub enum KeyData {
+    Tutorial,
+    Buy,
+    Rent,
+}
+
+impl From<KeyData> for String {
+    fn from(value: KeyData) -> Self {
+        serde_json::to_string(&value).unwrap()
+    }
+}
+
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+pub enum PurchaseKind {
+    #[default]
+    Buy,
+    Rent,
+}
+
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub enum State {
     #[default]
-    Menu,
-    AddRecord {
-        id: i64,
+    Start,
+    Tutorial,
+    SelectService {
+        purchase_kind: PurchaseKind,
+    },
+    SelectCountry {
+        purchase_kind: PurchaseKind,
+        service: i64,
+    },
+    Confirm {
+        purchase_kind: PurchaseKind,
+        service: i64,
+        country: i64,
     },
 }
 
@@ -37,21 +65,8 @@ pub enum State {
 pub enum Command {
     Start(String),
     Help,
-    // /// make a new record
-    // NewRecord,
-    // /// get a record by id
-    // GetRecord {
-    //     id: i64,
-    // },
-    // /// list of all records
-    // ListRecord,
-}
-
-#[derive(BotCommands, Clone)]
-#[command(rename_rule = "snake_case")]
-pub enum RecordCommand {
-    /// finish sending messages for records
-    EndRecord,
+    /// user info
+    MyInfo,
 }
 
 #[tokio::main]
@@ -106,28 +121,28 @@ async fn main() -> anyhow::Result<()> {
 }
 
 async fn handle_commands(
-    bot: Bot,
-    dlg: Dialogue,
-    pool: &SqlitePool,
-    msg: Message,
-    cmd: Command,
+    bot: Bot, dlg: Dialogue, pool: &SqlitePool, msg: Message, cmd: Command,
 ) -> HR {
     match cmd {
         Command::Start(arg) => {
             let arg = tools::parse_start_args(&arg);
+
+            bot.send_message(msg.chat.id, KeyData::Rent).await?;
+
             let inline = [
                 [InlineKeyboardButton::callback("Tutorial 📖", "tutorial")],
                 [InlineKeyboardButton::callback("Buy Virtual Number", "buy")],
-                [InlineKeyboardButton::callback(
-                    "Rent Virtual Number",
-                    "rent",
-                )],
+                [InlineKeyboardButton::callback("Rent Virtual Number", "rent")],
             ];
-            let keyboard = [[KeyboardButton::new("Hi")], [KeyboardButton::new("2")]];
+            let keyboard =
+                [[KeyboardButton::new("Hi")], [KeyboardButton::new("2")]];
+
+            bot.send_message(msg.chat.id, "Welcome")
+                .reply_markup(KeyboardMarkup::new(keyboard))
+                .await?;
 
             bot.send_message(msg.chat.id, "متن استارت")
                 .reply_markup(InlineKeyboardMarkup::new(inline))
-                .reply_markup(KeyboardMarkup::new(keyboard))
                 .await?;
 
             // let arg = parse_start_args(&arg);
@@ -144,20 +159,30 @@ async fn handle_commands(
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
                 .await?;
-        } // Command::NewRecord => new_record(bot, dlg, pool, msg).await?,
-          // Command::GetRecord { id } => get_record(bot, pool, id, msg).await?,
-          // Command::ListRecord => list_record(bot, pool, msg).await?,
+        }
+        Command::MyInfo => {
+            bot.send_message(msg.chat.id, format!("user info for {:#?}", msg))
+                .await?;
+        }
     }
 
     Ok(())
 }
 
-async fn cbq(bot: Bot, q: CallbackQuery) -> HR {
-    bot.answer_callback_query(q.id.clone()).await?;
-    if let Some(msg) = &q.message {
-        bot.send_message(msg.chat.id, format!("{q:#?}")).await?;
-        bot.send_message(msg.chat.id, "hi this is gg").await?;
+async fn cbq(bot: Bot, dlg: Dialogue, q: CallbackQuery) -> HR {
+    bot.answer_callback_query(q.id).await?;
+    if q.message.is_none() || q.data.is_none() {
+        return Ok(());
     }
+
+    let msg = q.message.unwrap();
+    let data = q.data.unwrap();
+    let key: KeyData = match serde_json::from_str(&data) {
+        Ok(v) => v,
+        Err(_) => return Ok(()),
+    };
+
+    bot.send_message(msg.chat.id, format!("key: {:?}", key)).await?;
 
     Ok(())
 }
