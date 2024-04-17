@@ -36,6 +36,12 @@ impl From<KeyData> for String {
     }
 }
 
+impl From<String> for KeyData {
+    fn from(value: String) -> Self {
+        serde_json::from_str(&value).unwrap_or(KeyData::Unknown)
+    }
+}
+
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub enum PurchaseKind {
     #[default]
