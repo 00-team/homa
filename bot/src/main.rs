@@ -97,14 +97,13 @@ async fn main() -> anyhow::Result<()> {
             .erase();
 
     let handler = dptree::entry()
+        .enter_dialogue::<Message, ErasedStorage<State>, State>()
         .branch(
-            Update::filter_message()
-                .enter_dialogue::<Message, ErasedStorage<State>, State>()
-                .branch(
-                    dptree::entry()
-                        .filter_command::<Command>()
-                        .endpoint(handle_commands),
-                ),
+            Update::filter_message().branch(
+                dptree::entry()
+                    .filter_command::<Command>()
+                    .endpoint(handle_commands),
+            ),
         )
         .branch(Update::filter_callback_query().endpoint(cbq));
 
@@ -138,13 +137,16 @@ async fn handle_commands(
             bot.send_message(msg.chat.id, KeyData::Rent).await?;
 
             let inline = [
-                [InlineKeyboardButton::callback("Tutorial 📖", KeyData::Tutorial)],
+                [InlineKeyboardButton::callback(
+                    "Tutorial 📖",
+                    KeyData::Tutorial,
+                )],
                 [InlineKeyboardButton::callback("Buy 💰", KeyData::Buy)],
                 [InlineKeyboardButton::callback("Rent 💳", KeyData::Rent)],
             ];
             let keyboard = [
                 [KeyboardButton::new("Buy 💰"), KeyboardButton::new("Rent 💳")],
-                [KeyboardButton::new("My Info 👤"), KeyboardButton::new("Hi")]
+                [KeyboardButton::new("My Info 👤"), KeyboardButton::new("Hi")],
             ];
 
             bot.send_message(msg.chat.id, "Welcome")
@@ -179,7 +181,9 @@ async fn handle_commands(
     Ok(())
 }
 
-async fn cbq(bot: Bot, dlg: Dialogue, pool: &SqlitePool, q: CallbackQuery) -> HR {
+async fn cbq(
+    bot: Bot, dlg: Dialogue, pool: &SqlitePool, q: CallbackQuery,
+) -> HR {
     bot.answer_callback_query(q.id).await?;
     if q.message.is_none() || q.data.is_none() {
         return Ok(());
