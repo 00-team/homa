@@ -139,11 +139,13 @@ async fn handle_commands(
 
             let inline = [
                 [InlineKeyboardButton::callback("Tutorial 📖", KeyData::Tutorial)],
-                [InlineKeyboardButton::callback("Buy Virtual Number", KeyData::Buy)],
-                [InlineKeyboardButton::callback("Rent Virtual Number", KeyData::Rent)],
+                [InlineKeyboardButton::callback("Buy 💰", KeyData::Buy)],
+                [InlineKeyboardButton::callback("Rent 💳", KeyData::Rent)],
             ];
-            let keyboard =
-                [[KeyboardButton::new("Hi")], [KeyboardButton::new("2")]];
+            let keyboard = [
+                [KeyboardButton::new("Buy 💰"), KeyboardButton::new("Rent 💳")],
+                [KeyboardButton::new("My Info 👤"), KeyboardButton::new("Hi")]
+            ];
 
             bot.send_message(msg.chat.id, "Welcome")
                 .reply_markup(KeyboardMarkup::new(keyboard))
