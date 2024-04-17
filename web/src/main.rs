@@ -5,13 +5,15 @@ use actix_web::{
     get,
     // http::header::ContentType,
     middleware,
-    web::Data,
+    web::{scope, Data},
     App,
     HttpResponse,
     HttpServer,
     Responder,
 };
 use sqlx::{Pool, Sqlite, SqlitePool};
+
+mod api;
 
 pub struct AppState {
     pub sql: Pool<Sqlite>,
@@ -42,6 +44,17 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::new("%s %r %Ts"))
             .app_data(Data::new(AppState { sql: pool.clone() }))
             .service(index)
+            .service(
+                scope("/api")
+                    .service(api::auth::router())
+                    // .service(api::product::router())
+                    // .service(api::verification::verification)
+                    // .service(
+                    //     scope("/admin")
+                    //         .service(admin::user::router())
+                    //         .service(admin::product::router()),
+                    // ),
+            )
     });
 
     let server = if cfg!(debug_assertions) {
