@@ -9,7 +9,7 @@ WorkingDirectory=/thora/bot/
 EnvironmentFile=/thora/.secrets.env
 ExecStart=/thora/target/release/bot
 KillSignal=SIGQUIT
-StandardError=syslog
+StandardError=file:/thora/logs/bot.error.log
 NotifyAccess=all
 
 [Install]

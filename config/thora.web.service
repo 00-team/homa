@@ -9,7 +9,7 @@ WorkingDirectory=/thora/web/
 EnvironmentFile=/thora/.secrets.env
 ExecStart=/thora/target/release/web
 KillSignal=SIGQUIT
-StandardError=syslog
+StandardError=file:/thora/logs/web.error.log
 NotifyAccess=all
 
 [Install]
