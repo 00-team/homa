@@ -60,4 +60,5 @@ pub enum Command {
     Help,
     /// user info
     MyInfo,
+    Login,
 }

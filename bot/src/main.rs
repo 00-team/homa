@@ -1,20 +1,23 @@
+use reqwest::Url;
 use sqlx::SqlitePool;
 use std::env;
 use std::sync::Arc;
 use teloxide::dispatching::dialogue::serializer::Json;
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
+use teloxide::payloads::SendMessageSetters;
 use teloxide::prelude::*;
 // use teloxide::types::ParseMode::MarkdownV2;
 use teloxide::types::{
     InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup,
+    LoginUrl,
 };
 use teloxide::utils::command::BotCommands;
 
 mod config;
+mod state;
 mod tools;
 mod types;
-mod state;
 
 use config::config;
 use types::*;
@@ -123,6 +126,20 @@ async fn handle_commands(
             bot.send_message(msg.chat.id, format!("user info for {:#?}", msg))
                 .await?;
         }
+        Command::Login => {
+            let keyboard = [[InlineKeyboardButton::login(
+                "🪪 Login",
+                LoginUrl {
+                    url: Url::parse("https://thora.dozar.web/login-telegram")?,
+                    forward_text: Some("test".to_string()),
+                    bot_username: None,
+                    request_write_access: Some(true),
+                },
+            )]];
+            bot.send_message(msg.chat.id, "Login to the site and buy")
+                .reply_markup(InlineKeyboardMarkup::new(keyboard))
+                .await?;
+        }
     }
 
     Ok(())
@@ -142,14 +159,22 @@ async fn cbq(
 
     let state = chit.get_or_default().await?;
     match state {
-        State::Start => {
-            match key {
-                KeyData::Buy => chit.update(State::SelectService { purchase_kind: PurchaseKind::Buy }).await?,
-                KeyData::Rent => chit.update(State::SelectService { purchase_kind: PurchaseKind::Rent }).await?,
-                _ => ()
+        State::Start => match key {
+            KeyData::Buy => {
+                chit.update(State::SelectService {
+                    purchase_kind: PurchaseKind::Buy,
+                })
+                .await?
             }
+            KeyData::Rent => {
+                chit.update(State::SelectService {
+                    purchase_kind: PurchaseKind::Rent,
+                })
+                .await?
+            }
+            _ => (),
         },
-        _ => ()
+        _ => (),
     }
 
     // match key {
