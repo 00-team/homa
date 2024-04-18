@@ -19,3 +19,4 @@ Cargo.lock
 /target
 .secrets.env
 main.db*
+.ignore*
