@@ -28,5 +28,6 @@ create table if not exists transactions (
 create table if not exists general (
     available_money integer not null default 0,
     total_money integer not null default 0,
-    rub_irr integer not null default 0
+    rub_irr integer not null default 0,
+    price_update integer not null default 0
 );
