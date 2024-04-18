@@ -10,7 +10,7 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "outDir": "./static/dist/",
+        "outDir": "./web/dist/",
         "rootDir": "./",
         "removeComments": true,
         "noEmitOnError": true,
