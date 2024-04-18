@@ -6,7 +6,7 @@ create table if not exists users (
     wallet integer not null default 0,
     in_hold integer not null default 0,
     token text not null,
-    photo text,
+    photo boolean not null default false,
     admin boolean not null default false,
     banned boolean not null default false
 );
