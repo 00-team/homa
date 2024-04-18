@@ -44,7 +44,7 @@ pub struct User {
 
 pub struct Admin(pub User);
 
-pub type Response<T> = Result<Json<T>, Err>;
+pub type Response<T> = Result<Json<T>, AppErr>;
 
 impl ops::Deref for Admin {
     type Target = User;
@@ -209,19 +209,19 @@ impl<T: DeserializeOwned + Default> From<String> for JsonStr<T> {
     }
 }
 
-#[derive(Serialize, Debug)]
-pub struct Err {
+#[derive(Serialize, Debug, ToSchema)]
+pub struct AppErr {
     status: u16,
     message: String,
 }
 
-impl fmt::Display for Err {
+impl fmt::Display for AppErr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
-impl ResponseError for Err {
+impl ResponseError for AppErr {
     fn status_code(&self) -> StatusCode {
         StatusCode::from_u16(self.status)
             .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
@@ -229,11 +229,11 @@ impl ResponseError for Err {
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
         HttpResponse::build(self.status_code())
-            .body(serde_json::to_string::<Err>(self).unwrap())
+            .body(serde_json::to_string(self).unwrap())
     }
 }
 
-impl From<sqlx::Error> for Err {
+impl From<sqlx::Error> for AppErr {
     fn from(value: sqlx::Error) -> Self {
         match value {
             sqlx::Error::RowNotFound => Self {
