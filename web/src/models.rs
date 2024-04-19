@@ -8,6 +8,7 @@ use actix_web::{
     body::BoxBody,
     dev::Payload,
     error::{self, PayloadError},
+    http::header,
     http::StatusCode,
     web::{Data, Json},
     FromRequest, HttpRequest, HttpResponse, ResponseError,
@@ -86,15 +87,35 @@ impl FromRequest for User {
     fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
         let state = req.app_data::<Data<AppState>>().unwrap();
         let pool = state.sql.clone();
-        let token = BearerAuth::from_request(req, pl);
+        let bearer_token = req.headers().get(header::AUTHORIZATION).map_or(
+            req.cookie(header::AUTHORIZATION.as_str())
+                .map_or(None, |c| Some(c.value().to_string())),
+            |hv| hv.to_str().map_or(None, |v| Some(v.to_string())),
+        );
+
+        // let token = BearerAuth::from_request(req, pl);
 
         Box::pin(async move {
-            let (id, token) = match token.await {
-                Ok(t) => match parse_token(t.token()) {
-                    Some(t) => t,
-                    None => return Err(error::ErrorForbidden("invalid token")),
-                },
-                Err(e) => return Err(e.into()),
+            let token = if let Some(bt) = bearer_token {
+                let mut tokens = bt.splitn(2, ' ');
+                let key = tokens.next();
+                let token = tokens.next();
+                if key.is_none() || token.is_none() {
+                    return Err(error::ErrorForbidden("invalid token format"));
+                }
+
+                if key.unwrap().to_lowercase() != "bearer" {
+                    return Err(error::ErrorForbidden("invalid token format"));
+                }
+
+                token.unwrap().to_string()
+            } else {
+                return Err(error::ErrorForbidden("token not found"));
+            };
+
+            let (id, token) = match parse_token(&token) {
+                Some(t) => t,
+                None => return Err(error::ErrorForbidden("invalid token")),
             };
 
             let token = hex::encode(sha2::Sha512::digest(&token));
