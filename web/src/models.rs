@@ -2,17 +2,18 @@
 // use sqlx::{encode::IsNull, sqlite::{SqliteArgumentValue, SqliteTypeInfo}, Sqlite};
 
 use core::fmt;
-use std::{future::Future, ops, pin::Pin};
+use std::{future::Future, io, ops, pin::Pin};
 
 use actix_web::{
     body::BoxBody,
     dev::Payload,
-    error,
+    error::{self, PayloadError},
     http::StatusCode,
     web::{Data, Json},
     FromRequest, HttpRequest, HttpResponse, ResponseError,
 };
 use actix_web_httpauth::extractors::bearer::BearerAuth;
+use awc::error::SendRequestError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sha2::Digest;
 use sqlx::{
@@ -236,14 +237,50 @@ impl ResponseError for AppErr {
 impl From<sqlx::Error> for AppErr {
     fn from(value: sqlx::Error) -> Self {
         match value {
-            sqlx::Error::RowNotFound => Self {
-                status: 404,
-                message: "not found".to_string(),
-            },
-            _ => Self {
-                status: 500,
-                message: "database error".to_string(),
-            },
+            sqlx::Error::RowNotFound => {
+                Self { status: 404, message: "not found".to_string() }
+            }
+            _ => Self { status: 500, message: "database error".to_string() },
         }
     }
 }
+
+impl From<error::Error> for AppErr {
+    fn from(value: error::Error) -> Self {
+        let r = value.error_response();
+        Self { status: r.status().as_u16(), message: format!("{}", value) }
+    }
+}
+
+impl From<io::Error> for AppErr {
+    fn from(value: io::Error) -> Self {
+        Self { status: 500, message: "internal server error".to_string() }
+    }
+}
+
+impl From<PayloadError> for AppErr {
+    fn from(value: PayloadError) -> Self {
+        Self { status: 500, message: "internal server error".to_string() }
+    }
+}
+
+impl From<SendRequestError> for AppErr {
+    fn from(value: SendRequestError) -> Self {
+        Self { status: 500, message: "internal server error".to_string() }
+    }
+}
+
+macro_rules! error_helper {
+    ($name:ident, $status:ident) => {
+        #[doc = concat!("Helper function that wraps any error and generates a `", stringify!($status), "` response.")]
+        #[allow(non_snake_case)]
+        pub fn $name(err: &str) -> AppErr {
+            AppErr {
+                status: StatusCode::$status.as_u16(),
+                message: err.to_string()
+            }
+        }
+    };
+}
+
+error_helper!(AppErrBadRequest, BAD_REQUEST);
