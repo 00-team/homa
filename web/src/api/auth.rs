@@ -1,22 +1,17 @@
-use actix_web::error::{self, ErrorBadRequest};
 use actix_web::http::header;
 use actix_web::http::StatusCode;
-use actix_web::web::{Data, Json, Query, Redirect};
-use actix_web::{get, post, HttpResponse, Responder, Scope};
+use actix_web::web::{Data, Query};
+use actix_web::{get, HttpResponse, Scope};
 use hmac::{Hmac, Mac};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sha2::{Digest, Sha256, Sha512};
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::config::config;
 use crate::config::Config;
 use crate::docs::UpdatePaths;
-use crate::models::{
-    AppErr, AppErrBadRequest, JsonStr, ListInput, Response, Transaction, User,
-};
-use crate::utils::{
-    get_random_bytes, get_random_string, now, remove_photo, save_photo, CutOff,
-};
+use crate::models::{AppErr, AppErrBadRequest, User};
+use crate::utils::{get_random_string, now, save_photo};
 use crate::AppState;
 
 type Hmac256 = Hmac<Sha256>;
@@ -108,7 +103,7 @@ async fn login_telegram(
     match result {
         Ok(user) => {
             if user.auth_date == q.auth_date {
-                return Err(AppErrBadRequest("invalid login info"))
+                return Err(AppErrBadRequest("invalid login info"));
             }
 
             sqlx::query_as! {
