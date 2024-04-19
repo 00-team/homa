@@ -25,8 +25,7 @@ function check_diff {
 function send_message {
     sleep 2
     base_url="https://api.telegram.org/bot$TELOXIDE_TOKEN/sendMessage"
-    curl "$base_url?chat_id=$TELOXIDE_DEVELOPER&text=$1" \ 
-        1> /dev/null 2> /dev/null &
+    curl -s "$base_url?chat_id=$TELOXIDE_DEVELOPER&text=$1" -o /dev/null &
 }
 
 function check_status {
