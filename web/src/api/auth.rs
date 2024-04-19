@@ -1,3 +1,4 @@
+use actix_web::cookie::{Cookie, SameSite, time::Duration};
 use actix_web::http::header;
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Query};
@@ -25,17 +26,6 @@ type Hmac256 = Hmac<Sha256>;
     modifiers(&UpdatePaths)
 )]
 pub struct ApiAuthDoc;
-
-// #[post("/login/")]
-// async fn login(body: Json<LoginBody>, state: Data<AppState>) -> Response<User> {
-//     verify(&body.phone, &body.code, Action::Login, &state.sql).await?;
-//
-
-//
-
-//
-//     Ok(Json(user))
-// }
 
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct LoginTelQuery {
@@ -128,8 +118,20 @@ async fn login_telegram(
     };
 
     Ok(HttpResponse::build(StatusCode::FOUND)
+        .cookie(
+            Cookie::build(
+                header::AUTHORIZATION.to_string(),
+                format!("Bearer {token_hashed}"),
+            )
+            .domain("thora.dozar.bid")
+            .path("/")
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .http_only(true)
+            .max_age(Duration::weeks(12))
+            .finish(),
+        )
         .insert_header((header::LOCATION, "/"))
-        .insert_header((header::AUTHORIZATION, "Bearer token"))
         .finish())
 }
 
