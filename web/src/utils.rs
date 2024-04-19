@@ -1,7 +1,10 @@
-use crate::config::Config;
-use actix_web::error::{Error, ErrorBadRequest};
+use crate::{config::Config, models::AppErr};
+use actix_web::{
+    error::{Error, ErrorBadRequest},
+    web::Buf,
+};
 use rand::Rng;
-use std::path::Path;
+use std::{fs::File, io, path::Path};
 
 pub fn phone_validator(phone: &str) -> Result<(), Error> {
     if phone.len() != 11 || !phone.starts_with("09") {
@@ -29,21 +32,27 @@ pub fn get_random_bytes(len: usize) -> String {
     hex::encode((0..len).map(|_| rng.gen::<u8>()).collect::<Vec<u8>>())
 }
 
-// pub fn save_photo(path: &Path, name: &str) -> io::Result<()> {
-//     let img = ImageReader::open(path)?
-//         .with_guessed_format()?
-//         .decode()
-//         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-//
-//     img.thumbnail(512, 512)
-//         .save_with_format(
-//             Path::new(Config::RECORD_DIR).join(name),
-//             ImageFormat::Png,
-//         )
-//         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-//
-//     Ok(())
-// }
+pub async fn save_photo(url: &str, id: i64) -> Result<(), AppErr> {
+    let client = awc::Client::new();
+    let mut result = client.get(url).send().await?.body().await?.reader();
+    let mut file = File::create(format!("{}/{id}.jpg", Config::RECORD_DIR))?;
+
+    io::copy(&mut result, &mut file)?;
+
+    // let img = ImageReader::open(path)?
+    //     .with_guessed_format()?
+    //     .decode()
+    //     .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    //
+    // img.thumbnail(512, 512)
+    //     .save_with_format(
+    //         Path::new(Config::RECORD_DIR).join(name),
+    //         ImageFormat::Png,
+    //     )
+    //     .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+    Ok(())
+}
 
 pub fn remove_photo(name: &str) {
     let _ = std::fs::remove_file(Path::new(Config::RECORD_DIR).join(name));
