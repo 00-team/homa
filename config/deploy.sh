@@ -41,6 +41,13 @@ if check_diff "config/*.service"; then
     echo $SPACER
 fi
 
+if check_diff "app/* package.json"; then
+    echo "$EG build the app"
+    npm i
+    npm run build
+    echo $SPACER
+fi
+
 cd web
 if [ ! -f web/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the web database"
