@@ -253,19 +253,19 @@ impl From<error::Error> for AppErr {
 }
 
 impl From<io::Error> for AppErr {
-    fn from(value: io::Error) -> Self {
+    fn from(_: io::Error) -> Self {
         Self { status: 500, message: "internal server error".to_string() }
     }
 }
 
 impl From<PayloadError> for AppErr {
-    fn from(value: PayloadError) -> Self {
+    fn from(_: PayloadError) -> Self {
         Self { status: 500, message: "internal server error".to_string() }
     }
 }
 
 impl From<SendRequestError> for AppErr {
-    fn from(value: SendRequestError) -> Self {
+    fn from(_: SendRequestError) -> Self {
         Self { status: 500, message: "internal server error".to_string() }
     }
 }
