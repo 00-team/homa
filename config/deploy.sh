@@ -54,6 +54,8 @@ if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build web"
     send_message "building web"
     cargo build -r
+    [[ $? = 0 ]] && e="✅" || e="❌"
+    send_message "web build status: $e"
     systemctl restart thora.web
     check_status thora.web
     echo $SPACER
@@ -72,6 +74,8 @@ if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build bot"
     send_message "building bot"
     cargo build -r
+    [[ $? = 0 ]] && e="✅" || e="❌"
+    send_message "bot build status: $e"
     echo $SPACER
 
     echo "🧹 removing the teloxide database"
