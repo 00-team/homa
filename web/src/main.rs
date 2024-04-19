@@ -8,6 +8,7 @@ use actix_web::{
     web::{self, scope, Data},
     App, HttpResponse, HttpServer, Responder,
 };
+use config::Config;
 use sqlx::{Pool, Sqlite, SqlitePool};
 use utoipa::OpenApi;
 
@@ -71,7 +72,7 @@ fn config_static(app: &mut web::ServiceConfig) {
     if cfg!(debug_assertions) {
         app.service(af::Files::new("/static", "./static"));
         app.service(af::Files::new("/assets", "./dist/assets"));
-        app.service(af::Files::new("/record", "./record"));
+        app.service(af::Files::new("/record", Config::RECORD_DIR));
     }
 }
 
@@ -80,6 +81,7 @@ async fn main() -> std::io::Result<()> {
     dotenvy::from_path("../.secrets.env").expect("could not read .secrets.env");
     pretty_env_logger::init();
 
+    let _ = std::fs::create_dir(Config::RECORD_DIR);
     let pool = SqlitePool::connect("sqlite://main.db").await.unwrap();
 
     sqlx::migrate!().run(&pool).await.expect("migration failed");
