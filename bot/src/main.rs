@@ -27,9 +27,8 @@ async fn main() -> anyhow::Result<()> {
     dotenvy::from_path("../.secrets.env").unwrap();
     pretty_env_logger::init();
 
-    let pool: &'static SqlitePool = Box::leak(Box::new(
-        SqlitePool::connect(&env::var("DATABASE_URL")?).await?,
-    ));
+    let pool: &'static SqlitePool =
+        Box::leak(Box::new(SqlitePool::connect("sqlite://main.db").await?));
     sqlx::migrate!().run(pool).await?;
 
     let bot = Bot::from_env();
@@ -130,7 +129,9 @@ async fn handle_commands(
             let keyboard = [[InlineKeyboardButton::login(
                 "🪪 Login",
                 LoginUrl {
-                    url: Url::parse("https://thora.dozar.bid/api/auth/login-telegram/")?,
+                    url: Url::parse(
+                        "https://thora.dozar.bid/api/auth/login-telegram/",
+                    )?,
                     forward_text: Some("some forward text".to_string()),
                     bot_username: None,
                     request_write_access: Some(true),
