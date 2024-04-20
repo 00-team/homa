@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import type { WatcherOptions } from 'rollup'
 import solidPlugin from 'vite-plugin-solid'
 
+import tsconfigPaths from 'vite-tsconfig-paths'
+
 export default defineConfig(env => {
     let watch: WatcherOptions | null = null
     if (env.mode == 'development') {
@@ -11,7 +13,7 @@ export default defineConfig(env => {
     }
 
     return {
-        plugins: [solidPlugin({ hot: false })],
+        plugins: [tsconfigPaths(), solidPlugin({ hot: false })],
         server: {
             https: false,
             port: 8200,

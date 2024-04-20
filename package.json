@@ -14,10 +14,12 @@
     },
     "dependencies": {
         "@solidjs/router": "^0.13.2",
-        "solid-js": "^1.8.16"
+        "solid-js": "^1.8.16",
+        "vite-tsconfig-paths": "^4.3.2"
     },
     "devDependencies": {
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "sass": "^1.75.0",
         "typescript": "^5.4.5",
         "vite": "^5.2.9",
         "vite-plugin-solid": "^2.10.2"

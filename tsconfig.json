@@ -38,6 +38,6 @@
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true
     },
-    "include": [],
+    "include": ["app"],
     "exclude": ["*.js"]
 }
