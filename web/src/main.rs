@@ -34,6 +34,7 @@ async fn index() -> impl Responder {
 async fn openapi() -> impl Responder {
     let mut doc = docs::ApiDoc::openapi();
     doc.merge(api::auth::ApiAuthDoc::openapi());
+    doc.merge(api::user::ApiAuthDoc::openapi());
     // doc.merge(api::verification::ApiVerificationDoc::openapi());
     // doc.merge(api::product::Doc::openapi());
 
@@ -94,7 +95,10 @@ async fn main() -> std::io::Result<()> {
             .service(openapi)
             .service(rapidoc)
             .service(index)
-            .service(scope("/api").service(api::auth::router()))
+            .service(scope("/api")
+                .service(api::auth::router())
+                .service(api::user::router())
+            )
     });
 
     let server = if cfg!(debug_assertions) {
