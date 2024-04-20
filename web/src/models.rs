@@ -1,6 +1,3 @@
-// use std::borrow::Cow;
-// use sqlx::{encode::IsNull, sqlite::{SqliteArgumentValue, SqliteTypeInfo}, Sqlite};
-
 use core::fmt;
 use std::{future::Future, io, ops, pin::Pin};
 
@@ -8,12 +5,13 @@ use actix_web::{
     body::BoxBody,
     dev::Payload,
     error::{self, PayloadError},
-    http::header,
-    http::StatusCode,
+    http::{
+        header::{self, AUTHORIZATION},
+        StatusCode,
+    },
     web::{Data, Json},
     FromRequest, HttpRequest, HttpResponse, ResponseError,
 };
-use actix_web_httpauth::extractors::bearer::BearerAuth;
 use awc::error::SendRequestError;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sha2::Digest;
@@ -80,40 +78,74 @@ fn parse_token(token: &str) -> Option<(i64, String)> {
     Some((id, token))
 }
 
+fn extract_token(request: &HttpRequest) -> Option<String> {
+    let mut bearer_token: Option<String> = None;
+    if let Some(value) = request.headers().get(AUTHORIZATION) {
+        bearer_token = value.to_str().map_or(None, |v| Some(v.to_string()));
+    }
+
+    if bearer_token.is_none() {
+        for hdr in request.headers().get_all(header::COOKIE) {
+            for cookie in hdr.as_bytes().split(|v| *v == b';') {
+                let mut s = cookie.splitn(2, |v| *v == b'=');
+
+                let key = s.next();
+                let val = s.next();
+                if key.is_none() || val.is_none() {
+                    continue;
+                }
+
+                let key = key.unwrap();
+                let val = val.unwrap();
+
+                if let Ok(key) = String::from_utf8(key.into()) {
+                    if key.trim().to_lowercase() == "authorization" {
+                        if let Ok(v) = String::from_utf8(val.into()) {
+                            bearer_token = Some(v);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let bearer_token = if let Some(v) = bearer_token {
+        v
+    } else {
+        return None;
+    };
+
+    let mut tokens = bearer_token.splitn(2, ' ');
+    let key = tokens.next();
+    let token = tokens.next();
+    if key.is_none() || token.is_none() {
+        return None;
+    }
+
+    if key.unwrap().to_lowercase() != "bearer" {
+        return None;
+    }
+
+    Some(token.unwrap().to_string())
+}
+
 impl FromRequest for User {
     type Error = error::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
 
-    fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
+    fn from_request(req: &HttpRequest, _pl: &mut Payload) -> Self::Future {
         let state = req.app_data::<Data<AppState>>().unwrap();
         let pool = state.sql.clone();
-        let bearer_token = req.headers().get(header::AUTHORIZATION).map_or(
-            req.cookie(header::AUTHORIZATION.as_str())
-                .map_or(None, |c| Some(c.value().to_string())),
-            |hv| hv.to_str().map_or(None, |v| Some(v.to_string())),
-        );
-
+        let token = extract_token(req);
         // let token = BearerAuth::from_request(req, pl);
 
         Box::pin(async move {
-            let token = if let Some(bt) = bearer_token {
-                let mut tokens = bt.splitn(2, ' ');
-                let key = tokens.next();
-                let token = tokens.next();
-                if key.is_none() || token.is_none() {
-                    return Err(error::ErrorForbidden("invalid token format"));
-                }
+            if token.is_none() {
+                return Err(error::ErrorForbidden("token was not found"));
+            }
 
-                if key.unwrap().to_lowercase() != "bearer" {
-                    return Err(error::ErrorForbidden("invalid token format"));
-                }
-
-                token.unwrap().to_string()
-            } else {
-                return Err(error::ErrorForbidden("token not found"));
-            };
-
-            let (id, token) = match parse_token(&token) {
+            let (id, token) = match parse_token(&token.unwrap()) {
                 Some(t) => t,
                 None => return Err(error::ErrorForbidden("invalid token")),
             };
