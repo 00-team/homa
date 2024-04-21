@@ -1,0 +1,225 @@
+@import './fonts.scss';
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    color-scheme: dark;
+    background-color: var(--slate-1);
+    color: var(--white);
+
+    font-family: 'Jakarta', sans-serif;
+    font-weight: 400;
+
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+
+    .root,
+    .root main {
+        width: 100%;
+        height: 100%;
+    }
+
+    svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    code {
+        // background-color: var(--slate-1);
+        background-color: var(--black);
+        padding: 0.1rem 0.2rem;
+        border-radius: var(--radius);
+        font-size: 16px;
+    }
+
+    a {
+        color: var(--blue-9);
+        text-decoration: none;
+    }
+
+    img {
+        user-select: none;
+    }
+
+    label {
+        user-select: none;
+    }
+}
+
+.custom-input {
+    background-color: var(--slate-2);
+    border: 2px solid var(--slate-4);
+    font-size: 18px;
+    border-radius: var(--radius);
+    padding: 0.25rem;
+    color: var(--white);
+
+    &:focus {
+        border-color: var(--blue-9);
+        outline: 0;
+    }
+}
+
+button {
+    background-color: var(--slate-2);
+    color: var(--slate-12);
+    border: 2px;
+    border-color: var(--slate-4);
+    border-style: solid;
+    border-radius: var(--radius);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: 220ms ease-in-out;
+    transition-property: border-color, background-color;
+
+    --color-1: var(--blue-7);
+    --color-2: var(--blue-9);
+
+    &.icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        width: 32px;
+        height: 32px;
+        border: 0;
+    }
+
+    &.trash,
+    &.remove {
+        --color-1: var(--red);
+        --color-2: var(--red);
+    }
+
+    &:hover {
+        border-color: var(--color-1);
+    }
+
+    &:not(&.icon):active {
+        background-color: var(--color-2);
+        border-color: var(--color-2);
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:disabled {
+        pointer-events: none;
+        opacity: 0.6;
+        border: 2px solid var(--slate-4);
+        background-color: var(--slate-2);
+        outline: 0;
+        cursor: default;
+    }
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.gene {
+    font-family: monospace;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    & &__spacer {
+        color: var(--yellow);
+    }
+
+    & &__pepper {
+        display: none;
+    }
+
+    & button {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+    }
+}
+
+:root {
+    --radius: 0.25rem;
+
+    --white: #f2f2f2;
+    --black: #040404;
+    --red: #e20338;
+    --blue: #51eaff;
+    --green: #00dc7d;
+    --yellow: #ffd600;
+
+    --blue-1: #0d1520;
+    --blue-2: #111927;
+    --blue-3: #0d2847;
+    --blue-4: #003362;
+    --blue-5: #004074;
+    --blue-6: #104d87;
+    --blue-7: #205d9e;
+    --blue-8: #2870bd;
+    --blue-9: #0090ff;
+    --blue-10: #3b9eff;
+    --blue-11: #70b8ff;
+    --blue-12: #c2e6ff;
+
+    --slate-1: #111113;
+    --slate-2: #18191b;
+    --slate-3: #212225;
+    --slate-4: #272a2d;
+    --slate-5: #2e3135;
+    --slate-6: #363a3f;
+    --slate-7: #43484e;
+    --slate-8: #5a6169;
+    --slate-9: #696e77;
+    --slate-10: #777b84;
+    --slate-11: #b0b4ba;
+    --slate-12: #edeef0;
+
+    --scroll-bg: var(--slate-1);
+    --scorll-fg: var(--blue-6);
+    --scorll-hover: var(--blue-7);
+    --scorll-active: var(--blue-9);
+
+    --selection-fg: var(--white);
+    --selection-bg: var(--blue-9);
+}
+
+::-webkit-scrollbar {
+    width: 9px;
+    background-color: var(--scroll-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    border: 2px solid var(--scroll-bg);
+    background-color: var(--scorll-fg);
+
+    &:hover {
+        background-color: var(--scorll-hover);
+    }
+
+    &:active {
+        background-color: var(--scorll-active);
+    }
+}
+
+::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
+}
