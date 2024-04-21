@@ -1,14 +1,12 @@
-import { A, RouteSectionProps } from '@solidjs/router'
-import { Component } from 'solid-js'
+import { A } from '@solidjs/router'
 
 import './style/404.scss'
 
-const NotFound: Component<RouteSectionProps> = P => {
+const NotFound = () => {
     return (
         <div class='not-found-fnd'>
-            <h1>Not Found</h1>
-            <p>path: '/{P.params.path}' was not found</p>
-            <A href='/'>Home</A>
+            <h1>پیدا نشد</h1>
+            <A href='/'>خانه</A>
         </div>
     )
 }

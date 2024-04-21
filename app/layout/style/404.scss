@@ -6,4 +6,17 @@
     justify-content: center;
     align-items: center;
     gap: 1rem;
+
+    h1 {
+        font-style: 'Arvand';
+        font-size: clamp(3rem, 1rem + 10vw, 7rem);
+    }
+
+    a {
+        font-size: clamp(1.5rem, 0.3rem + 5vw, 2rem);
+        color: var(--fg-2);
+        border: 2px solid var(--fg-2);
+        padding: 0 2rem;
+        border-radius: var(--radius);
+    }
 }
