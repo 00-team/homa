@@ -50,6 +50,11 @@ fi
 
 cd web
 if [ ! -f web/main.db ] || check_diff "migrations/*"; then
+    send_message "web db backup starting ⏳"
+    mkdir -p backup
+    tar czf backup/$(date +%s).tgz main.db
+    send_message "web db backup done ⌛"
+
     echo "$EG setup the web database"
     cargo sqlx database setup
     [[ $? = 0 ]] && e="✅" || e="❌"
@@ -71,6 +76,11 @@ fi
 cd ../bot
 if [ ! -f bot/main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the bot database"
+    send_message "bot db backup starting ⏳"
+    mkdir -p backup
+    tar czf backup/$(date +%s).tgz main.db
+    send_message "bot db backup done ⌛"
+
     cargo sqlx database setup
     [[ $? = 0 ]] && e="✅" || e="❌"
     send_message "bot db setup: $e"
