@@ -7,6 +7,7 @@ use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
 use teloxide::payloads::SendMessageSetters;
 use teloxide::prelude::*;
+use tools::StartArg;
 // use teloxide::types::ParseMode::MarkdownV2;
 use teloxide::types::{
     InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup,
@@ -79,9 +80,32 @@ async fn main() -> anyhow::Result<()> {
 async fn handle_commands(
     bot: Bot, chit: ChitChat, pool: &SqlitePool, msg: Message, cmd: Command,
 ) -> HR {
+    let login_keyboard =
+        InlineKeyboardMarkup::new([[InlineKeyboardButton::login(
+            "🪪 Login",
+            LoginUrl {
+                url: Url::parse(
+                    "https://thora.dozar.bid/api/auth/login-telegram/",
+                )?,
+                forward_text: Some("some forward text".to_string()),
+                bot_username: None,
+                request_write_access: Some(true),
+            },
+        )]]);
+
     match cmd {
         Command::Start(arg) => {
             let arg = tools::parse_start_args(&arg);
+            match arg {
+                StartArg::Login => {
+                    bot.send_message(msg.chat.id, "ورود به سایت")
+                        .reply_markup(login_keyboard)
+                        .await?;
+
+                    return Ok(());
+                }
+                _ => {}
+            }
 
             bot.send_message(msg.chat.id, KeyData::Rent).await?;
 
@@ -126,19 +150,8 @@ async fn handle_commands(
                 .await?;
         }
         Command::Login => {
-            let keyboard = [[InlineKeyboardButton::login(
-                "🪪 Login",
-                LoginUrl {
-                    url: Url::parse(
-                        "https://thora.dozar.bid/api/auth/login-telegram/",
-                    )?,
-                    forward_text: Some("some forward text".to_string()),
-                    bot_username: None,
-                    request_write_access: Some(true),
-                },
-            )]];
             bot.send_message(msg.chat.id, "Login to the site and buy")
-                .reply_markup(InlineKeyboardMarkup::new(keyboard))
+                .reply_markup(login_keyboard)
                 .await?;
         }
     }

@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum StartArg {
     Invite { id: i64 },
+    Login,
     None,
 }
 
@@ -13,6 +14,7 @@ pub fn parse_start_args(arg: &str) -> StartArg {
     };
 
     match key {
+        "login" => StartArg::Login,
         "invite" => {
             if let Some(id) = value.next() {
                 if let Ok(id) = id.parse::<i64>() {
