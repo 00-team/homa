@@ -49,7 +49,7 @@ if check_diff "app/* package.json"; then
 fi
 
 cd web
-if [ ! -f web/main.db ] || check_diff "migrations/*"; then
+if [ ! -f main.db ] || check_diff "migrations/*"; then
     send_message "web db backup starting ⏳"
     mkdir -p backup
     tar czf backup/$(date +%s).tgz main.db
@@ -74,7 +74,7 @@ if check_diff "src/* Cargo.toml"; then
 fi
 
 cd ../bot
-if [ ! -f bot/main.db ] || check_diff "migrations/*"; then
+if [ ! -f main.db ] || check_diff "migrations/*"; then
     echo "$EG setup the bot database"
     send_message "bot db backup starting ⏳"
     mkdir -p backup
