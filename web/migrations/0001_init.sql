@@ -3,6 +3,7 @@ create table if not exists users (
     id integer primary key not null,
     name text not null,
     auth_date integer not null,
+    username text,
     wallet integer not null default 0,
     in_hold integer not null default 0,
     token text not null,

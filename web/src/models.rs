@@ -33,6 +33,7 @@ pub struct ListInput {
 pub struct User {
     pub id: i64,
     pub name: String,
+    pub username: Option<String>,
     pub auth_date: i64,
     pub wallet: i64,
     pub in_hold: i64,
