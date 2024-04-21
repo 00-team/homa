@@ -8,10 +8,10 @@
 
 body {
     color-scheme: dark;
-    background-color: var(--slate-1);
+    background-color: var(--bg-2);
     color: var(--white);
 
-    font-family: 'Jakarta', sans-serif;
+    font-family: 'Zan', sans-serif;
     font-weight: 400;
 
     width: 100%;
@@ -73,13 +73,14 @@ button {
     border-style: solid;
     border-radius: var(--radius);
     font-size: 18px;
+    font-family: 'Zan';
     cursor: pointer;
     padding: 0.25rem;
     transition: 220ms ease-in-out;
     transition-property: border-color, background-color;
 
-    --color-1: var(--blue-7);
-    --color-2: var(--blue-9);
+    --color-1: var(--fg-1);
+    --color-2: var(--fg-2);
 
     &.icon {
         display: flex;
@@ -120,41 +121,6 @@ button {
     }
 }
 
-.row {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.col {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    align-items: center;
-}
-
-.gene {
-    font-family: monospace;
-    font-size: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-
-    & &__spacer {
-        color: var(--yellow);
-    }
-
-    & &__pepper {
-        display: none;
-    }
-
-    & button {
-        width: 24px;
-        height: 24px;
-        padding: 0;
-    }
-}
-
 :root {
     --radius: 0.25rem;
 
@@ -165,39 +131,24 @@ button {
     --green: #00dc7d;
     --yellow: #ffd600;
 
-    --blue-1: #0d1520;
-    --blue-2: #111927;
-    --blue-3: #0d2847;
-    --blue-4: #003362;
-    --blue-5: #004074;
-    --blue-6: #104d87;
-    --blue-7: #205d9e;
-    --blue-8: #2870bd;
-    --blue-9: #0090ff;
-    --blue-10: #3b9eff;
-    --blue-11: #70b8ff;
-    --blue-12: #c2e6ff;
+    --fg-1: #494a4c;
+    --fg-2: #d9af65;
+    --fg-3: #dab475;
 
-    --slate-1: #111113;
-    --slate-2: #18191b;
-    --slate-3: #212225;
-    --slate-4: #272a2d;
-    --slate-5: #2e3135;
-    --slate-6: #363a3f;
-    --slate-7: #43484e;
-    --slate-8: #5a6169;
-    --slate-9: #696e77;
-    --slate-10: #777b84;
-    --slate-11: #b0b4ba;
-    --slate-12: #edeef0;
+    --bg-1: #1c1c1c;
+    --bg-2: #333333;
+    // --bg-2: #131862;
+    // --bg-3: #2e4482;
+    // --bg-4: #546bab;
+    // --bg-5: #87889c;
 
     --scroll-bg: var(--slate-1);
     --scorll-fg: var(--blue-6);
     --scorll-hover: var(--blue-7);
     --scorll-active: var(--blue-9);
 
-    --selection-fg: var(--white);
-    --selection-bg: var(--blue-9);
+    --selection-fg: var(--black);
+    --selection-bg: var(--white);
 }
 
 ::-webkit-scrollbar {
