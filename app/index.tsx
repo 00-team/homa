@@ -5,6 +5,7 @@ import 'style/index.scss'
 import Login from 'layout/login'
 import Dash from 'layout/dash'
 import Home from 'layout/home'
+import Profile from 'layout/profile'
 import Alert from 'comps/alert'
 import { Route, Router } from '@solidjs/router'
 import NotFound from 'layout/404'
@@ -15,6 +16,7 @@ const Root = () => (
             <Router>
                 <Route path='/' component={Dash}>
                     <Route path='/' component={Home} />
+                    <Route path='/profile/' component={Profile} />
                 </Route>
                 <Route path='*path' component={NotFound} />
             </Router>
