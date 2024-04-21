@@ -98,9 +98,9 @@ async fn login_telegram(
 
             sqlx::query_as! {
                 User,
-                "update users set name = ?, auth_date = ?,
+                "update users set name = ?, username = ?, auth_date = ?,
                 token = ?, photo = ? where id = ?",
-                name, q.auth_date, token_hashed, has_photo, user.id
+                name, q.username, q.auth_date, token_hashed, has_photo, user.id
             }
             .execute(&state.sql)
             .await?;
@@ -108,9 +108,9 @@ async fn login_telegram(
         Err(_) => {
             sqlx::query_as! {
                 User,
-                "insert into users (id, name, auth_date, token, photo)
-                values(?, ?, ?, ?, ?)",
-                q.id, name, q.auth_date, token_hashed, has_photo
+                "insert into users (id, name, username, auth_date, token, photo)
+                values(?, ?, ?, ?, ?, ?)",
+                q.id, name, q.username, q.auth_date, token_hashed, has_photo
             }
             .execute(&state.sql)
             .await?;
