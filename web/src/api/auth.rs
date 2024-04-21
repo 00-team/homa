@@ -123,7 +123,7 @@ async fn login_telegram(
                 header::AUTHORIZATION.to_string(),
                 format!("Bearer {}:{token}", q.id),
             )
-            .domain("thora.dozar.bid")
+            // .domain("thora.dozar.bid")
             .path("/")
             .secure(true)
             .same_site(SameSite::Strict)
