@@ -9,12 +9,16 @@ import {
     MailWarningIcon,
     PhoneIcon,
     UserIcon,
+    HomeIcon,
 } from 'icons'
 
 const Navbar: Component = () => {
     return (
         <nav class='nav-fnd'>
             <div class='left'>
+                <A href='/'>
+                    <HomeIcon />
+                </A>
                 <A href='/profile/' class='avatar'>
                     <Show when={self.user.photo} fallback={<UserIcon />}>
                         <img
