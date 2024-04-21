@@ -1,6 +1,7 @@
 .navbar-fnd {
     width: 100%;
-    border-bottom: 2px solid var(--slate-7);
+    border-bottom: 2px solid var(--fg-2);
+    background: var(--bg-1);
     height: var(--nav-height);
     display: flex;
     flex-shrink: 0;

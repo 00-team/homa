@@ -1,4 +1,4 @@
-export const CirclePlusIcon = () => (
+export const CircleAlertIcon = () => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
         viewBox='0 0 24 24'
@@ -9,8 +9,8 @@ export const CirclePlusIcon = () => (
         stroke-linejoin='round'
     >
         <circle cx='12' cy='12' r='10' />
-        <path d='M8 12h8' />
-        <path d='M12 8v8' />
+        <path d='M12 16v-4' />
+        <path d='M12 8h.01' />
     </svg>
 )
 
@@ -45,42 +45,33 @@ export const CircleXIcon = () => (
     </svg>
 )
 
-export const CircleAlertIcon = () => (
+export const XIcon = () => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
-        viewBox='0 0 24 24'
         fill='none'
+        viewBox='0 0 24 24'
+        stroke-width='1.5'
         stroke='currentColor'
-        stroke-width='2'
-        stroke-linecap='round'
-        stroke-linejoin='round'
     >
-        <circle cx='12' cy='12' r='10' />
-        <path d='M12 16v-4' />
-        <path d='M12 8h.01' />
+        <path
+            stroke-linecap='round'
+            stroke-linejoin='round'
+            d='M6 18L18 6M6 6l12 12'
+        />
     </svg>
 )
 
-export const CircleHelpIcon = () => (
+export const TelegramIcon = () => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
-        width='24'
-        height='24'
-        viewBox='0 0 24 24'
-        fill='none'
-        stroke='currentColor'
-        stroke-width='2'
-        stroke-linecap='round'
-        stroke-linejoin='round'
-        class='lucide lucide-circle-help'
+        viewBox='0 0 496 512'
+        fill='currentColor'
     >
-        <circle cx='12' cy='12' r='10' />
-        <path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3' />
-        <path d='M12 17h.01' />
+        <path d='M248 8C111 8 0 119 0 256S111 504 248 504 496 393 496 256 385 8 248 8zM363 176.7c-3.7 39.2-19.9 134.4-28.1 178.3-3.5 18.6-10.3 24.8-16.9 25.4-14.4 1.3-25.3-9.5-39.3-18.7-21.8-14.3-34.2-23.2-55.3-37.2-24.5-16.1-8.6-25 5.3-39.5 3.7-3.8 67.1-61.5 68.3-66.7 .2-.7 .3-3.1-1.2-4.4s-3.6-.8-5.1-.5q-3.3 .7-104.6 69.1-14.8 10.2-26.9 9.9c-8.9-.2-25.9-5-38.6-9.1-15.5-5-27.9-7.7-26.8-16.3q.8-6.7 18.5-13.7 108.4-47.2 144.6-62.3c68.9-28.6 83.2-33.6 92.5-33.8 2.1 0 6.6 .5 9.6 2.9a10.5 10.5 0 0 1 3.5 6.7A43.8 43.8 0 0 1 363 176.7z' />
     </svg>
 )
 
-export const CircleDashedIcon = () => (
+export const HistoryIcon = () => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
         viewBox='0 0 24 24'
@@ -90,18 +81,13 @@ export const CircleDashedIcon = () => (
         stroke-linecap='round'
         stroke-linejoin='round'
     >
-        <path d='M10.1 2.182a10 10 0 0 1 3.8 0' />
-        <path d='M13.9 21.818a10 10 0 0 1-3.8 0' />
-        <path d='M17.609 3.721a10 10 0 0 1 2.69 2.7' />
-        <path d='M2.182 13.9a10 10 0 0 1 0-3.8' />
-        <path d='M20.279 17.609a10 10 0 0 1-2.7 2.69' />
-        <path d='M21.818 10.1a10 10 0 0 1 0 3.8' />
-        <path d='M3.721 6.391a10 10 0 0 1 2.7-2.69' />
-        <path d='M6.391 20.279a10 10 0 0 1-2.69-2.7' />
+        <path d='M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8' />
+        <path d='M3 3v5h5' />
+        <path d='M12 7v5l4 2' />
     </svg>
 )
 
-export const CircleCheckBigIcon = () => (
+export const UserIcon = () => (
     <svg
         xmlns='http://www.w3.org/2000/svg'
         viewBox='0 0 24 24'
@@ -111,7 +97,7 @@ export const CircleCheckBigIcon = () => (
         stroke-linecap='round'
         stroke-linejoin='round'
     >
-        <path d='M22 11.08V12a10 10 0 1 1-5.93-9.14' />
-        <path d='m9 11 3 3L22 4' />
+        <circle cx='12' cy='8' r='5' />
+        <path d='M20 21a8 8 0 0 0-16 0' />
     </svg>
 )

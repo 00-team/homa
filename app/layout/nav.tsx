@@ -10,6 +10,15 @@ const Navbar: Component = () => {
 
     return (
         <nav class='navbar-fnd'>
+            <div class='avatar'>
+                <Show when={self.user.photo} fallback={<UserIcon />}>
+                    <img
+                        draggable={false}
+                        src={`/record/${self.user.id}.jpg`}
+                    />
+                </Show>
+            </div>
+
             <div class='links'>
                 <A href='/' classList={{ active: location.pathname == '/' }}>
                     Overview
@@ -19,16 +28,7 @@ const Navbar: Component = () => {
                 <A href='/search/'>Search</A>
                 <A href='/config/'>Config</A>
             </div>
-            <A href='/profile/' class='session' draggable={false}>
-                <div class='avatar'>
-                    <Show when={self.user.photo} fallback={<UserIcon />}>
-                        <img
-                            draggable={false}
-                            src={`/record/${self.user.id}.jpg`}
-                        />
-                    </Show>
-                </div>
-            </A>
+            <A href='/profile/' class='session' draggable={false}></A>
         </nav>
     )
 }
