@@ -25,7 +25,7 @@ type Hmac256 = Hmac<Sha256>;
     servers((url = "/auth")),
     modifiers(&UpdatePaths)
 )]
-pub struct ApiAuthDoc;
+pub struct ApiDoc;
 
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct LoginTelQuery {

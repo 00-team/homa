@@ -1,21 +1,9 @@
-use actix_web::cookie::{time::Duration, Cookie, SameSite};
-use actix_web::http::header;
-use actix_web::http::StatusCode;
-use actix_web::web::{Data, Json, Query};
-use actix_web::{get, HttpResponse, Scope};
-use hmac::{Hmac, Mac};
-use serde::Deserialize;
-use sha2::{Digest, Sha256, Sha512};
-use utoipa::{IntoParams, OpenApi, ToSchema};
+use actix_web::web::Json;
+use actix_web::{get, Scope};
+use utoipa::OpenApi;
 
-use crate::config::config;
-use crate::config::Config;
 use crate::docs::UpdatePaths;
-use crate::models::{AppErr, AppErrBadRequest, Response, User};
-use crate::utils::{get_random_string, now, save_photo};
-use crate::AppState;
-
-type Hmac256 = Hmac<Sha256>;
+use crate::models::{Response, User};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -25,7 +13,7 @@ type Hmac256 = Hmac<Sha256>;
     servers((url = "/user")),
     modifiers(&UpdatePaths)
 )]
-pub struct ApiAuthDoc;
+pub struct ApiDoc;
 
 #[utoipa::path(get, responses((status = 200, body = User)))]
 #[get("/")]
