@@ -7,7 +7,9 @@ pub struct General {
     pub available_money: i64,
     pub total_money: i64,
     pub rub_irr: i64,
-    pub price_update: i64,
+    pub rub_irr_update: i64,
+    // pub vnum_prices: String,
+    // pub vnum_update: i64,
 }
 
 pub async fn general_get(pool: &Pool<Sqlite>) -> Result<General, AppErr> {
@@ -31,7 +33,7 @@ pub async fn general_get(pool: &Pool<Sqlite>) -> Result<General, AppErr> {
                 available_money: 0,
                 total_money: 0,
                 rub_irr: 0,
-                price_update: 0,
+                rip_update: 0,
             })
         }
     }
