@@ -6,30 +6,32 @@
     align-items: center;
 
     .cmp-select {
+        width: 300px;
+        direction: rtl;
+
         .cmp-select-body.active {
             height: 300px;
         }
     }
 
-    .country {
-        max-width: 300px;
-        direction: rtl;
+    .country .country-dpy {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
 
-        .country-dpy {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-
-            .name {
-                white-space: nowrap;
-                overflow: hidden;
-            }
-
-            .cc {
-                font-family: monospace;
-                direction: ltr;
-            }
+        .name {
+            white-space: nowrap;
+            overflow: hidden;
         }
+
+        .cc {
+            font-family: var(--en);
+            direction: ltr;
+        }
+    }
+
+    .service .service-dpy {
+        width: 100%;
     }
 }
