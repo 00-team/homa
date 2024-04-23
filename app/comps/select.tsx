@@ -1,34 +1,35 @@
 import { ChevronDownIcon, ChevronUpIcon } from 'icons'
 import './style/select.scss'
 import { createStore, produce } from 'solid-js/store'
-import { Show, createEffect, on } from 'solid-js'
+import { Component, JSXElement, Show, createEffect, on } from 'solid-js'
 
-type BaseItem = { display: string; idx: number }
-
-type Props<T extends BaseItem[]> = {
-    items: T
-    onChange(props: T): void
-    defaults?: T
+type Props = {
+    items: JSXElement[]
+    onChange(props: number[]): void
+    defaults?: number[]
     multiple?: true | number
     disabled?: boolean
+    placeholder?: string
 }
 
-export const Select = <T extends BaseItem[]>(P: Props<T>) => {
+export const Select: Component<Props> = P => {
     type State = {
         open: boolean
-        selected: typeof P.items
+        selected: number[]
         changed: number
+        ph: string
     }
     const [state, setState] = createStore<State>({
         open: false,
-        selected: P.defaults || ([] as T),
+        selected: P.defaults || [],
         changed: 0,
+        ph: P.placeholder || '---',
     })
 
     createEffect(
         on(
             () => state.changed,
-            () => P.onChange(state.selected),
+            () => P.onChange([...state.selected]),
             { defer: true }
         )
     )
@@ -47,13 +48,13 @@ export const Select = <T extends BaseItem[]>(P: Props<T>) => {
             >
                 <Show
                     when={P.multiple}
-                    fallback={<>{state.selected[0]?.display || '---'}</>}
+                    fallback={<>{P.items[state.selected[0]] || state.ph}</>}
                 >
                     <div class='selected'>
                         {state.selected.map(item => (
-                            <div class='item'>{item.display}</div>
+                            <div class='item'>{P.items[item]}</div>
                         ))}
-                        {!state.selected.length && '---'}
+                        {!state.selected.length && state.ph}
                     </div>
                 </Show>
                 <Show when={!P.disabled}>
@@ -64,26 +65,22 @@ export const Select = <T extends BaseItem[]>(P: Props<T>) => {
                 class='cmp-select-body'
                 classList={{ active: state.open, multiple: !!P.multiple }}
             >
-                {P.items.map(item => (
+                {P.items.map((item, idx) => (
                     <div
                         class='item'
                         classList={{
-                            active: !!state.selected.find(
-                                i => i.idx == item.idx
-                            ),
+                            active: state.selected.includes(idx),
                         }}
                         onclick={() =>
                             setState(
                                 produce(s => {
                                     if (!P.multiple) {
-                                        s.selected = [item] as T
+                                        s.selected = [idx]
                                         s.changed = performance.now()
                                         return
                                     }
 
-                                    let x = s.selected.findIndex(
-                                        i => i.idx == item.idx
-                                    )
+                                    let x = s.selected.indexOf(idx)
 
                                     if (x != -1) {
                                         s.selected.splice(x, 1)
@@ -94,7 +91,7 @@ export const Select = <T extends BaseItem[]>(P: Props<T>) => {
                                         )
                                             return
 
-                                        s.selected.push(item)
+                                        s.selected.push(idx)
                                     }
 
                                     s.changed = performance.now()
@@ -102,7 +99,7 @@ export const Select = <T extends BaseItem[]>(P: Props<T>) => {
                             )
                         }
                     >
-                        {item.display}
+                        {item}
                     </div>
                 ))}
             </div>
