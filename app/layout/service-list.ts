@@ -1,11 +1,11 @@
 type Service = [string, string, ...string[]]
 
 export const SERVICE_LIST: Service[] = [
-    ['full', 'Full Rent', ''],
-    ['ig', 'Instagram+Threads'],
-    ['go', 'Google,youtube,Gmail'],
-    ['tg', 'Telegram'],
-    ['mm', 'Microsoft'],
+    ['full', 'Full Rent', 'اجاره کامل'],
+    ['tg', 'Telegram', 'تلگرام'],
+    ['ig', 'Instagram+Threads', 'اینستاگرام'],
+    ['go', 'Google,youtube,Gmail', 'گوگل'],
+    ['mm', 'Microsoft', 'مایکروسافت'],
     ['wa', 'Whatsapp'],
     ['fb', 'facebook'],
     ['oi', 'Tinder'],
