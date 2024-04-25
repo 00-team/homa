@@ -324,6 +324,12 @@ impl From<SendRequestError> for AppErr {
     }
 }
 
+impl From<serde_json::Error> for AppErr {
+    fn from(_: serde_json::Error) -> Self {
+        Self { status: 500, message: "internal server error".to_string() }
+    }
+}
+
 macro_rules! error_helper {
     ($name:ident, $status:ident) => {
         #[doc = concat!("Helper function that wraps any error and generates a `", stringify!($status), "` response.")]
