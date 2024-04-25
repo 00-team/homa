@@ -33,7 +33,7 @@ pub async fn general_get(pool: &Pool<Sqlite>) -> Result<General, AppErr> {
                 available_money: 0,
                 total_money: 0,
                 rub_irr: 0,
-                rip_update: 0,
+                rub_irr_update: 0,
             })
         }
     }
@@ -53,10 +53,10 @@ pub async fn general_set(
         Some(_) => {
             sqlx::query! {
                 "update general set
-                    available_money = ?, total_money = ?,
-                    rub_irr = ?, price_update = ?",
+                available_money = ?, total_money = ?,
+                rub_irr = ?, rub_irr_update = ?",
                 general.available_money, general.total_money,
-                general.rub_irr, general.price_update
+                general.rub_irr, general.rub_irr_update
             }
             .execute(pool)
             .await?;
@@ -67,7 +67,7 @@ pub async fn general_set(
             sqlx::query! {
                 "insert into general values(?, ?, ?, ?)",
                 general.available_money, general.total_money,
-                general.rub_irr, general.price_update
+                general.rub_irr, general.rub_irr_update
             }
             .execute(pool)
             .await?;
