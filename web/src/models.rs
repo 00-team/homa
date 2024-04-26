@@ -12,7 +12,7 @@ use actix_web::{
     web::{Data, Json},
     FromRequest, HttpRequest, HttpResponse, ResponseError,
 };
-use awc::error::SendRequestError;
+use awc::error::{JsonPayloadError, SendRequestError};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use sha2::Digest;
 use sqlx::{
@@ -314,6 +314,12 @@ impl From<io::Error> for AppErr {
 
 impl From<PayloadError> for AppErr {
     fn from(_: PayloadError) -> Self {
+        Self { status: 500, message: "internal server error".to_string() }
+    }
+}
+
+impl From<JsonPayloadError> for AppErr {
+    fn from(_: JsonPayloadError) -> Self {
         Self { status: 500, message: "internal server error".to_string() }
     }
 }
