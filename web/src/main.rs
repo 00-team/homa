@@ -96,10 +96,11 @@ async fn main() -> std::io::Result<()> {
             .service(openapi)
             .service(rapidoc)
             .service(index)
-            .service(scope("/api")
-                .service(api::auth::router())
-                .service(api::user::router())
-                .service(api::vnum::router())
+            .service(
+                scope("/api")
+                    .service(api::auth::router())
+                    .service(api::user::router())
+                    .service(api::vnum::router()),
             )
     });
 
