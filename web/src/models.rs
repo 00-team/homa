@@ -6,7 +6,7 @@ use actix_web::{
     dev::Payload,
     error::{self, PayloadError},
     http::{
-        header::{self, AUTHORIZATION},
+        header::{self, ContentType, AUTHORIZATION},
         StatusCode,
     },
     web::{Data, Json},
@@ -283,8 +283,7 @@ impl ResponseError for AppErr {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        HttpResponse::build(self.status_code())
-            .body(serde_json::to_string(self).unwrap())
+        HttpResponse::build(self.status_code()).json(self)
     }
 }
 
@@ -302,37 +301,37 @@ impl From<sqlx::Error> for AppErr {
 impl From<error::Error> for AppErr {
     fn from(value: error::Error) -> Self {
         let r = value.error_response();
-        Self { status: r.status().as_u16(), message: format!("{}", value) }
+        Self { status: r.status().as_u16(), message: value.to_string() }
     }
 }
 
 impl From<io::Error> for AppErr {
-    fn from(_: io::Error) -> Self {
-        Self { status: 500, message: "internal server error".to_string() }
+    fn from(value: io::Error) -> Self {
+        Self { status: 500, message: value.to_string() }
     }
 }
 
 impl From<PayloadError> for AppErr {
-    fn from(_: PayloadError) -> Self {
-        Self { status: 500, message: "internal server error".to_string() }
+    fn from(value: PayloadError) -> Self {
+        Self { status: 500, message: value.to_string() }
     }
 }
 
 impl From<JsonPayloadError> for AppErr {
-    fn from(_: JsonPayloadError) -> Self {
-        Self { status: 500, message: "internal server error".to_string() }
+    fn from(value: JsonPayloadError) -> Self {
+        Self { status: 500, message: value.to_string() }
     }
 }
 
 impl From<SendRequestError> for AppErr {
-    fn from(_: SendRequestError) -> Self {
-        Self { status: 500, message: "internal server error".to_string() }
+    fn from(value: SendRequestError) -> Self {
+        Self { status: 500, message: value.to_string() }
     }
 }
 
 impl From<serde_json::Error> for AppErr {
-    fn from(_: serde_json::Error) -> Self {
-        Self { status: 500, message: "internal server error".to_string() }
+    fn from(value: serde_json::Error) -> Self {
+        Self { status: 500, message: value.to_string() }
     }
 }
 
