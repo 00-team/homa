@@ -270,6 +270,12 @@ pub struct AppErr {
     message: String,
 }
 
+impl AppErr {
+    pub fn new(status: u16, message: &str) -> Self {
+        Self { status, message: message.to_string() }
+    }
+}
+
 impl fmt::Display for AppErr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
