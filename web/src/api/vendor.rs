@@ -2,14 +2,13 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Mutex;
 
-use actix_web::http::header::ContentType;
 use actix_web::web::{Json, Query};
 use actix_web::{get, HttpResponse, Scope};
 use lazy_static::lazy_static;
 use serde::Deserialize;
+use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
-use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::{AppErr, Response, User};
 use crate::vendor;
@@ -31,10 +30,10 @@ lazy_static! {
 
 #[derive(OpenApi)]
 #[openapi(
-    tags((name = "api::vnum")),
+    tags((name = "api::vendor")),
     paths(prices_get, check_service),
     components(),
-    servers((url = "/vnum")),
+    servers((url = "/vendor")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
@@ -56,38 +55,19 @@ struct CheckServiceQuery {
 #[utoipa::path(
     get,
     params(CheckServiceQuery),
-    responses((status = 200, body = User))
+    responses((status = 200))
 )]
 #[get("/check-service/")]
 async fn check_service(
     _: User, q: Query<CheckServiceQuery>,
-) -> Result<HttpResponse, AppErr> {
+) -> Response<Value> {
     let args = vec![("service", q.service.as_str())];
-    let result = vendor::request("getBalance", Vec::new()).await?;
-    log::warn!("balance: {result}");
     let result = vendor::request("getPricesVerification", args).await?;
-    log::warn!("pv: {result}");
-    // let mut response = awc::Client::new()
-    //     .get(format!("&action=getPricesVerification&service={}", q.service))
-    //     .send()
-    //     .await?;
-    //
-    // //.json::<Value>().await?;
-    // log::info!("{:#?}", response);
-    // log::info!("{:?}", response.body().await?);
-    // log::info!("status: {}", response.status());
-    // // let x = serde_json::to_value(response.body().await?);
-    // let x = serde_json::from_slice::<Value>(&response.body().await?);
-    // log::info!("body: {:#?}", x);
-
-    Ok(HttpResponse::Ok().body("hi"))
-    // Ok(HttpResponse::Ok()
-    //     .content_type(ContentType::json())
-    //     .body(response.body().await?))
+    return Ok(Json(result));
 }
 
 pub fn router() -> Scope {
-    Scope::new("/vnum").service(prices_get).service(check_service)
+    Scope::new("/vendor").service(prices_get).service(check_service)
     // .service(user_get)
     // .service(user_update)
     // .service(user_update_photo)

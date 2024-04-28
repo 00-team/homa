@@ -8,8 +8,6 @@ pub struct General {
     pub total_money: i64,
     pub rub_irr: i64,
     pub rub_irr_update: i64,
-    // pub vnum_prices: String,
-    // pub vnum_update: i64,
 }
 
 pub async fn general_get(pool: &Pool<Sqlite>) -> Result<General, AppErr> {

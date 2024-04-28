@@ -36,7 +36,7 @@ async fn openapi() -> impl Responder {
     let mut doc = docs::ApiDoc::openapi();
     doc.merge(api::auth::ApiDoc::openapi());
     doc.merge(api::user::ApiDoc::openapi());
-    doc.merge(api::vnum::ApiDoc::openapi());
+    doc.merge(api::vendor::ApiDoc::openapi());
     // doc.merge(api::verification::ApiVerificationDoc::openapi());
     // doc.merge(api::product::Doc::openapi());
 
@@ -101,7 +101,7 @@ async fn main() -> std::io::Result<()> {
                 scope("/api")
                     .service(api::auth::router())
                     .service(api::user::router())
-                    .service(api::vnum::router()),
+                    .service(api::vendor::router()),
             )
     });
 
