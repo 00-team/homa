@@ -1,6 +1,7 @@
-use std::{collections::HashSet, env};
+use std::{collections::HashSet, env, str::FromStr};
 
 use lazy_static::lazy_static;
+use serde_json::{Number, Value};
 
 use crate::models::AppErr;
 
@@ -50,12 +51,48 @@ lazy_static! {
 
 pub async fn request(
     action: &'static str, args: Vec<(&'static str, &str)>,
-) -> Result<(), AppErr> {
+) -> Result<Value, AppErr> {
     let p = args.iter().map(|(a, b)| format!("&{a}={b}")).collect::<String>();
     let url = format!("{}&action={}{}", *BASE_URL, action, p);
 
-    let response = awc::Client::new().get(url).send().await?;
-    log::warn!("{:#?}", response);
+    let response = String::from_utf8(
+        awc::Client::new().get(url).send().await?.body().await?.to_vec(),
+    )?;
 
-    Ok(())
+    if response.len() <= 25 && ERRORS.contains(response.as_str()) {
+        return Err(AppErr::new(500, "service not available"));
+    }
+
+    // log::warn!("{:#?}", response);
+
+    match action {
+        "getBalance" | "getBalanceAndCashBack" => {
+            Ok(Value::Number(Number::from_str(response.split_at(15).1)?))
+        },
+        _ => {
+            Ok(serde_json::from_str::<Value>(&response)?)
+        }
+    }
+
+
+    // action == "getNumber":
+    //     response = str(response[14:])
+    //     data = response.split(":")
+    //     activation_id = int(data[0])
+    //     phone = int(data[1])
+    //     result = {"activation_id": activation_id, "phone": phone}
+    //     return result
+    //
+    // elif action == "getAdditionalService":
+    //     response = str(response[11:])
+    //     data = response.split(":")
+    //     id = int(data[0])
+    //     phone = int(data[1])
+    //     result = {"id": id, "phone": phone}
+    //     return result
+
+
+
+    //
+    // Ok(())
 }
