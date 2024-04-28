@@ -60,6 +60,7 @@ pub async fn request(
     )?;
 
     if response.len() <= 25 && ERRORS.contains(response.as_str()) {
+        log::error!("response: {response}");
         return Err(AppErr::new(500, "service not available"));
     }
 
