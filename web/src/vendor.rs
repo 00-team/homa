@@ -1,7 +1,7 @@
 use std::{collections::HashSet, env, str::FromStr};
 
 use lazy_static::lazy_static;
-use serde_json::{Number, Value};
+use serde_json::{json, Number, Value};
 
 use crate::models::AppErr;
 
@@ -63,36 +63,24 @@ pub async fn request(
         return Err(AppErr::new(500, "service not available"));
     }
 
-    // log::warn!("{:#?}", response);
-
     match action {
         "getBalance" | "getBalanceAndCashBack" => {
             Ok(Value::Number(Number::from_str(response.split_at(15).1)?))
-        },
+        }
+        "getNumber" => {
+            let mut result = response.split_at(14).1.splitn(2, ':');
+            let id = Number::from_str(result.next().unwrap())?;
+            let phone = Number::from_str(result.next().unwrap())?;
+            Ok(json!({ "id": id, "phone": phone }))
+        }
+        "getAdditionalService" => {
+            let mut result = response.split_at(11).1.splitn(2, ':');
+            let id = Number::from_str(result.next().unwrap())?;
+            let phone = Number::from_str(result.next().unwrap())?;
+            Ok(json!({ "id": id, "phone": phone }))
+        }
         _ => {
             Ok(serde_json::from_str::<Value>(&response)?)
         }
     }
-
-
-    // action == "getNumber":
-    //     response = str(response[14:])
-    //     data = response.split(":")
-    //     activation_id = int(data[0])
-    //     phone = int(data[1])
-    //     result = {"activation_id": activation_id, "phone": phone}
-    //     return result
-    //
-    // elif action == "getAdditionalService":
-    //     response = str(response[11:])
-    //     data = response.split(":")
-    //     id = int(data[0])
-    //     phone = int(data[1])
-    //     result = {"id": id, "phone": phone}
-    //     return result
-
-
-
-    //
-    // Ok(())
 }
