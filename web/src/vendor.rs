@@ -1,4 +1,4 @@
-use std::{collections::HashSet, env, str::FromStr};
+use std::{collections::HashMap, env, ops::Deref, str::FromStr};
 
 use lazy_static::lazy_static;
 use serde_json::{json, Number, Value};
@@ -12,39 +12,39 @@ lazy_static! {
             env::var("VENDOR_APIKEY").unwrap()
         )
     };
-    static ref ERRORS: HashSet<&'static str> = {
-        HashSet::from([
-            "NO_NUMBERS",
-            "NO_BALANCE",
-            "BAD_ACTION",
-            "BAD_SERVICE",
-            "BAD_KEY",
-            "ERROR_SQL",
-            "SQL_ERROR",
-            "NO_ACTIVATION",
-            "BAD_STATUS",
-            "STATUS_CANCEL",
-            "BANNED",
-            "NO_CONNECTION",
-            "ACCOUNT_INACTIVE",
-            "NO_ID_RENT",
-            "INVALID_PHONE",
-            "STATUS_FINISH",
-            "INCORECT_STATUS",
-            "CANT_CANCEL",
-            "ALREADY_FINISH",
-            "ALREADY_CANCEL",
-            "WRONG_OPERATOR",
-            "NO_YULA_MAIL",
-            "WHATSAPP_NOT_AVAILABLE",
-            "NOT_INCOMING",
-            "INVALID_ACTIVATION_ID",
-            "WRONG_ADDITIONAL_SERVICE",
-            "WRONG_ACTIVATION_ID",
-            "WRONG_SECURITY",
-            "REPEAT_ADDITIONAL_SERVICE",
-            "NO_KEY",
-            "OPERATORS_NOT_FOUND",
+    static ref ERRORS: HashMap<&'static str, Option<AppErr>> = {
+        HashMap::from([
+            ("NO_NUMBERS", Some(AppErr::new(404, "no number was found"))),
+            ("NO_BALANCE", None),
+            ("BAD_ACTION", None),
+            ("BAD_SERVICE", None),
+            ("BAD_KEY", None),
+            ("ERROR_SQL", None),
+            ("SQL_ERROR", None),
+            ("NO_ACTIVATION", None),
+            ("BAD_STATUS", None),
+            ("STATUS_CANCEL", None),
+            ("BANNED", None),
+            ("NO_CONNECTION", None),
+            ("ACCOUNT_INACTIVE", None),
+            ("NO_ID_RENT", None),
+            ("INVALID_PHONE", None),
+            ("STATUS_FINISH", None),
+            ("INCORECT_STATUS", None),
+            ("CANT_CANCEL", None),
+            ("ALREADY_FINISH", None),
+            ("ALREADY_CANCEL", None),
+            ("WRONG_OPERATOR", None),
+            ("NO_YULA_MAIL", None),
+            ("WHATSAPP_NOT_AVAILABLE", None),
+            ("NOT_INCOMING", None),
+            ("INVALID_ACTIVATION_ID", None),
+            ("WRONG_ADDITIONAL_SERVICE", None),
+            ("WRONG_ACTIVATION_ID", None),
+            ("WRONG_SECURITY", None),
+            ("REPEAT_ADDITIONAL_SERVICE", None),
+            ("NO_KEY", None),
+            ("OPERATORS_NOT_FOUND", None),
         ])
     };
 }
@@ -59,9 +59,15 @@ pub async fn request(
         awc::Client::new().get(url).send().await?.body().await?.to_vec(),
     )?;
 
-    if response.len() <= 25 && ERRORS.contains(response.as_str()) {
-        log::error!("response: {response}");
-        return Err(AppErr::new(500, "service not available"));
+    if response.len() <= 25 {
+        if let Some(err) = ERRORS.get(response.as_str()) {
+            log::error!("response: {response}");
+            if let Some(app_err) = err {
+                return Err(app_err.clone());
+            }
+
+            return Err(AppErr::new(500, "service not available"));
+        }
     }
 
     match action {
@@ -80,8 +86,6 @@ pub async fn request(
             let phone = Number::from_str(result.next().unwrap())?;
             Ok(json!({ "id": id, "phone": phone }))
         }
-        _ => {
-            Ok(serde_json::from_str::<Value>(&response)?)
-        }
+        _ => Ok(serde_json::from_str::<Value>(&response)?),
     }
 }

@@ -267,7 +267,7 @@ impl<T: DeserializeOwned + Default> From<String> for JsonStr<T> {
     }
 }
 
-#[derive(Serialize, Debug, ToSchema)]
+#[derive(Clone, Serialize, Debug, ToSchema)]
 pub struct AppErr {
     status: u16,
     message: String,
