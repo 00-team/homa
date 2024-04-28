@@ -318,7 +318,9 @@ macro_rules! impl_from_err {
     ($ty:path) => {
         impl From<$ty> for AppErr {
             fn from(value: $ty) -> Self {
-                Self { status: 500, message: value.to_string() }
+                let value = value.to_string();
+                log::error!("{}", value);
+                Self { status: 500, message: value }
             }
         }
     };
