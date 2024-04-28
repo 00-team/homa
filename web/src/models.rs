@@ -1,12 +1,12 @@
 use core::fmt;
-use std::{future::Future, io, ops, pin::Pin};
+use std::{future::Future, io, ops, pin::Pin, string::FromUtf8Error};
 
 use actix_web::{
     body::BoxBody,
     dev::Payload,
     error::{self, PayloadError},
     http::{
-        header::{self, ContentType, AUTHORIZATION},
+        header::{self, AUTHORIZATION},
         StatusCode,
     },
     web::{Data, Json},
@@ -331,6 +331,12 @@ impl From<SendRequestError> for AppErr {
 
 impl From<serde_json::Error> for AppErr {
     fn from(value: serde_json::Error) -> Self {
+        Self { status: 500, message: value.to_string() }
+    }
+}
+
+impl From<FromUtf8Error> for AppErr {
+    fn from(value: FromUtf8Error) -> Self {
         Self { status: 500, message: value.to_string() }
     }
 }
