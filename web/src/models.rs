@@ -1,5 +1,8 @@
 use core::fmt;
-use std::{future::Future, io, ops, pin::Pin, string::FromUtf8Error};
+use std::{
+    future::Future, io, num::ParseFloatError, ops, pin::Pin,
+    string::FromUtf8Error,
+};
 
 use actix_web::{
     body::BoxBody,
@@ -311,41 +314,23 @@ impl From<error::Error> for AppErr {
     }
 }
 
-impl From<io::Error> for AppErr {
-    fn from(value: io::Error) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
+macro_rules! impl_from_err {
+    ($ty:path) => {
+        impl From<$ty> for AppErr {
+            fn from(value: $ty) -> Self {
+                Self { status: 500, message: value.to_string() }
+            }
+        }
+    };
 }
 
-impl From<PayloadError> for AppErr {
-    fn from(value: PayloadError) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
-}
-
-impl From<JsonPayloadError> for AppErr {
-    fn from(value: JsonPayloadError) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
-}
-
-impl From<SendRequestError> for AppErr {
-    fn from(value: SendRequestError) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
-}
-
-impl From<serde_json::Error> for AppErr {
-    fn from(value: serde_json::Error) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
-}
-
-impl From<FromUtf8Error> for AppErr {
-    fn from(value: FromUtf8Error) -> Self {
-        Self { status: 500, message: value.to_string() }
-    }
-}
+impl_from_err!(io::Error);
+impl_from_err!(PayloadError);
+impl_from_err!(ParseFloatError);
+impl_from_err!(JsonPayloadError);
+impl_from_err!(SendRequestError);
+impl_from_err!(FromUtf8Error);
+impl_from_err!(serde_json::Error);
 
 macro_rules! error_helper {
     ($name:ident, $status:ident) => {
