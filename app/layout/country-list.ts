@@ -1,4 +1,4 @@
-type Country = [number, number, string, string, string]
+export type Country = [number, number, string, string, string]
 
 export const COUNTRY_LIST: Country[] = [
     [0, 7, 'Russia', 'روسیه', '🇷🇺'],

@@ -1,4 +1,4 @@
-type Service = [string, string, ...string[]]
+export type Service = [string, string, ...string[]]
 
 export const SERVICE_LIST: Service[] = [
     ['full', 'Full Rent', 'اجاره کامل'],
