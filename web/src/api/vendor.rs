@@ -20,16 +20,6 @@ lazy_static! {
     static ref PRICES_UPDATE: Mutex<i64> = Mutex::new(0);
 }
 
-// type Prices = HashMap<String, i64>;
-// static mut PRICES: Option<Prices> = None;
-// static mut PRICES_UPDATE: i64 = 0;
-//
-// async fn prices() -> Prices {
-//     if PRICES.is_none() || PRICES_UPDATE < now() - 600 {}
-//
-//     if let Some(p) = PRICES {}
-// }
-
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
