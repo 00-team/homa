@@ -28,6 +28,14 @@ export const Select = <T extends string | number>(P: Props<T>) => {
         ph: P.placeholder || '---',
     })
 
+    createEffect(() => {
+        if (!P.defaults) return
+
+        setState({
+            selected: P.defaults.map(id => P.items.findIndex(i => i[0] == id)),
+        })
+    })
+
     createEffect(
         on(
             () => state.changed,

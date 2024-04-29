@@ -65,6 +65,7 @@ export default () => {
                     ])}
                     onChange={v => setState({ country: v[0] })}
                     placeholder='کشور'
+                    defaults={state.country ? [state.country] : undefined}
                 />
             </div>
             <div class='service'>
@@ -87,6 +88,7 @@ export default () => {
                     ])}
                     onChange={v => setState({ service: v[0] })}
                     placeholder='سرویس'
+                    defaults={state.service ? [state.service] : undefined}
                 />
             </div>
             <div
