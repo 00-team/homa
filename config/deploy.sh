@@ -55,8 +55,9 @@ if [ ! -f main.db ] || check_diff "migrations/*"; then
     tar czf backup/$(date +%s).tgz main.db
     send_message "web db backup done ⌛"
 
+    rm main.db
     echo "$EG setup the web database"
-    cargo sqlx database setup
+    cargo sqlx db setup
     [[ $? = 0 ]] && e="✅" || e="❌"
     send_message "web db setup: $e"
     echo $SPACER
@@ -81,7 +82,8 @@ if [ ! -f main.db ] || check_diff "migrations/*"; then
     tar czf backup/$(date +%s).tgz main.db
     send_message "bot db backup done ⌛"
 
-    cargo sqlx database setup
+    rm main.db
+    cargo sqlx db setup
     [[ $? = 0 ]] && e="✅" || e="❌"
     send_message "bot db setup: $e"
     echo $SPACER
