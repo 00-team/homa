@@ -3,16 +3,16 @@ import './style/select.scss'
 import { createStore, produce } from 'solid-js/store'
 import { Component, JSXElement, Show, createEffect, on } from 'solid-js'
 
-type Props = {
-    items: JSXElement[]
-    onChange(props: number[]): void
-    defaults?: number[]
+type Props<T extends string | number> = {
+    items: [T, JSXElement][]
+    onChange(props: T[]): void
+    defaults?: T[]
     multiple?: true | number
     disabled?: boolean
     placeholder?: string
 }
 
-export const Select: Component<Props> = P => {
+export const Select = <T extends string | number>(P: Props<T>) => {
     type State = {
         open: boolean
         selected: number[]
@@ -21,7 +21,9 @@ export const Select: Component<Props> = P => {
     }
     const [state, setState] = createStore<State>({
         open: false,
-        selected: P.defaults || [],
+        selected: (P.defaults || []).map(id =>
+            P.items.findIndex(i => i[0] == id)
+        ),
         changed: 0,
         ph: P.placeholder || '---',
     })
@@ -29,7 +31,7 @@ export const Select: Component<Props> = P => {
     createEffect(
         on(
             () => state.changed,
-            () => P.onChange([...state.selected]),
+            () => P.onChange(state.selected.map(idx => P.items[idx][0])),
             { defer: true }
         )
     )
@@ -48,11 +50,17 @@ export const Select: Component<Props> = P => {
             >
                 <Show
                     when={P.multiple}
-                    fallback={<>{P.items[state.selected[0]] || state.ph}</>}
+                    fallback={
+                        <>
+                            {(P.items[state.selected[0]] &&
+                                P.items[state.selected[0]][1]) ||
+                                state.ph}
+                        </>
+                    }
                 >
                     <div class='selected'>
                         {state.selected.map(item => (
-                            <div class='item'>{P.items[item]}</div>
+                            <div class='item'>{P.items[item][1]}</div>
                         ))}
                         {!state.selected.length && state.ph}
                     </div>
@@ -65,7 +73,7 @@ export const Select: Component<Props> = P => {
                 class='cmp-select-body'
                 classList={{ active: state.open, multiple: !!P.multiple }}
             >
-                {P.items.map((item, idx) => (
+                {P.items.map(([id, item], idx) => (
                     <div
                         class='item'
                         classList={{
