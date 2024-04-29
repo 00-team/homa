@@ -2,15 +2,16 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Mutex;
 
-use actix_web::web::{Json, Query};
+use actix_web::web::{Json, Path, Query};
 use actix_web::{get, post, HttpResponse, Scope};
 use lazy_static::lazy_static;
 use serde::Deserialize;
 use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
+use crate::config::config;
 use crate::docs::UpdatePaths;
-use crate::models::{AppErr, Response, User};
+use crate::models::{AppErr, AppErrForbidden, Response, User};
 use crate::utils::send_webhook;
 use crate::vendor;
 
@@ -90,11 +91,18 @@ struct SmsData {
 
 #[utoipa::path(
     post,
+    params(("pass" = String, Path,)),
     request_body = SmsData,
     responses((status = 200))
 )]
-#[post("/sms-callback/")]
-async fn sms_callback(data: Json<SmsData>) -> Result<HttpResponse, AppErr> {
+#[post("/sms-callback/{pass}/")]
+async fn sms_callback(
+    data: Json<SmsData>, path: Path<(String,)>,
+) -> Result<HttpResponse, AppErr> {
+    if path.0 != config().sms_cb_pass {
+        return Err(AppErrForbidden("invalid pass"));
+    }
+
     send_webhook(
         "Sms",
         &format!(
