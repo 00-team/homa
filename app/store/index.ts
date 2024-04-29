@@ -1,2 +1,2 @@
 export * from './self'
-export * from './sidebar'
+export * from './prices'
