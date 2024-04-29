@@ -3,7 +3,7 @@ use std::ops::Deref;
 use std::sync::Mutex;
 
 use actix_web::web::{Json, Query};
-use actix_web::{get, HttpResponse, Scope};
+use actix_web::{get, post, HttpResponse, Scope};
 use lazy_static::lazy_static;
 use serde::Deserialize;
 use serde_json::Value;
@@ -11,6 +11,7 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
 use crate::models::{AppErr, Response, User};
+use crate::utils::send_webhook;
 use crate::vendor;
 
 lazy_static! {
@@ -31,8 +32,8 @@ lazy_static! {
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
-    paths(prices_get, check_service),
-    components(),
+    paths(prices_get, check_service, sms_callback),
+    components(schemas(SmsData)),
     servers((url = "/vendor")),
     modifiers(&UpdatePaths)
 )]
@@ -49,6 +50,7 @@ async fn prices_get(_: User) -> Response<HashMap<String, i64>> {
 
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 struct CheckServiceQuery {
+    time: u16,
     service: String,
 }
 
@@ -61,17 +63,65 @@ struct CheckServiceQuery {
 async fn check_service(
     _: User, q: Query<CheckServiceQuery>,
 ) -> Response<Value> {
-    let args = vec![("service", q.service.as_str())];
-    let result = vendor::request("getPricesVerification", args).await?;
-    return Ok(Json(result));
+    if q.time == 20 {
+        let args = vec![("service", q.service.as_str())];
+        let result = vendor::request("getPricesVerification", args).await?;
+        Ok(Json(result))
+    } else {
+        let time = q.time.to_string();
+        let args = vec![("rent_time", time.as_str())];
+        let result =
+            vendor::request("getRentServicesAndCountries", args).await?;
+        Ok(Json(result))
+    }
+}
+
+#[derive(Deserialize, ToSchema)]
+// #[allow(non_snake_case)]
+#[serde(rename_all = "camelCase")]
+struct SmsData {
+    activation_id: i64,
+    service: String,
+    text: String,
+    code: String,
+    country: i64,
+    received_at: String,
+}
+
+#[utoipa::path(
+    post,
+    request_body = SmsData,
+    responses((status = 200))
+)]
+#[post("/sms-callback/")]
+async fn sms_callback(data: Json<SmsData>) -> Result<HttpResponse, AppErr> {
+    send_webhook(
+        "Sms",
+        &format!(
+            "
+id: {}
+service: {}
+text: `{}`
+code: `{}`
+country: {}
+receivedAt: {}
+",
+            data.activation_id,
+            data.service,
+            data.text,
+            data.code,
+            data.country,
+            data.received_at
+        ),
+        13868854,
+    )
+    .await;
+    Ok(HttpResponse::Ok().body(""))
 }
 
 pub fn router() -> Scope {
-    Scope::new("/vendor").service(prices_get).service(check_service)
-    // .service(user_get)
-    // .service(user_update)
-    // .service(user_update_photo)
-    // .service(user_delete_photo)
-    // .service(user_wallet_test)
-    // .service(user_transactions_list)
+    Scope::new("/vendor")
+        .service(prices_get)
+        .service(check_service)
+        .service(sms_callback)
 }
