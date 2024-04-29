@@ -5,6 +5,7 @@ use std::{env, sync::OnceLock};
 pub struct Config {
     pub bot_token_hash: [u8; 32],
     pub discord_webhook: String,
+    pub sms_cb_pass: String,
 }
 
 impl Config {
@@ -19,6 +20,7 @@ pub fn config() -> &'static Config {
         Config {
             bot_token_hash: token.into(),
             discord_webhook: env::var("DISCORD_WEBHOOK").unwrap(),
+            sms_cb_pass: env::var("SMS_CB_PASS").unwrap(),
         }
     })
 }
