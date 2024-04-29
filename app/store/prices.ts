@@ -24,14 +24,34 @@ createRoot(() => {
                     onLoad(x) {
                         if (x.status != 200) return
 
+                        let country: State['data'] = {}
+                        let service: State['data'] = {}
+                        let data: State['data'] = x.response
+                        Object.entries(data).map(([k, [cost]]) => {
+                            let [c, s] = k.split('-')
+                            if (c in country) {
+                                country[c][0] += cost
+                                country[c][1] += 1
+                            } else {
+                                country[c] = [cost, 1]
+                            }
+
+                            if (s in service) {
+                                service[s][0] += cost
+                                service[s][1] += 1
+                            } else {
+                                service[s] = [cost, 1]
+                            }
+                        })
+
                         setPrices({
                             update: Date.now(),
-                            data: x.response,
+                            data: { ...data, ...country, ...service },
                         })
                     },
                 })
             },
-            { defer: true }
+            { defer: false }
         )
     )
 })
