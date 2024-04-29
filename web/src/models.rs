@@ -277,6 +277,10 @@ impl AppErr {
     pub fn new(status: u16, message: &str) -> Self {
         Self { status, message: message.to_string() }
     }
+
+    pub fn default() -> Self {
+        Self { status: 500, message: "Internal Server Error".to_string() }
+    }
 }
 
 impl fmt::Display for AppErr {
