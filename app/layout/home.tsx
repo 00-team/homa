@@ -4,31 +4,29 @@ import { SERVICE_LIST } from './service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
 
-const TIME_LIST: [number, string][] = [
-    20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
-    360, 384, 408, 432, 456, 480, 504, 528, 552, 576, 600, 624, 648, 672, 696,
-    720,
-].map((t, i) => {
-    if (i === 0) return [t, t + ' دقیقه']
-
-    if (t >= 24) {
-        return [t, ~~(t / 24) + ' روز']
-    }
-
-    return [t, t + ' ساعت']
-})
+// const TIME_LIST: [number, string][] = [
+//     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
+//     360, 384, 408, 432, 456, 480, 504, 528, 552, 576, 600, 624, 648, 672, 696,
+//     720,
+// ].map((t, i) => {
+//     if (i === 0) return [t, t + ' دقیقه']
+//
+//     if (t >= 24) {
+//         return [t, ~~(t / 24) + ' روز']
+//     }
+//
+//     return [t, t + ' ساعت']
+// })
 
 export default () => {
     type State = {
         country: number | null
         service: string | null
-        time: number | null
     }
 
     const [state, setState] = createStore<State>({
         country: null,
         service: null,
-        time: null,
     })
 
     return (
@@ -66,15 +64,6 @@ export default () => {
                     placeholder='سرویس'
                 />
             </div>
-            <div class='time'>
-                <Select
-                    items={TIME_LIST.map(s => (
-                        <span class='time-dpy'>{s[1]}</span>
-                    ))}
-                    onChange={v => setState({ time: TIME_LIST[v[0]][0] })}
-                    placeholder='زمان اجاره'
-                />
-            </div>
             <div
                 style={{
                     display: 'flex',
@@ -84,7 +73,6 @@ export default () => {
             >
                 <span>country: {state.country}</span>
                 <span>service: {state.service}</span>
-                <span>time: {state.time}</span>
             </div>
         </div>
     )
