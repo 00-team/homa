@@ -1,8 +1,9 @@
 import './style/home.scss'
-import { COUNTRY_LIST } from './country-list'
-import { SERVICE_LIST } from './service-list'
+import { COUNTRY_LIST, Country } from './country-list'
+import { SERVICE_LIST, Service } from './service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
+import { prices } from 'store'
 
 // const TIME_LIST: [number, string][] = [
 //     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
@@ -29,23 +30,47 @@ export default () => {
         service: null,
     })
 
+    function filter_country(country: Country) {
+        if (!prices.update) return false
+
+        let key = country[0].toString()
+        if (state.service) {
+            key += '-' + state.service
+        }
+
+        return key in prices.data
+    }
+
+    function filter_service(service: Service) {
+        if (!prices.update) return false
+
+        let key = service[0]
+        if (state.country) {
+            key = state.country + '-' + key
+        }
+
+        return key in prices.data
+    }
+
     return (
         <div class='home-fnd'>
             <div class='country'>
                 <Select
-                    items={COUNTRY_LIST.map(c => (
+                    items={COUNTRY_LIST.filter(filter_country).map(c => [
+                        c[0],
                         <div class='country-dpy'>
                             <span class='name'>{c[4] + ' ' + c[3]}</span>
                             <span class='cc'>+{c[1]}</span>{' '}
-                        </div>
-                    ))}
-                    onChange={v => setState({ country: COUNTRY_LIST[v[0]][0] })}
+                        </div>,
+                    ])}
+                    onChange={v => setState({ country: v[0] })}
                     placeholder='کشور'
                 />
             </div>
             <div class='service'>
                 <Select
-                    items={SERVICE_LIST.map(s => (
+                    items={SERVICE_LIST.filter(filter_service).map(s => [
+                        s[0],
                         <span
                             class='service-dpy'
                             style={
@@ -58,9 +83,9 @@ export default () => {
                             }
                         >
                             {s[2] || s[1]}
-                        </span>
-                    ))}
-                    onChange={v => setState({ service: SERVICE_LIST[v[0]][0] })}
+                        </span>,
+                    ])}
+                    onChange={v => setState({ service: v[0] })}
                     placeholder='سرویس'
                 />
             </div>
@@ -73,6 +98,7 @@ export default () => {
             >
                 <span>country: {state.country}</span>
                 <span>service: {state.service}</span>
+                <span>{prices.update}</span>
             </div>
         </div>
     )
