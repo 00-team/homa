@@ -5,6 +5,7 @@ import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
 import { prices } from 'store'
 import { Show, createMemo } from 'solid-js'
+import { RotateCcwIcon } from 'icons'
 
 // const TIME_LIST: [number, string][] = [
 //     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
@@ -98,7 +99,7 @@ export default () => {
                     ])}
                     onChange={v => setState({ service: v[0] })}
                     placeholder='سرویس'
-                    defaults={state.service ? [state.service] : undefined}
+                    selected={state.service ? [state.service] : []}
                 />
             </div>
             <div class='country'>
@@ -113,29 +114,45 @@ export default () => {
                     ])}
                     onChange={v => setState({ country: v[0] })}
                     placeholder='کشور'
-                    defaults={
-                        state.country != null ? [state.country] : undefined
-                    }
+                    selected={state.country != null ? [state.country] : []}
                 />
             </div>
-
-            <div
-                style={{
-                    display: 'flex',
-                    'flex-direction': 'column',
-                    'font-family': 'var(--en)',
-                }}
-            >
-                <span>country: {state.country}</span>
-                <span>service: {state.service}</span>
-                <span>
-                    {prices.update} | {selected()}
-                </span>
-                <Show when={selected()}>
-                    <button>
-                        {(~~(selected() / 10)).toLocaleString()} تومان
-                    </button>
+            <div class='prices'>
+                <Show when={service()}>
+                    <div class='row'>
+                        <span>{service()} میانگین قیمت</span>
+                        <span class='n'>
+                            {(~~(
+                                prices.data[state.service][0] /
+                                prices.data[state.service][1] /
+                                10
+                            )).toLocaleString()}
+                        </span>
+                    </div>
                 </Show>
+                <Show when={country()}>
+                    <div class='row'>
+                        <span>{country()} میانگین قیمت</span>
+                        <span class='n'>
+                            {(~~(
+                                prices.data[state.country][0] /
+                                prices.data[state.country][1] /
+                                10
+                            )).toLocaleString()}
+                        </span>
+                    </div>
+                </Show>
+            </div>
+            <div class='actions'>
+                <button class='buy' disabled={!selected()}>
+                    {(~~(selected() / 10)).toLocaleString()} تومان
+                </button>
+                <button
+                    class='reset'
+                    onclick={() => setState({ service: null, country: null })}
+                >
+                    <RotateCcwIcon />
+                </button>
             </div>
         </div>
     )
