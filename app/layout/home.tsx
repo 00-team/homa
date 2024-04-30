@@ -63,23 +63,6 @@ export default () => {
 
     return (
         <div class='home-fnd'>
-            <div class='country'>
-                <Select
-                    disabled={!prices.update}
-                    items={COUNTRY_LIST.filter(filter_country).map(c => [
-                        c[0],
-                        <div class='country-dpy'>
-                            <span class='name'>{c[4] + ' ' + c[3]}</span>
-                            <span class='cc'>+{c[1]}</span>{' '}
-                        </div>,
-                    ])}
-                    onChange={v => setState({ country: v[0] })}
-                    placeholder='کشور'
-                    defaults={
-                        state.country != null ? [state.country] : undefined
-                    }
-                />
-            </div>
             <div class='service'>
                 <Select
                     disabled={!prices.update}
@@ -104,6 +87,24 @@ export default () => {
                     defaults={state.service ? [state.service] : undefined}
                 />
             </div>
+            <div class='country'>
+                <Select
+                    disabled={!prices.update}
+                    items={COUNTRY_LIST.filter(filter_country).map(c => [
+                        c[0],
+                        <div class='country-dpy'>
+                            <span class='name'>{c[4] + ' ' + c[3]}</span>
+                            <span class='cc'>+{c[1]}</span>{' '}
+                        </div>,
+                    ])}
+                    onChange={v => setState({ country: v[0] })}
+                    placeholder='کشور'
+                    defaults={
+                        state.country != null ? [state.country] : undefined
+                    }
+                />
+            </div>
+
             <div
                 style={{
                     display: 'flex',
