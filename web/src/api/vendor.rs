@@ -57,7 +57,7 @@ async fn prices(_: User) -> Response<Prices> {
 
                         prices.insert(
                             format!("{country}-{service}"),
-                            (cost * 6660.0, count),
+                            ((cost * 6660.0 * 3.0 * 1e4).ceil() / 1e4, count),
                         );
                     },
                 );
