@@ -65,6 +65,7 @@ export default () => {
         <div class='home-fnd'>
             <div class='country'>
                 <Select
+                    disabled={!prices.update}
                     items={COUNTRY_LIST.filter(filter_country).map(c => [
                         c[0],
                         <div class='country-dpy'>
@@ -81,6 +82,7 @@ export default () => {
             </div>
             <div class='service'>
                 <Select
+                    disabled={!prices.update}
                     items={SERVICE_LIST.filter(filter_service).map(s => [
                         s[0],
                         <span
