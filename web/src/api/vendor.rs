@@ -14,7 +14,7 @@ use crate::models::{AppErr, AppErrForbidden, Response, User};
 use crate::utils;
 use crate::vendor;
 
-type Prices = HashMap<String, (i64, i64)>;
+type Prices = HashMap<String, (f64, i64)>;
 lazy_static! {
     static ref PRICES: Mutex<Prices> = Mutex::new(HashMap::new());
     static ref PRICES_UPDATE: Mutex<i64> = Mutex::new(0);
@@ -23,54 +23,46 @@ lazy_static! {
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
-    paths(rub_price, prices, sms_callback),
-    components(schemas(SmsData, RubPrice)),
+    paths(prices, sms_callback),
+    components(schemas(SmsData)),
     servers((url = "/vendor")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
 
-#[derive(Serialize, ToSchema)]
-struct RubPrice {
-    rub_irr: i64
-}
-
-#[utoipa::path(get, responses((status = 200, body = RubPrice)))]
-#[get("/rub-price/")]
-async fn rub_price(_: User) -> Response<RubPrice> {
-    Ok(Json(RubPrice {rub_irr: 12}))
-}
-
 #[utoipa::path(get, responses((status = 200)))]
 #[get("/prices/")]
 async fn prices(_: User) -> Response<Prices> {
     let now = utils::now();
-    let mut update = PRICES_UPDATE.lock().unwrap();
-    let mut prices = PRICES.lock().unwrap();
+    let mut update = PRICES_UPDATE.lock().expect("PRICES_UPDATE lock err");
+    let mut prices = PRICES.lock().expect("PRICES lock err");
     if *update + 600 < now {
         let result = vendor::request("getPrices", vec![]).await?;
         prices.clear();
         *update = now;
 
-        let result = if let Some(v) = result.as_object() {
-            v
-        } else {
-            return Err(AppErr::default());
-        };
+        result.as_object().expect("result is not an object").iter().for_each(
+            |(country, v)| {
+                v.as_object().expect("invalid response L1").iter().for_each(
+                    |(service, vv)| {
+                        let vv = vv.as_object().expect("invalid response L2");
+                        let count = vv.get("count").expect("count not found");
+                        let count = count.as_i64().expect("count is NaN");
+                        let cost = vv.get("cost").expect("cost not found");
+                        let cost = cost.as_f64().expect("cost is NaN");
 
-        result.iter().for_each(|(country, v)| {
-            v.as_object().unwrap().iter().for_each(|(service, vv)| {
-                let vv = vv.as_object().unwrap();
-                let count = vv.get("count").unwrap().as_i64().unwrap();
-                let cost = vv.get("cost").unwrap().as_i64().unwrap();
+                        if count == 0 {
+                            return;
+                        }
 
-                if count == 0 {
-                    return;
-                }
-
-                prices.insert(format!("{country}-{service}"), (cost, count));
-            });
-        });
+                        prices.insert(
+                            format!("{country}-{service}"),
+                            (cost * 6660.0, count),
+                        );
+                    },
+                );
+            },
+        );
     }
 
     Ok(Json(prices.deref().clone()))
@@ -127,7 +119,6 @@ receivedAt: {}
 
 pub fn router() -> Scope {
     Scope::new("/vendor")
-        .service(rub_price)
         .service(prices)
         .service(sms_callback)
 }
