@@ -46,7 +46,7 @@ export default () => {
         if (!prices.update) return false
 
         let key = service[0]
-        if (state.country) {
+        if (state.country != null) {
             key = state.country + '-' + key
         }
 
@@ -54,7 +54,7 @@ export default () => {
     }
 
     const selected = createMemo(() => {
-        if (!state.country || !state.service) return null
+        if (state.country == null || state.service == null) return null
         let key = state.country + '-' + state.service
         let value = prices.data[key]
         if (!value) return null
@@ -74,7 +74,9 @@ export default () => {
                     ])}
                     onChange={v => setState({ country: v[0] })}
                     placeholder='کشور'
-                    defaults={state.country ? [state.country] : undefined}
+                    defaults={
+                        state.country != null ? [state.country] : undefined
+                    }
                 />
             </div>
             <div class='service'>
@@ -109,10 +111,12 @@ export default () => {
             >
                 <span>country: {state.country}</span>
                 <span>service: {state.service}</span>
-                <span>{prices.update}</span>
+                <span>
+                    {prices.update} | {selected()}
+                </span>
                 <Show when={selected()}>
                     <button>
-                        {selected()} | {selected() * prices.rub_irr}
+                        {(~~(selected() / 10)).toLocaleString()} تومان
                     </button>
                 </Show>
             </div>
