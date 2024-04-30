@@ -4,6 +4,7 @@ import { SERVICE_LIST, Service } from './service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
 import { prices } from 'store'
+import { Show, createMemo } from 'solid-js'
 
 // const TIME_LIST: [number, string][] = [
 //     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
@@ -51,6 +52,14 @@ export default () => {
 
         return key in prices.data
     }
+
+    const selected = createMemo(() => {
+        if (!state.country || !state.service) return null
+        let key = state.country + '-' + state.service
+        let value = prices.data[key]
+        if (!value) return null
+        return value[0]
+    })
 
     return (
         <div class='home-fnd'>
@@ -101,6 +110,11 @@ export default () => {
                 <span>country: {state.country}</span>
                 <span>service: {state.service}</span>
                 <span>{prices.update}</span>
+                <Show when={selected()}>
+                    <button>
+                        {selected()} | {selected() * prices.rub_irr}
+                    </button>
+                </Show>
             </div>
         </div>
     )
