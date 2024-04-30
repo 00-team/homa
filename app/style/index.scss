@@ -114,8 +114,8 @@ button {
     &:disabled {
         pointer-events: none;
         opacity: 0.6;
-        border: 2px solid var(--slate-4);
-        background-color: var(--slate-2);
+        border: 2px solid var(--bg-3);
+        background-color: var(--bg-1);
         outline: 0;
         cursor: default;
     }
