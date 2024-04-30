@@ -5,13 +5,11 @@ import { createStore } from 'solid-js/store'
 type State = {
     update: number
     data: { [k: string]: [number, number] }
-    rub_irr: number
 }
 
 const [prices, setPrices] = createStore<State>({
     update: 0,
     data: {},
-    rub_irr: 0,
 })
 
 createRoot(() => {
@@ -22,15 +20,6 @@ createRoot(() => {
             },
             () => {
                 if (prices.update + 600e3 > Date.now()) return
-
-                httpx({
-                    method: 'GET',
-                    url: '/api/vendor/rub-price/',
-                    onLoad(x) {
-                        if (x.status != 200) return
-                        setPrices({ rub_irr: x.response.rub_irr })
-                    },
-                })
 
                 httpx({
                     method: 'GET',
