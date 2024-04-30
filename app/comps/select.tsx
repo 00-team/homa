@@ -6,7 +6,7 @@ import { Component, JSXElement, Show, createEffect, on } from 'solid-js'
 type Props<T extends string | number> = {
     items: [T, JSXElement][]
     onChange(props: T[]): void
-    defaults?: T[]
+    selected: T[]
     multiple?: true | number
     disabled?: boolean
     placeholder?: string
@@ -21,18 +21,14 @@ export const Select = <T extends string | number>(P: Props<T>) => {
     }
     const [state, setState] = createStore<State>({
         open: false,
-        selected: (P.defaults || []).map(id =>
-            P.items.findIndex(i => i[0] == id)
-        ),
+        selected: P.selected.map(id => P.items.findIndex(i => i[0] == id)),
         changed: 0,
         ph: P.placeholder || '---',
     })
 
     createEffect(() => {
-        if (!P.defaults) return
-
         setState({
-            selected: P.defaults.map(id => P.items.findIndex(i => i[0] == id)),
+            selected: P.selected.map(id => P.items.findIndex(i => i[0] == id)),
         })
     })
 
