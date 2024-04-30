@@ -40,4 +40,33 @@
     .service .service-dpy {
         width: 100%;
     }
+
+    .prices {
+        display: flex;
+        flex-direction: column;
+        direction: rtl;
+        font-size: 18px;
+
+        .n {
+            font-family: var(--en);
+        }
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 0.4rem;
+
+        .buy {
+            width: 100%;
+        }
+
+        .reset {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 }
