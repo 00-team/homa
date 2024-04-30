@@ -61,6 +61,20 @@ export default () => {
         return value[0]
     })
 
+    const service = createMemo(() => {
+        if (state.service == null) return null
+        let s = SERVICE_LIST.find(s => s[0] == state.service)
+        if (!s) return null
+        return s[2] || s[1]
+    })
+
+    const country = createMemo(() => {
+        if (state.country == null) return null
+        let c = COUNTRY_LIST.find(c => c[0] == state.country)
+        if (!c) return null
+        return c[4] + ' ' + c[3]
+    })
+
     return (
         <div class='home-fnd'>
             <div class='service'>
