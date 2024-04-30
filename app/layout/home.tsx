@@ -76,6 +76,15 @@ export default () => {
         return c[3]
     })
 
+    function avg(key: string): string {
+        let cost = prices.data[key][0]
+        let count = prices.data[key][1]
+
+        let a = ~~(cost / count / 1e4) * 1e3
+
+        return a.toLocaleString()
+    }
+
     return (
         <div class='home-fnd'>
             <div class='service'>
@@ -121,27 +130,13 @@ export default () => {
                 <Show when={service()}>
                     <div class='row'>
                         <span>میانگین قیمت {service()}:</span>
-                        <span class='n'>
-                            {(~~(
-                                prices.data[state.service][0] /
-                                prices.data[state.service][1] /
-                                10
-                            )).toLocaleString()}{' '}
-                            تومان
-                        </span>
+                        <span class='n'>{avg(state.service)} تومان</span>
                     </div>
                 </Show>
                 <Show when={country()}>
                     <div class='row'>
                         <span>میانگین قیمت {country()}:</span>
-                        <span class='n'>
-                            {(~~(
-                                prices.data[state.country][0] /
-                                prices.data[state.country][1] /
-                                10
-                            )).toLocaleString()}{' '}
-                            تومان
-                        </span>
+                        <span class='n'>{avg(state.country + '')} تومان</span>
                     </div>
                 </Show>
             </div>
