@@ -5,7 +5,7 @@ use std::sync::Mutex;
 use actix_web::web::{Json, Path};
 use actix_web::{get, post, HttpResponse, Scope};
 use lazy_static::lazy_static;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use utoipa::{OpenApi, ToSchema};
 
 use crate::config::config;
@@ -118,7 +118,5 @@ receivedAt: {}
 }
 
 pub fn router() -> Scope {
-    Scope::new("/vendor")
-        .service(prices)
-        .service(sms_callback)
+    Scope::new("/vendor").service(prices).service(sms_callback)
 }
