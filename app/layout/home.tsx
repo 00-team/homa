@@ -150,6 +150,7 @@ export default () => {
                     {(~~(selected() / 10)).toLocaleString()} تومان
                 </button>
                 <button
+                    disabled={state.service == null && state.country == null}
                     class='reset'
                     onclick={() => setState({ service: null, country: null })}
                 >
