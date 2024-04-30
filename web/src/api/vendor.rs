@@ -5,7 +5,7 @@ use std::sync::Mutex;
 use actix_web::web::{Json, Path};
 use actix_web::{get, post, HttpResponse, Scope};
 use lazy_static::lazy_static;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::{OpenApi, ToSchema};
 
 use crate::config::config;
@@ -23,23 +23,27 @@ lazy_static! {
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
-    paths(prices_get, check_service, sms_callback),
-    components(schemas(SmsData)),
+    paths(rub_price, prices, sms_callback),
+    components(schemas(SmsData, RubPrice)),
     servers((url = "/vendor")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
 
-#[utoipa::path(get, responses((status = 200, body = User)))]
-#[get("/prices/")]
-async fn prices_get(_: User) -> Response<Prices> {
-    let x = PRICES.lock().unwrap();
-    Ok(Json(x.deref().clone()))
+#[derive(Serialize, ToSchema)]
+struct RubPrice {
+    rub_irr: i64
+}
+
+#[utoipa::path(get, responses((status = 200, body = RubPrice)))]
+#[get("/rub-price/")]
+async fn rub_price(_: User) -> Response<RubPrice> {
+    Ok(Json(RubPrice {rub_irr: 12}))
 }
 
 #[utoipa::path(get, responses((status = 200)))]
-#[get("/check-service/")]
-async fn check_service(_: User) -> Response<Prices> {
+#[get("/prices/")]
+async fn prices(_: User) -> Response<Prices> {
     let now = utils::now();
     let mut update = PRICES_UPDATE.lock().unwrap();
     let mut prices = PRICES.lock().unwrap();
@@ -123,7 +127,7 @@ receivedAt: {}
 
 pub fn router() -> Scope {
     Scope::new("/vendor")
-        .service(prices_get)
-        .service(check_service)
+        .service(rub_price)
+        .service(prices)
         .service(sms_callback)
 }
