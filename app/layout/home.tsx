@@ -120,25 +120,27 @@ export default () => {
             <div class='prices'>
                 <Show when={service()}>
                     <div class='row'>
-                        <span>{service()} میانگین قیمت</span>
+                        <span>میانگین قیمت {service()}:</span>
                         <span class='n'>
                             {(~~(
                                 prices.data[state.service][0] /
                                 prices.data[state.service][1] /
                                 10
-                            )).toLocaleString()}
+                            )).toLocaleString()}{' '}
+                            تومان
                         </span>
                     </div>
                 </Show>
                 <Show when={country()}>
                     <div class='row'>
-                        <span>{country()} میانگین قیمت</span>
+                        <span>میانگین قیمت {country()}:</span>
                         <span class='n'>
                             {(~~(
                                 prices.data[state.country][0] /
                                 prices.data[state.country][1] /
                                 10
-                            )).toLocaleString()}
+                            )).toLocaleString()}{' '}
+                            تومان
                         </span>
                     </div>
                 </Show>
