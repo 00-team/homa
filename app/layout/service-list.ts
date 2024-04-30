@@ -14,10 +14,9 @@ export const SERVICE_LIST: Service[] = [
     ['hw', 'Alipay/Alibaba/1688', 'علی بابا'],
     ['tw', 'Twitter', 'تویتر'],
     ['am', 'Amazon', 'آمازون'],
-    ['yw', 'Grindr'],
-    ['ot', 'Any other'],
+    ['ot', 'Any other', 'غیره'],
     // ['ot', 'Any other call forwarding'],
-    ['vk', 'vk.com', 'وی کی'],
+    ['vk', 'vk.com'],
     ['pm', 'AOL'],
     ['uu', 'Wildberries'],
     ['li', 'Baidu'],
@@ -1058,4 +1057,5 @@ export const SERVICE_LIST: Service[] = [
     ['ajc', 'Почта России'],
     ['rh', 'Ace2Three'],
     ['ob', 'Onlinerby'],
+    ['yw', 'Grindr'],
 ]
