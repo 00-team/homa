@@ -46,9 +46,12 @@
         flex-direction: column;
         direction: rtl;
         font-size: 18px;
+        width: 100%;
 
-        .n {
-            font-family: var(--en);
+        .row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
         }
     }
 
@@ -60,6 +63,7 @@
 
         .buy {
             width: 100%;
+            direction: rtl;
         }
 
         .reset {
