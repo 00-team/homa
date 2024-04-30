@@ -73,7 +73,7 @@ export default () => {
         if (state.country == null) return null
         let c = COUNTRY_LIST.find(c => c[0] == state.country)
         if (!c) return null
-        return c[4] + ' ' + c[3]
+        return c[3]
     })
 
     return (
