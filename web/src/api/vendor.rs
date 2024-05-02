@@ -2,17 +2,18 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Mutex;
 
-use actix_web::web::{Json, Path};
+use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, HttpResponse, Scope};
 use lazy_static::lazy_static;
 use serde::Deserialize;
 use utoipa::{OpenApi, ToSchema};
 
-use crate::config::config;
+use crate::config::{config, Config};
 use crate::docs::UpdatePaths;
+use crate::general::{general_get, general_set};
 use crate::models::{AppErr, AppErrForbidden, Response, User};
-use crate::utils;
-use crate::vendor;
+use crate::vendor::{self, rub_irr_price};
+use crate::{utils, AppState};
 
 type Prices = HashMap<String, (f64, i64)>;
 lazy_static! {
@@ -32,14 +33,22 @@ pub struct ApiDoc;
 
 #[utoipa::path(get, responses((status = 200)))]
 #[get("/prices/")]
-async fn prices(_: User) -> Response<Prices> {
+async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     let now = utils::now();
     let mut update = PRICES_UPDATE.lock().expect("PRICES_UPDATE lock err");
     let mut prices = PRICES.lock().expect("PRICES lock err");
     if *update + 600 < now {
+        *update = now;
+
         let result = vendor::request("getPrices", vec![]).await?;
         prices.clear();
-        *update = now;
+
+        let mut general = general_get(&state.sql).await?;
+        if general.rub_irr_update + 86400 < now {
+            general.rub_irr_update = now;
+            general.rub_irr = rub_irr_price().await?;
+            general_set(&state.sql, &general).await?;
+        }
 
         result.as_object().expect("result is not an object").iter().for_each(
             |(country, v)| {
@@ -55,13 +64,12 @@ async fn prices(_: User) -> Response<Prices> {
                             return;
                         }
 
+                        let price = cost * general.rub_irr as f64 * Config::TAX;
+                        let price = ((price / 1e4).ceil() / 1e4).max(15e4);
+
                         prices.insert(
                             format!("{country}-{service}"),
-                            (
-                                ((cost * 6660.0 * 3.0 / 1e4).ceil() * 1e4)
-                                    .max(15e4),
-                                count,
-                            ),
+                            (price, count),
                         );
                     },
                 );
