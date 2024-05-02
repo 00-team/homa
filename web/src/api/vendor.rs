@@ -65,7 +65,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                         }
 
                         let price = cost * general.rub_irr as f64 * Config::TAX;
-                        let price = ((price / 1e4).ceil() / 1e4).max(15e4);
+                        let price = ((price / 1e4).ceil() * 1e4).max(15e4);
 
                         prices.insert(
                             format!("{country}-{service}"),
