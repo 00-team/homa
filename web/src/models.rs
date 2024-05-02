@@ -1,6 +1,6 @@
 use core::fmt;
 use std::{
-    future::Future, io, num::ParseFloatError, ops, pin::Pin,
+    future::Future, io, num::{ParseFloatError, ParseIntError}, ops, pin::Pin,
     string::FromUtf8Error,
 };
 
@@ -333,6 +333,7 @@ macro_rules! impl_from_err {
 impl_from_err!(io::Error);
 impl_from_err!(PayloadError);
 impl_from_err!(ParseFloatError);
+impl_from_err!(ParseIntError);
 impl_from_err!(JsonPayloadError);
 impl_from_err!(SendRequestError);
 impl_from_err!(FromUtf8Error);
