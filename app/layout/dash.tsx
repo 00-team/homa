@@ -8,9 +8,7 @@ const Dash: Component<RouteSectionProps> = P => {
         <div class='dash-fnd'>
             <Navbar />
             <div class='sec-bottom'>
-                <div class='sec-content'>
-                    <div class='sec-wrapper'>{P.children}</div>
-                </div>
+                <div class='sec-content'>{P.children}</div>
             </div>
         </div>
     )

@@ -9,17 +9,11 @@
         display: flex;
         height: calc(100% - var(--nav-height));
         width: 100%;
+        justify-content: center;
 
         .sec-content {
+            width: clamp(300px, 100vw, 500px);
             height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-
-            .sec-wrapper {
-                width: clamp(300px, 100vw, 500px);
-                height: 100%;
-            }
         }
     }
 }
