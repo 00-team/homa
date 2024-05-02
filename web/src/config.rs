@@ -6,6 +6,7 @@ pub struct Config {
     pub bot_token_hash: [u8; 32],
     pub discord_webhook: String,
     pub sms_cb_pass: String,
+    pub navasan_apikey: String,
 }
 
 impl Config {
@@ -21,6 +22,7 @@ pub fn config() -> &'static Config {
             bot_token_hash: token.into(),
             discord_webhook: env::var("DISCORD_WEBHOOK").unwrap(),
             sms_cb_pass: env::var("SMS_CB_PASS").unwrap(),
+            navasan_apikey: env::var("NAVASAN_APIKEY").unwrap(),
         }
     })
 }
