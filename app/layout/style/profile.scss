@@ -50,4 +50,34 @@
             }
         }
     }
+
+    .add-wallet {
+        display: flex;
+        direction: rtl;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+        max-width: 300px;
+        justify-content: space-between;
+
+        button {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px solid var(--green);
+        }
+
+        .up-down {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+
+            button {
+                border-color: var(--fg-2);
+            }
+        }
+
+        .amount {
+            font-size: 1.4rem;
+        }
+    }
 }

@@ -1,14 +1,14 @@
 import { Show } from 'solid-js'
 import './style/profile.scss'
 import { self } from 'store'
-import { ChevronDownIcon, ChevronUpIcon, UserIcon } from 'icons'
+import { ChevronDownIcon, ChevronUpIcon, CirclePlusIcon, UserIcon } from 'icons'
 import { createStore } from 'solid-js/store'
 
 export default () => {
     type State = {
         add_amount: number
     }
-    const [state, setState] = createStore<State>({ add_amount: 0 })
+    const [state, setState] = createStore<State>({ add_amount: 55555 })
 
     function add_amount(value: number) {
         setState(s => {
@@ -50,6 +50,9 @@ export default () => {
                     </button>
                 </div>
                 <span class='amount'>{state.add_amount} هزار تومان</span>
+                <button class='icon'>
+                    <CirclePlusIcon />
+                </button>
             </div>
         </div>
     )
