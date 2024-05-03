@@ -203,6 +203,7 @@ impl FromRequest for Admin {
 macro_rules! sql_enum {
     ($vis:vis enum $name:ident { $($member:ident,)* }) => {
         #[derive(Default, Clone, Debug, Serialize, Deserialize, ToSchema)]
+        #[serde(rename_all = "snake_case")]
         $vis enum $name {
             #[default]
             $($member,)*
