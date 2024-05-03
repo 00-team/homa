@@ -32,7 +32,10 @@ export default () => {
             <div class='info'>
                 <span class='name'>{self.user.name}</span>
                 <Show when={self.user.username}>
-                    <span class='username'>@{self.user.username}</span>
+                    <div class='username'>
+                        <span>نام کاربری: </span>
+                        <span class='handle'>@{self.user.username}</span>
+                    </div>
                 </Show>
                 <span class='wallet'>کیف پول: {self.user.wallet}</span>
                 <span class='in-hold'>در انتظار: {self.user.in_hold}</span>

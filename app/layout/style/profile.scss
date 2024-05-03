@@ -24,4 +24,30 @@
             object-fit: contain;
         }
     }
+
+    .info {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        direction: rtl;
+        max-width: 300px;
+        font-size: 1.2rem;
+
+        .name {
+            font-family: var(--en), 'Zan';
+        }
+
+        .username {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+
+            .handle {
+                font-family: var(--en);
+                direction: ltr;
+            }
+        }
+    }
 }
