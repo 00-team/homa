@@ -22,6 +22,10 @@ export default defineConfig(env => {
                     target: 'http://127.0.0.1:7200',
                     changeOrigin: true,
                 },
+                '/record/': {
+                    target: 'http://127.0.0.1:7200',
+                    changeOrigin: true,
+                },
             },
         },
         build: {
