@@ -1,6 +1,10 @@
 use core::fmt;
 use std::{
-    future::Future, io, num::{ParseFloatError, ParseIntError}, ops, pin::Pin,
+    future::Future,
+    io,
+    num::{ParseFloatError, ParseIntError},
+    ops,
+    pin::Pin,
     string::FromUtf8Error,
 };
 
@@ -196,12 +200,67 @@ impl FromRequest for Admin {
     }
 }
 
+macro_rules! sql_enum {
+    ($(#[$meta:meta])* $vis:vis enum $name:ident {
+        $($(#[$vmeta:meta])* $member:ident $(= $val:expr)?,)*
+    }) => {
+        $(#[$meta])*
+        $vis enum $name {
+            $($(#[$vmeta])* $member $(= $val)?,)*
+        }
+
+        impl From<i64> for $name {
+            fn from(value: i64) -> Self {
+                match value {
+                    $(x if x == $name::$member as i64 => $name::$member,)*
+                    _ => $name::default()
+                }
+            }
+        }
+
+        impl sqlx::Type<Sqlite> for $name {
+            fn type_info() -> SqliteTypeInfo {
+                <i64 as sqlx::Type<Sqlite>>::type_info()
+            }
+        }
+
+        impl<'q> sqlx::Encode<'q, Sqlite> for $name {
+            fn encode_by_ref(
+                &self,
+                buf: &mut <Sqlite as sqlx::database::HasArguments<'q>>::ArgumentBuffer,
+            ) -> IsNull {
+                buf.push(SqliteArgumentValue::Int(self.clone() as i32));
+                IsNull::No
+            }
+        }
+    };
+}
+
+sql_enum! {
+    #[derive(Default, Clone, Debug, Serialize, Deserialize)]
+    pub enum TransactionStatus {
+        #[default]
+        InProgress,
+        Failed,
+        Success,
+    }
+}
+
+sql_enum! {
+    #[derive(Default, Clone, Debug, Serialize, Deserialize)]
+    pub enum TransactionKind {
+        #[default]
+        In,
+        Out,
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 pub struct Transaction {
     pub id: i64,
     pub user: i64,
-    pub kind: i64,   // in OR out | withdrawl OR deposit
-    pub status: i64, // success | failed | in progress
+    pub kind: TransactionKind, // in OR out | withdrawl OR deposit
+    pub status: TransactionStatus, // success | failed | in progress
     pub amount: i64,
     pub vendor_order_id: Option<String>,
     pub vendor_track_id: Option<i64>,
