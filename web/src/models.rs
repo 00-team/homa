@@ -201,12 +201,11 @@ impl FromRequest for Admin {
 }
 
 macro_rules! sql_enum {
-    ($(#[$meta:meta])* $vis:vis enum $name:ident {
-        $($(#[$vmeta:meta])* $member:ident $(= $val:expr)?,)*
-    }) => {
-        $(#[$meta])*
+    ($vis:vis enum $name:ident { $($member:ident,)* }) => {
+        #[derive(Default, Clone, Debug, Serialize, Deserialize, ToSchema)]
         $vis enum $name {
-            $($(#[$vmeta])* $member $(= $val)?,)*
+            #[default]
+            $($member,)*
         }
 
         impl From<i64> for $name {
@@ -237,9 +236,7 @@ macro_rules! sql_enum {
 }
 
 sql_enum! {
-    #[derive(Default, Clone, Debug, Serialize, Deserialize)]
     pub enum TransactionStatus {
-        #[default]
         InProgress,
         Failed,
         Success,
@@ -247,9 +244,7 @@ sql_enum! {
 }
 
 sql_enum! {
-    #[derive(Default, Clone, Debug, Serialize, Deserialize)]
     pub enum TransactionKind {
-        #[default]
         In,
         Out,
     }
@@ -337,9 +332,9 @@ impl AppErr {
         Self { status, message: message.to_string() }
     }
 
-    pub fn default() -> Self {
-        Self { status: 500, message: "Internal Server Error".to_string() }
-    }
+    // pub fn default() -> Self {
+    //     Self { status: 500, message: "Internal Server Error".to_string() }
+    // }
 }
 
 impl fmt::Display for AppErr {
