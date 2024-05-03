@@ -1,6 +1,7 @@
 export type UserModel = {
     id: number
     name: string
+    username: string | null
     auth_date: number
     wallet: number
     in_hold: number
