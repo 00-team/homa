@@ -1,15 +1,19 @@
-use actix_web::web::Json;
+use actix_web::web::{Data, Json, Query};
 use actix_web::{get, Scope};
-use utoipa::OpenApi;
+use serde::Deserialize;
+use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
-use crate::models::{Response, User};
+use crate::models::{
+    Response, Transaction, TransactionKind, TransactionStatus, User,
+};
+use crate::AppState;
 
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::user")),
-    paths(user_get),
-    components(schemas(User)),
+    paths(user_get, user_deposit, user_transactions),
+    components(schemas(User, Transaction, TransactionKind, TransactionStatus)),
     servers((url = "/user")),
     modifiers(&UpdatePaths)
 )]
@@ -21,12 +25,74 @@ async fn user_get(user: User) -> Response<User> {
     Ok(Json(user))
 }
 
+#[derive(Deserialize, ToSchema, IntoParams)]
+struct DepositParams {
+    amount: i64,
+    auto_order: Option<bool>,
+}
+
+#[utoipa::path(
+    get,
+    params(DepositParams),
+    responses((status = 200, body = String))
+)]
+#[get("/deposit/")]
+async fn user_deposit(
+    user: User, q: Query<DepositParams>, state: Data<AppState>,
+) -> Response<String> {
+    let amount = q.amount.max(50_000).min(50_000_000);
+    let wallet = user.wallet + amount;
+
+    if let Some(true) = q.auto_order {
+        todo!("impl this")
+    }
+
+    sqlx::query! {
+        "insert into transactions(user, amount) values(?, ?)",
+        user.id, amount
+    }
+    .execute(&state.sql)
+    .await?;
+
+    sqlx::query! {
+        "update users set wallet = ? where id = ?",
+        wallet, user.id
+    }
+    .execute(&state.sql)
+    .await?;
+
+    Ok(Json(format!("amount is {amount}")))
+}
+
+#[derive(Deserialize, ToSchema, IntoParams)]
+struct TLParams {
+    page: i64,
+}
+
+#[utoipa::path(
+    get,
+    params(TLParams),
+    responses((status = 200, body = Vec<Transaction>))
+)]
+#[get("/transactions/")]
+async fn user_transactions(
+    user: User, q: Query<TLParams>, state: Data<AppState>,
+) -> Response<Vec<Transaction>> {
+    let offset = q.page * 32;
+    let result = sqlx::query_as! {
+        Transaction,
+        "select * from transactions where user = ? limit 32 offset ?",
+        user.id, offset
+    }
+    .fetch_all(&state.sql)
+    .await?;
+
+    Ok(Json(result))
+}
+
 pub fn router() -> Scope {
-    Scope::new("/user").service(user_get)
-    // .service(user_get)
-    // .service(user_update)
-    // .service(user_update_photo)
-    // .service(user_delete_photo)
-    // .service(user_wallet_test)
-    // .service(user_transactions_list)
+    Scope::new("/user")
+        .service(user_get)
+        .service(user_deposit)
+        .service(user_transactions)
 }
