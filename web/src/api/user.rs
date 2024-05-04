@@ -47,16 +47,25 @@ async fn user_deposit(
         todo!("impl this")
     }
 
-    sqlx::query! {
+    let tid = sqlx::query! {
         "insert into transactions(user, amount) values(?, ?)",
-        user.id, amount
+        user.id,
+        amount
+    }
+    .execute(&state.sql)
+    .await?
+    .last_insert_rowid();
+
+    sqlx::query! {
+        "update users set wallet = ? where id = ?",
+        wallet, user.id
     }
     .execute(&state.sql)
     .await?;
 
     sqlx::query! {
-        "update users set wallet = ? where id = ?",
-        wallet, user.id
+        "update transactions set status = ? where id = ?",
+        TransactionStatus::Success, tid
     }
     .execute(&state.sql)
     .await?;
