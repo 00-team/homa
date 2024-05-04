@@ -1,7 +1,7 @@
 use std::{collections::HashMap, env, str::FromStr};
 
 use lazy_static::lazy_static;
-use serde_json::{json, Map, Number, Value};
+use serde_json::{json, Number, Value};
 
 use crate::{config::config, models::AppErr};
 
