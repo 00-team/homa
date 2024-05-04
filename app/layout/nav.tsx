@@ -39,7 +39,7 @@ const Navbar: Component = () => {
             </div>
             <div class='right'>
                 <A href='/profile/' class='money'>
-                    <span>{self.user.wallet.toLocaleString()}</span>
+                    <span>{(~~(self.user.wallet / 10)).toLocaleString()}</span>
                     <CirclePlusIcon />
                 </A>
             </div>
