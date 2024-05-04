@@ -31,6 +31,17 @@ create table if not exists general (
     total_money integer not null default 0,
     rub_irr integer not null default 0,
     rub_irr_update integer not null default 0
-    -- vnum_update integer not null default 0,
-    -- vnum_prices text not null default "{}"
 );
+
+create table if not exists orders (
+    id integer primary key not null,
+    user integer not null references users(id) on delete cascade,
+    activation_id integer not null,
+    phone text not null,
+    cost integer not null,
+    cc integer not null,
+    operator text not null,
+    datetime text not null
+);
+create index if not exists orders_activation_id on orders(activation_id);
+create index if not exists orders_user on orders(user);
