@@ -8,7 +8,7 @@ export default () => {
     type State = {
         add_amount: number
     }
-    const [state, setState] = createStore<State>({ add_amount: 55555 })
+    const [state, setState] = createStore<State>({ add_amount: 50 })
 
     function add_amount(value: number) {
         setState(s => {
@@ -17,6 +17,10 @@ export default () => {
             if (a > 5000) a = 5000
             return { add_amount: a }
         })
+    }
+
+    function cash(value: number): string {
+        return (~~(value / 10)).toLocaleString()
     }
 
     return (
@@ -37,8 +41,12 @@ export default () => {
                         <span class='handle'>@{self.user.username}</span>
                     </div>
                 </Show>
-                <span class='wallet'>کیف پول: {self.user.wallet}</span>
-                <span class='in-hold'>در انتظار: {self.user.in_hold}</span>
+                <span class='wallet'>
+                    کیف پول: {cash(self.user.wallet)} تومان
+                </span>
+                <span class='in-hold'>
+                    در انتظار: {cash(self.user.in_hold)} تومان
+                </span>
             </div>
             <div class='add-wallet'>
                 <div class='up-down'>
