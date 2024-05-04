@@ -12,7 +12,7 @@ use crate::AppState;
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::user")),
-    paths(user_get, user_deposit, user_transactions),
+    paths(user_get, user_deposit, user_transactions, user_test),
     components(schemas(User, Transaction, TransactionKind, TransactionStatus)),
     servers((url = "/user")),
     modifiers(&UpdatePaths)
@@ -99,9 +99,19 @@ async fn user_transactions(
     Ok(Json(result))
 }
 
+#[utoipa::path(
+    get,
+    responses((status = 200, body = String))
+)]
+#[get("/test/")]
+async fn user_test(user: User, state: Data<AppState>) -> Response<String> {
+    Ok(Json(format!("hi in test")))
+}
+
 pub fn router() -> Scope {
     Scope::new("/user")
         .service(user_get)
         .service(user_deposit)
         .service(user_transactions)
+        .service(user_test)
 }
