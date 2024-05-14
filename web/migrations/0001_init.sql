@@ -53,6 +53,8 @@ create table if not exists prices (
     id integer primary key not null,
     country integer not null,
     service text not null,
-    purchase_cost integer not null,
-    current_cost integer not null
+    purchase_cost intege,
+    current_cost integer not null,
+    count integer not null
 );
+create index if not exists prices_cs on prices(country, service);
