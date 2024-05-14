@@ -36,6 +36,7 @@ create table if not exists general (
 create table if not exists orders (
     id integer primary key not null,
     user integer not null references users(id) on delete cascade,
+    status integer not null default 0,
     activation_id integer not null,
     phone text not null,
     cost integer not null,
@@ -45,3 +46,11 @@ create table if not exists orders (
 );
 create index if not exists orders_activation_id on orders(activation_id);
 create index if not exists orders_user on orders(user);
+
+create table if not exists prices (
+    id integer primary key not null,
+    country integer not null,
+    service text not null,
+    purchase_cost integer not null,
+    current_cost integer not null
+);
