@@ -30,7 +30,9 @@ create table if not exists general (
     available_money integer not null default 0,
     total_money integer not null default 0,
     rub_irr integer not null default 0,
-    rub_irr_update integer not null default 0
+    rub_irr_update integer not null default 0,
+    price_diff_average integer not null default 0,
+    price_diff_count integer not null default 0
 );
 
 create table if not exists orders (
