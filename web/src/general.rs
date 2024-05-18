@@ -5,12 +5,12 @@ use sqlx::{Pool, Sqlite};
 
 use crate::models::{AppErr, JsonStr};
 
-#[derive(Serialize_tuple, Deserialize_tuple)]
-struct PriceValue {
-    cost_api: f32,
-    cost_buy: f32,
-    count: i64,
-    timestamp: i64,
+#[derive(Serialize_tuple, Deserialize_tuple, Default, Clone)]
+pub struct PriceValue {
+    pub cost_api: f64,
+    pub cost_buy: f64,
+    pub count: i64,
+    pub timestamp: i64,
 }
 
 type PriceData = HashMap<String, PriceValue>;
