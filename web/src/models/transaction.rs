@@ -31,7 +31,6 @@ pub struct Transaction {
     pub user: i64,
     pub kind: TransactionKind,
     pub status: TransactionStatus,
-    pub vendor: TransactionVendor,
     pub amount: i64,
     pub timestamp: i64,
     pub vendor_order_id: Option<String>,
