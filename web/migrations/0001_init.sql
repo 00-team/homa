@@ -17,6 +17,7 @@ create table if not exists transactions (
     user integer not null references users(id) on delete cascade,
     kind integer not null default 0, -- in OR out | withdrawl OR deposit
     status integer not null default 0, -- success | failed | in progress
+    timestamp integer not null,
     amount integer not null,
     vendor_order_id text,
     vendor_track_id integer,
@@ -31,8 +32,10 @@ create table if not exists general (
     total_money integer not null default 0,
     rub_irr integer not null default 0,
     rub_irr_update integer not null default 0,
-    price_diff_average integer not null default 0,
-    price_diff_count integer not null default 0
+    price_diff_total integer not null default 0,
+    price_diff_count integer not null default 0,
+    prices text not null default '{}',
+    prices_update integer not null default 0
 );
 
 create table if not exists orders (
@@ -49,12 +52,3 @@ create table if not exists orders (
 create index if not exists orders_activation_id on orders(activation_id);
 create index if not exists orders_user on orders(user);
 
-create table if not exists prices (
-    id integer primary key not null,
-    country integer not null,
-    service text not null,
-    purchase_cost intege,
-    current_cost integer not null,
-    count integer not null
-);
-create index if not exists prices_cs on prices(country, service);
