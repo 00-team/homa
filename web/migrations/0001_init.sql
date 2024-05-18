@@ -21,8 +21,8 @@ create table if not exists transactions (
     amount integer not null,
     vendor_order_id text,
     vendor_track_id integer,
-    card_number text,
-    hashed_card_number text,
+    card text,
+    card_hash text,
     date integer,
     bank_track_id integer
 );

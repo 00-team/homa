@@ -37,7 +37,7 @@ pub struct Transaction {
     pub vendor_order_id: Option<String>,
     pub vendor_track_id: Option<i64>,
     pub card: Option<String>,
-    pub hashed_card: Option<String>,
+    pub card_hash: Option<String>,
     pub date: Option<i64>,
     pub bank_track_id: Option<i64>,
 }
