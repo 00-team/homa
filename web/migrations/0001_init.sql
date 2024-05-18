@@ -45,7 +45,6 @@ create table if not exists orders (
     activation_id integer not null,
     phone text not null,
     cost integer not null,
-    cc integer not null,
     operator text not null,
     datetime text not null
 );
