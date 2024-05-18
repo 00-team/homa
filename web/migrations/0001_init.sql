@@ -46,7 +46,9 @@ create table if not exists orders (
     phone text not null,
     cost integer not null,
     operator text not null,
-    datetime text not null
+    datetime text not null,
+    country text not null,
+    service text not null
 );
 create index if not exists orders_activation_id on orders(activation_id);
 create index if not exists orders_user on orders(user);
