@@ -28,9 +28,10 @@ pub struct Order {
     pub activation_id: i64,
     pub phone: String,
     pub cost: i64,
-    pub cc: i64,
     pub operator: String,
     pub datetime: String,
+    pub country: String,
+    pub service: String
 }
 
 impl FromRequest for Order {
