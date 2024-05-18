@@ -18,13 +18,6 @@ sql_enum! {
     }
 }
 
-sql_enum! {
-    pub enum TransactionVendor {
-        Zarinpal,
-        Zibal,
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 pub struct Transaction {
     pub id: i64,

@@ -1,7 +1,10 @@
 use std::{future::Future, pin::Pin};
 
-use actix_web::{web::{Data, Path}, FromRequest, HttpRequest};
 use actix_web::dev::Payload;
+use actix_web::{
+    web::{Data, Path},
+    FromRequest, HttpRequest,
+};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 

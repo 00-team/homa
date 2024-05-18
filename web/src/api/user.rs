@@ -1,12 +1,20 @@
 use actix_web::web::{Data, Json, Query};
 use actix_web::{get, Scope};
 use serde::Deserialize;
+use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
-use crate::models::{
-    Response, Transaction, TransactionKind, TransactionStatus, User,
+use crate::models::transaction::{
+    Transaction, TransactionKind, TransactionStatus,
 };
+use crate::models::user::User;
+use crate::models::Response;
+// use crate::models::{
+//     AppErr, AppErrForbidden, Response, Transaction, TransactionKind,
+//     TransactionStatus, User,
+// };
+use crate::vendor;
 use crate::AppState;
 
 #[derive(OpenApi)]
@@ -105,7 +113,72 @@ async fn user_transactions(
 )]
 #[get("/test/")]
 async fn user_test(user: User, state: Data<AppState>) -> Response<String> {
-    Ok(Json(format!("hi in test")))
+    let args = vec![
+        ("service", "ds"),
+        ("country", "12"),
+        // ("forward", "$forward"),
+        // ("operator", "$operator"),
+        // ("ref", "$ref"),
+        // ("phoneException", "$phoneException"),
+        ("maxPrice", "1"),
+        // ("verification", "$verification"),
+    ];
+    let result = vendor::request("getNumberV2", args).await?;
+    let result = result.as_object().expect("result is not an object");
+
+    log::info!("{:#?}", result);
+
+    let activation_id = result
+        .get("activationId")
+        .expect("activation_id not found")
+        .as_i64()
+        .expect("could not convert activation_id to i64");
+    let phone = result
+        .get("phoneNumber")
+        .expect("phone not found")
+        .as_str()
+        .expect("phone not str");
+    let cost = result
+        .get("activationCost")
+        .expect("cost not found")
+        .as_str()
+        .expect("cost is not str");
+    let cost: f64 = cost.parse()?;
+    let cc = result
+        .get("countryCode")
+        .expect("cc not found")
+        .as_str()
+        .expect("cc is not str");
+    let cc: i64 = cc.parse()?;
+    let datetime = result
+        .get("activationTime")
+        .expect("activationTime not found")
+        .as_str()
+        .expect("activationTime is not str");
+    let operator = result
+        .get("activationOperator")
+        .expect("operator not found")
+        .as_str()
+        .expect("operator is not str");
+
+    /*
+    "activationCost": String("10.00"),
+    "activationEndTime": String("0000-00-00 00:00:00"),
+    "activationId": String("2386367288"),
+    "activationOperator": String("any"),
+    "activationTime": String("2024-05-04 11:25:14"),
+    "canGetAnotherSms": Bool(true),
+    "countryCode": String("12"),
+    "phoneNumber": String("1 231 484 5483"),
+    */
+
+    sqlx::query! {
+        "insert into orders(user, activation_id, phone, cost, cc, operator, datetime)
+        values(?, ?, ?, ?, ?, ?, ?)",
+        user.id, activation_id, phone, cost, cc, operator, datetime
+    }.execute(&state.sql).await?;
+
+    Ok(Json("ok".to_string()))
 }
 
 pub fn router() -> Scope {

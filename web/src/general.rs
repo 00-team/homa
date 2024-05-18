@@ -72,7 +72,7 @@ pub async fn general_set(
                 rub_irr = ?, rub_irr_update = ?, price_diff_total = ?,
                 price_diff_count = ?, prices = ?, prices_update = ?",
                 general.available_money, general.total_money, general.rub_irr,
-                general.rub_irr_update, general.price_diff_total, 
+                general.rub_irr_update, general.price_diff_total,
                 general.price_diff_count, general.prices, general.prices_update
             }
             .execute(pool)
@@ -86,7 +86,7 @@ pub async fn general_set(
                 rub_irr_update, price_diff_total, price_diff_count, prices,
                 prices_update) values(?,?,?,?,?,?,?,?)",
                 general.available_money, general.total_money, general.rub_irr,
-                general.rub_irr_update, general.price_diff_total, 
+                general.rub_irr_update, general.price_diff_total,
                 general.price_diff_count, general.prices, general.prices_update
             }
             .execute(pool)
