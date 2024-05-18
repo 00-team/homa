@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use actix_web::web::{Data, Json, Path};
+use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{get, post, HttpResponse, Scope};
 use serde::Deserialize;
-use utoipa::{OpenApi, ToSchema};
+use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::config::{config, Config};
 use crate::docs::UpdatePaths;
@@ -16,7 +16,7 @@ use crate::{utils, AppState};
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
-    paths(prices, sms_callback),
+    paths(prices, sms_callback, vendor_buy),
     components(schemas(SmsData)),
     servers((url = "/vendor")),
     modifiers(&UpdatePaths)
@@ -157,6 +157,66 @@ receivedAt: {}
     Ok(HttpResponse::Ok().body(""))
 }
 
+#[derive(Deserialize, IntoParams)]
+struct BuyQuery {
+    country: String,
+    service: String,
+}
+
+#[utoipa::path(
+    post,
+    params(BuyQuery),
+    responses((status = 200, body = String))
+)]
+#[post("/buy/")]
+async fn vendor_buy(
+    user: User, q: Query<BuyQuery>, state: Data<AppState>,
+) -> Response<String> {
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct Answer {
+        activation_id: i64,
+        phone: String,
+        activation_cost: String,
+        activation_time: String,
+        activation_operator: String,
+    }
+
+    let args = vec![
+        ("service", q.service.as_str()),
+        ("country", q.country.as_str()),
+        // ("forward", "$forward"),
+        // ("operator", "$operator"),
+        // ("ref", "$ref"),
+        // ("phoneException", "$phoneException"),
+        // ("maxPrice", "1"),
+        // ("verification", "$verification"),
+    ];
+    let result = vendor::request("getNumberV2", args).await?;
+    let result = serde_json::from_value::<Answer>(result)?;
+    let cost: f64 = result.activation_cost.parse()?;
+
+    log::info!("{:#?}", result);
+
+    // TODO: update prices
+    let general = general_get(&state.sql).await?;
+
+    sqlx::query! {
+        "insert into orders(user, activation_id, phone,
+        cost, country, operator, datetime, service)
+        values(?,?,?,?,?,?,?,?)",
+        user.id, result.activation_id, result.phone, cost, q.country,
+        result.activation_operator, result.activation_time, q.service
+    }
+    .execute(&state.sql)
+    .await?;
+
+    Ok(Json("ok".to_string()))
+}
+
 pub fn router() -> Scope {
-    Scope::new("/vendor").service(prices).service(sms_callback)
+    Scope::new("/vendor")
+        .service(prices)
+        .service(sms_callback)
+        .service(vendor_buy)
 }
