@@ -1,7 +1,6 @@
 use actix_web::web::{Data, Json, Query};
 use actix_web::{get, Scope};
 use serde::Deserialize;
-use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;

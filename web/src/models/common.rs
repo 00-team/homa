@@ -18,11 +18,11 @@ pub struct ListInput {
 #[derive(Debug, Deserialize, Default)]
 pub struct JsonStr<T>(pub T);
 
-impl<T> JsonStr<T> {
-    pub fn into_inner(self) -> T {
-        self.0
-    }
-}
+// impl<T> JsonStr<T> {
+//     pub fn into_inner(self) -> T {
+//         self.0
+//     }
+// }
 
 impl<T> ops::Deref for JsonStr<T> {
     type Target = T;

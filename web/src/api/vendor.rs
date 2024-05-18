@@ -11,7 +11,8 @@ use utoipa::{OpenApi, ToSchema};
 use crate::config::{config, Config};
 use crate::docs::UpdatePaths;
 use crate::general::{general_get, general_set};
-use crate::models::{AppErr, AppErrForbidden, Response, User};
+use crate::models::user::User;
+use crate::models::{AppErr, AppErrForbidden, Response};
 use crate::vendor::{self, rub_irr_price};
 use crate::{utils, AppState};
 

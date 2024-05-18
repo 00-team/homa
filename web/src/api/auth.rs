@@ -11,7 +11,8 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 use crate::config::config;
 use crate::config::Config;
 use crate::docs::UpdatePaths;
-use crate::models::{AppErr, AppErrBadRequest, User};
+use crate::models::user::User;
+use crate::models::{AppErr, AppErrBadRequest};
 use crate::utils::{get_random_string, now, save_photo};
 use crate::AppState;
 
