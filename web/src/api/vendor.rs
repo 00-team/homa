@@ -9,7 +9,7 @@ use crate::config::{config, Config};
 use crate::docs::UpdatePaths;
 use crate::general::{general_get, general_set, PriceValue};
 use crate::models::user::User;
-use crate::models::{AppErr, AppErrForbidden, Response};
+use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
 use crate::vendor::{self, rub_irr_price};
 use crate::{utils, AppState};
 
@@ -93,7 +93,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
         .prices
         .iter()
         .map(|(k, v)| {
-            let cost = if v.cost_buy > 0.0 && v.timestamp + 30 * 86400 > now {
+            let cost = if v.cost_buy > 0.0 && v.timestamp + 864000 > now {
                 v.cost_buy
             } else {
                 v.cost_api
@@ -182,6 +182,40 @@ async fn vendor_buy(
         activation_operator: String,
     }
 
+    let now = utils::now();
+    let key = format!("{}-{}", q.country, q.service);
+    let mut general = general_get(&state.sql).await?;
+    let mut price = general.prices.get_mut(&key);
+    if price.is_none() {
+        return Err(AppErrBadRequest("not found"));
+    }
+    let price = price.unwrap();
+
+    if general.rub_irr_update + 86400 < now {
+        general.rub_irr_update = now;
+        general.rub_irr = rub_irr_price().await?;
+    }
+
+    let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
+        price.cost_buy
+    } else {
+        price.cost_api
+    };
+    let cost_irr = cost_rub * general.rub_irr as f64 * Config::TAX;
+    let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
+
+    if user.wallet < cost_irr {
+        return Err(AppErrBadRequest("not enough in the wallet"));
+    }
+
+    let wallet = user.wallet - cost_irr;
+    sqlx::query! {
+        "update users set wallet = ? where id = ?",
+        wallet, user.id
+    }
+    .execute(&state.sql)
+    .await?;
+
     let args = vec![
         ("service", q.service.as_str()),
         ("country", q.country.as_str()),
@@ -194,18 +228,27 @@ async fn vendor_buy(
     ];
     let result = vendor::request("getNumberV2", args).await?;
     let result = serde_json::from_value::<Answer>(result)?;
-    let cost: f64 = result.activation_cost.parse()?;
+    let new_cost_rub: f64 = result.activation_cost.parse()?;
+
+    let new_cost_irr = new_cost_rub * general.rub_irr as f64;
+    let profit = cost_irr - new_cost_irr as i64;
+
+    if profit < 0 {
+        general.money_loss += profit * -1;
+    } else {
+        general.money_gain += profit;
+    }
+
+    price.cost_api = new_cost_rub;
+    price.timestamp = now;
 
     log::info!("{:#?}", result);
-
-    // TODO: update prices
-    let general = general_get(&state.sql).await?;
 
     sqlx::query! {
         "insert into orders(user, activation_id, phone,
         cost, country, operator, datetime, service)
         values(?,?,?,?,?,?,?,?)",
-        user.id, result.activation_id, result.phone, cost, q.country,
+        user.id, result.activation_id, result.phone, cost_irr, q.country,
         result.activation_operator, result.activation_time, q.service
     }
     .execute(&state.sql)
