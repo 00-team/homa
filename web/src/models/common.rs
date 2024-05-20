@@ -10,7 +10,7 @@ use sqlx::{
 
 pub type Response<T> = Result<Json<T>, super::AppErr>;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoParams)]
 pub struct ListInput {
     pub page: u32,
 }
@@ -108,3 +108,5 @@ macro_rules! sql_enum {
 }
 
 pub(crate) use sql_enum;
+use utoipa::IntoParams;
+
