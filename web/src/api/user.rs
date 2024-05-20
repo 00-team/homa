@@ -15,7 +15,10 @@ use crate::AppState;
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::user")),
-    paths(user_get, user_deposit, user_transactions, user_messages, user_message_seen),
+    paths(
+        user_get, user_deposit, user_transactions,
+        user_messages, user_message_seen, user_messages_unseen_count
+    ),
     components(schemas(User, Transaction, TransactionKind, TransactionStatus, Message)),
     servers((url = "/user")),
     modifiers(&UpdatePaths)
@@ -142,6 +145,26 @@ async fn user_message_seen(
     Ok(HttpResponse::Ok().finish())
 }
 
+#[utoipa::path(
+    get,
+    responses((status = 200, body = i32))
+)]
+/// Messages UnSeen Count
+#[get("/messages-unseen-count/")]
+async fn user_messages_unseen_count(
+    user: User, state: Data<AppState>,
+) -> Response<i32> {
+    let result = sqlx::query! {
+        "select count(id) as count from messages where user = ? and seen = false
+        order by id desc limit 10",
+        user.id
+    }
+    .fetch_one(&state.sql)
+    .await?;
+
+    Ok(Json(result.count))
+}
+
 pub fn router() -> Scope {
     Scope::new("/user")
         .service(user_get)
@@ -149,4 +172,5 @@ pub fn router() -> Scope {
         .service(user_transactions)
         .service(user_messages)
         .service(user_message_seen)
+        .service(user_messages_unseen_count)
 }
