@@ -163,7 +163,7 @@ async fn sms_callback(
     };
 
     utils::send_webhook("Sms", &desc, 13868854).await;
-    Ok(HttpResponse::Ok().body(""))
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[derive(Deserialize, IntoParams)]
