@@ -1,32 +1,29 @@
 use actix_web::web::{Data, Json, Query};
-use actix_web::{get, Scope};
+use actix_web::{get, post, HttpResponse, Scope};
 use serde::Deserialize;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
+use crate::models::message::Message;
 use crate::models::transaction::{
     Transaction, TransactionKind, TransactionStatus,
 };
 use crate::models::user::User;
-use crate::models::Response;
-// use crate::models::{
-//     AppErr, AppErrForbidden, Response, Transaction, TransactionKind,
-//     TransactionStatus, User,
-// };
-use crate::vendor;
+use crate::models::{AppErr, ListInput, Response};
 use crate::AppState;
 
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::user")),
-    paths(user_get, user_deposit, user_transactions, user_test),
-    components(schemas(User, Transaction, TransactionKind, TransactionStatus)),
+    paths(user_get, user_deposit, user_transactions, user_messages, user_message_seen),
+    components(schemas(User, Transaction, TransactionKind, TransactionStatus, Message)),
     servers((url = "/user")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
 
 #[utoipa::path(get, responses((status = 200, body = User)))]
+/// Get
 #[get("/")]
 async fn user_get(user: User) -> Response<User> {
     Ok(Json(user))
@@ -43,6 +40,7 @@ struct DepositParams {
     params(DepositParams),
     responses((status = 200, body = String))
 )]
+/// Deposit
 #[get("/deposit/")]
 async fn user_deposit(
     user: User, q: Query<DepositParams>, state: Data<AppState>,
@@ -80,19 +78,15 @@ async fn user_deposit(
     Ok(Json(format!("amount is {amount}")))
 }
 
-#[derive(Deserialize, ToSchema, IntoParams)]
-struct TLParams {
-    page: i64,
-}
-
 #[utoipa::path(
     get,
-    params(TLParams),
+    params(ListInput),
     responses((status = 200, body = Vec<Transaction>))
 )]
+/// List Transactions
 #[get("/transactions/")]
 async fn user_transactions(
-    user: User, q: Query<TLParams>, state: Data<AppState>,
+    user: User, q: Query<ListInput>, state: Data<AppState>,
 ) -> Response<Vec<Transaction>> {
     let offset = q.page * 32;
     let result = sqlx::query_as! {
@@ -108,76 +102,44 @@ async fn user_transactions(
 
 #[utoipa::path(
     get,
-    responses((status = 200, body = String))
+    params(ListInput),
+    responses((status = 200, body = Vec<Message>))
 )]
-#[get("/test/")]
-async fn user_test(user: User, state: Data<AppState>) -> Response<String> {
-    let args = vec![
-        ("service", "ds"),
-        ("country", "12"),
-        // ("forward", "$forward"),
-        // ("operator", "$operator"),
-        // ("ref", "$ref"),
-        // ("phoneException", "$phoneException"),
-        ("maxPrice", "1"),
-        // ("verification", "$verification"),
-    ];
-    let result = vendor::request("getNumberV2", args).await?;
-    let result = result.as_object().expect("result is not an object");
+/// List Messages
+#[get("/messages/")]
+async fn user_messages(
+    user: User, q: Query<ListInput>, state: Data<AppState>,
+) -> Response<Vec<Message>> {
+    let offset = q.page * 32;
+    let result = sqlx::query_as! {
+        Message,
+        "select * from messages where user = ? order by id desc limit 32 offset ?",
+        user.id, offset
+    }
+    .fetch_all(&state.sql)
+    .await?;
 
-    log::info!("{:#?}", result);
+    Ok(Json(result))
+}
 
-    let activation_id = result
-        .get("activationId")
-        .expect("activation_id not found")
-        .as_i64()
-        .expect("could not convert activation_id to i64");
-    let phone = result
-        .get("phoneNumber")
-        .expect("phone not found")
-        .as_str()
-        .expect("phone not str");
-    let cost = result
-        .get("activationCost")
-        .expect("cost not found")
-        .as_str()
-        .expect("cost is not str");
-    let cost: f64 = cost.parse()?;
-    let cc = result
-        .get("countryCode")
-        .expect("cc not found")
-        .as_str()
-        .expect("cc is not str");
-    let cc: i64 = cc.parse()?;
-    let datetime = result
-        .get("activationTime")
-        .expect("activationTime not found")
-        .as_str()
-        .expect("activationTime is not str");
-    let operator = result
-        .get("activationOperator")
-        .expect("operator not found")
-        .as_str()
-        .expect("operator is not str");
-
-    /*
-    "activationCost": String("10.00"),
-    "activationEndTime": String("0000-00-00 00:00:00"),
-    "activationId": String("2386367288"),
-    "activationOperator": String("any"),
-    "activationTime": String("2024-05-04 11:25:14"),
-    "canGetAnotherSms": Bool(true),
-    "countryCode": String("12"),
-    "phoneNumber": String("1 231 484 5483"),
-    */
-
+#[utoipa::path(
+    post,
+    params(("id" = i64, Path,)),
+    responses((status = 200))
+)]
+/// Message Seen
+#[post("/messages/{id}/seen/")]
+async fn user_message_seen(
+    user: User, message: Message, state: Data<AppState>,
+) -> Result<HttpResponse, AppErr> {
     sqlx::query! {
-        "insert into orders(user, activation_id, phone, cost, cc, operator, datetime)
-        values(?, ?, ?, ?, ?, ?, ?)",
-        user.id, activation_id, phone, cost, cc, operator, datetime
-    }.execute(&state.sql).await?;
+        "update messages set seen = true where id = ? and user = ?",
+        message.id, user.id
+    }
+    .execute(&state.sql)
+    .await?;
 
-    Ok(Json("ok".to_string()))
+    Ok(HttpResponse::Ok().finish())
 }
 
 pub fn router() -> Scope {
@@ -185,5 +147,6 @@ pub fn router() -> Scope {
         .service(user_get)
         .service(user_deposit)
         .service(user_transactions)
-        .service(user_test)
+        .service(user_messages)
+        .service(user_message_seen)
 }
