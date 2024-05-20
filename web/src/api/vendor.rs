@@ -24,7 +24,7 @@ use crate::{utils, AppState};
 )]
 pub struct ApiDoc;
 
-type Prices = HashMap<String, i64>;
+type Prices = HashMap<String, (i64, i64)>;
 
 #[utoipa::path(get, responses((status = 200)))]
 #[get("/prices/")]
@@ -102,7 +102,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
 
             let p = cost * general.rub_irr as f64 * Config::TAX;
             let p = ((p / 1e4).ceil() * 1e4).max(15e4) as i64;
-            (k.clone(), p)
+            (k.clone(), (p, v.count))
         })
         .collect();
 
