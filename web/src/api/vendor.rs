@@ -8,6 +8,7 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 use crate::config::{config, Config};
 use crate::docs::UpdatePaths;
 use crate::general::{general_get, general_set, PriceValue};
+use crate::models::order::Order;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
 use crate::vendor::{self, rub_irr_price};
@@ -127,33 +128,41 @@ struct SmsData {
 )]
 #[post("/sms-callback/{pass}/")]
 async fn sms_callback(
-    data: Json<SmsData>, path: Path<(String,)>,
+    data: Json<SmsData>, path: Path<(String,)>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
     if path.0 != config().sms_cb_pass {
         return Err(AppErrForbidden("invalid pass"));
     }
+    let now = utils::now();
 
-    utils::send_webhook(
-        "Sms",
-        &format!(
-            "
-id: {}
-service: {}
-text: `{}`
-code: `{}`
-country: {}
-receivedAt: {}
-",
-            data.activation_id,
-            data.service,
-            data.text,
-            data.code,
-            data.country,
-            data.received_at
-        ),
-        13868854,
-    )
+    let order = sqlx::query_as! {
+        Order,
+        "select * from orders where activation_id = ?",
+        data.activation_id
+    }
+    .fetch_one(&state.sql)
     .await;
+
+    if order.is_err() {
+        return Ok(HttpResponse::Ok().finish());
+    }
+    let order = order.unwrap();
+
+    sqlx::query! {
+        "insert into messages(user, activation_id, timestamp, text, code,
+         country, service, received_at) values(?,?,?,?,?,?,?,?)",
+        order.user, data.activation_id, now, data.text, data.code,
+        data.country, data.service, data.received_at
+    }
+    .execute(&state.sql)
+    .await?;
+
+    let desc = format! {
+        "id: {}\nservice: {}\ntext: `{}`\ncode: `{}`\ncountry: {}\nreceivedAt: {}",
+        data.activation_id, data.service, data.text, data.code, data.country, data.received_at
+    };
+
+    utils::send_webhook("Sms", &desc, 13868854).await;
     Ok(HttpResponse::Ok().body(""))
 }
 
@@ -185,7 +194,7 @@ async fn vendor_buy(
     let now = utils::now();
     let key = format!("{}-{}", q.country, q.service);
     let mut general = general_get(&state.sql).await?;
-    let mut price = general.prices.get_mut(&key);
+    let price = general.prices.get_mut(&key);
     if price.is_none() {
         return Err(AppErrBadRequest("not found"));
     }
@@ -239,7 +248,7 @@ async fn vendor_buy(
         general.money_gain += profit;
     }
 
-    price.cost_api = new_cost_rub;
+    price.cost_buy = new_cost_rub;
     price.timestamp = now;
 
     log::info!("{:#?}", result);
