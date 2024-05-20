@@ -54,3 +54,16 @@ create table if not exists orders (
 create index if not exists orders_activation_id on orders(activation_id);
 create index if not exists orders_user on orders(user);
 
+create table if not exists messages (
+    id integer primary key not null,
+    user integer not null references users(id) on delete cascade,
+    activation_id integer not null,
+    timestamp integer not null,
+    text text not null,
+    code text not null,
+    country text not null,
+    service text not null,
+    received_at text not null,
+    seen boolean not null default false
+);
+
