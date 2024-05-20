@@ -37,6 +37,7 @@ async function get_default(): Promise<SelfModel> {
         user: {
             id: 0,
             name: '',
+            username: '',
             auth_date: 0,
             wallet: 0,
             in_hold: 0,
