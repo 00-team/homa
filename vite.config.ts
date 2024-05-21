@@ -14,6 +14,7 @@ export default defineConfig(env => {
 
     return {
         plugins: [tsconfigPaths(), solidPlugin({ hot: false })],
+        root: 'app',
         server: {
             https: false,
             port: 8200,
