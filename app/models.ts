@@ -24,3 +24,16 @@ export type Transaction = {
     date: number | null
     bank_track_id: number | null
 }
+
+export type Message = {
+    id: number
+    user: number
+    activation_id: number
+    text: string
+    code: string
+    country: string
+    service: string
+    seen: boolean
+    received_at: string
+    timestamp: number
+}
