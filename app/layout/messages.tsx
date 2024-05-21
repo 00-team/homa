@@ -1,11 +1,12 @@
-import { Component, createEffect, onMount } from 'solid-js'
+import { Component, Show, createEffect, onMount } from 'solid-js'
 
 import './style/messages.scss'
 
 import { createStore } from 'solid-js/store'
 import { httpx } from 'shared'
 import { Message } from 'models'
-import { useParams } from '@solidjs/router'
+import { useNavigate, useParams } from '@solidjs/router'
+import { ChevronLeftIcon, ChevronRightIcon } from 'icons'
 
 const Messages: Component = () => {
     type State = {
@@ -15,9 +16,14 @@ const Messages: Component = () => {
 
     const [state, setState] = createStore<State>({ messages: [], page: 0 })
     const UP = useParams()
+    const nav = useNavigate()
 
     createEffect(() => {
-        let page = parseInt(UP.page || '0') || 0
+        let page = parseInt(UP.page || '0')
+        if (isNaN(page) || page < 0) {
+            nav('/messages/')
+            return
+        }
         fetch_messages(page)
     })
 
@@ -27,6 +33,8 @@ const Messages: Component = () => {
             method: 'GET',
             type: 'json',
             onLoad(x) {
+                if (x.status != 200) return
+
                 setState({ messages: x.response, page })
             },
         })
@@ -34,6 +42,12 @@ const Messages: Component = () => {
 
     return (
         <div class='messages-fnd'>
+            <Show when={state.messages.length == 0}>
+                <div class='message-empty'>
+                    <h2>پیامی یافت نشد</h2>
+                    <span>صفحه: {state.page}</span>
+                </div>
+            </Show>
             <div class='message-list'>
                 {state.messages.map(m => (
                     <div class='message'>
@@ -55,6 +69,24 @@ const Messages: Component = () => {
                         <br />
                     </div>
                 ))}
+            </div>
+            <div class='pagination'>
+                <Show when={state.page > 0}>
+                    <button
+                        class='styled'
+                        onClick={() => nav('/messages/' + (state.page - 1))}
+                    >
+                        <ChevronLeftIcon />
+                    </button>
+                </Show>
+                <Show when={state.messages.length >= 32}>
+                    <button
+                        class='styled'
+                        onClick={() => nav('/messages/' + (state.page + 1))}
+                    >
+                        <ChevronRightIcon />
+                    </button>
+                </Show>
             </div>
         </div>
     )
