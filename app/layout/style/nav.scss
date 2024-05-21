@@ -59,7 +59,50 @@
         }
     }
 
+    .mail-icon {
+        position: relative;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+
+        &-count {
+            font-family: monospace;
+            position: absolute;
+            font-size: 18px;
+            color: var(--red);
+            top: 10%;
+            left: -60%;
+            border-radius: 100%;
+            aspect-ratio: 1;
+            width: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        svg {
+            z-index: 1;
+        }
+    }
+
     .mail-warning-icon-exclamation {
         color: var(--red);
+        animation: flash 0.9s infinite;
+
+        @keyframes flash {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
     }
 }

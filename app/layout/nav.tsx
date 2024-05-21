@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router'
-import { Component, Show } from 'solid-js'
+import { Component, Show, onMount } from 'solid-js'
 
 import './style/nav.scss'
 import { self } from 'store'
@@ -10,9 +10,28 @@ import {
     PhoneIcon,
     UserIcon,
     HomeIcon,
+    MailOpenIcon,
 } from 'icons'
+import { createStore } from 'solid-js/store'
+import { httpx } from 'shared'
 
 const Navbar: Component = () => {
+    type State = {
+        messages: number
+    }
+
+    const [state, setState] = createStore<State>({ messages: 0 })
+
+    onMount(() => {
+        httpx({
+            url: '/api/user/messages-unseen-count/',
+            method: 'GET',
+            onLoad(x) {
+                setState({ messages: x.response })
+            },
+        })
+    })
+
     return (
         <nav class='nav-fnd'>
             <div class='left'>
@@ -31,7 +50,16 @@ const Navbar: Component = () => {
                     <HistoryIcon />
                 </A>
                 <A href='/messages/'>
-                    <MailWarningIcon />
+                    <Show when={state.messages} fallback={<MailOpenIcon />}>
+                        <span class='mail-icon'>
+                            <span class='mail-icon-count'>
+                                <Show when={state.messages < 10} fallback={'+'}>
+                                    {state.messages}
+                                </Show>
+                            </span>
+                            <MailWarningIcon />
+                        </span>
+                    </Show>
                 </A>
                 <A href='/numbers/'>
                     <PhoneIcon />
