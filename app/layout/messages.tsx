@@ -1,12 +1,14 @@
-import { Component, Show, createEffect, onMount } from 'solid-js'
+import { Component, Show, createEffect, createMemo } from 'solid-js'
 
 import './style/messages.scss'
 
-import { createStore } from 'solid-js/store'
+import { createStore, produce } from 'solid-js/store'
 import { httpx } from 'shared'
 import { Message } from 'models'
 import { useNavigate, useParams } from '@solidjs/router'
-import { ChevronLeftIcon, ChevronRightIcon } from 'icons'
+import { ChevronLeftIcon, ChevronRightIcon, EyeIcon } from 'icons'
+import { COUNTRY_LIST } from './country-list'
+import { SERVICE_LIST } from './service-list'
 
 const Messages: Component = () => {
     type State = {
@@ -40,6 +42,26 @@ const Messages: Component = () => {
         })
     }
 
+    function seen(id: number) {
+        httpx({
+            url: `/api/user/messages/${id}/seen/`,
+            method: 'POST',
+            type: 'json',
+            onLoad(x) {
+                if (x.status != 200) return
+
+                setState(
+                    produce(s => {
+                        let idx = s.messages.findIndex(m => m.id == id)
+                        if (idx != -1) {
+                            s.messages[idx].seen = true
+                        }
+                    })
+                )
+            },
+        })
+    }
+
     return (
         <div class='messages-fnd'>
             <Show when={state.messages.length == 0}>
@@ -51,22 +73,36 @@ const Messages: Component = () => {
             <div class='message-list'>
                 {state.messages.map(m => (
                     <div class='message'>
-                        text: {m.text}
-                        <br />
-                        code: {m.code}
-                        <br />
-                        id: {m.id}
-                        <br />
-                        aid: {m.activation_id}
-                        <br />
-                        timestamp: {m.timestamp}
-                        <br />
-                        rec: {m.received_at}
-                        <br />
-                        country: {m.country}
-                        <br />
-                        service: {m.service}
-                        <br />
+                        <div class='info'>
+                            <div class='row'>
+                                <span class='code'>code: {m.code}</span>
+                                <ServiceDpy d={m.service} />
+                                <CountryDpy d={m.country} />
+                            </div>
+                            <textarea
+                                class='text'
+                                rows={m.text.split('\\n').length}
+                                disabled
+                                dir='auto'
+                            >
+                                {m.text.replaceAll('\\n', '\n')}
+                            </textarea>
+                            {/*<p class='text'>{m.text}</p>*/}
+                            <span class='date'>
+                                {new Date(m.timestamp * 1e3).toLocaleString()}
+                            </span>
+                            <span>{m.received_at}</span>
+                        </div>
+                        <Show when={!m.seen}>
+                            <div class='actions'>
+                                <button
+                                    class='styled icon'
+                                    onClick={() => seen(m.id)}
+                                >
+                                    <EyeIcon />
+                                </button>
+                            </div>
+                        </Show>
                     </div>
                 ))}
             </div>
@@ -89,6 +125,30 @@ const Messages: Component = () => {
                 </Show>
             </div>
         </div>
+    )
+}
+
+const CountryDpy: Component<{ d: string }> = P => {
+    const country = createMemo(() => {
+        return COUNTRY_LIST.find(c => c[0].toString() == P.d)
+    })
+    return (
+        <Show when={country()}>
+            <span>
+                {country()[3]} - {country()[4]}
+            </span>
+        </Show>
+    )
+}
+
+const ServiceDpy: Component<{ d: string }> = P => {
+    const service = createMemo(() => {
+        return SERVICE_LIST.find(s => s[0] == P.d)
+    })
+    return (
+        <Show when={service()}>
+            <span>{service()[2] || service()[1]}</span>
+        </Show>
     )
 }
 
