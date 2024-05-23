@@ -27,6 +27,7 @@ pub struct ApiDoc;
 type Prices = HashMap<String, (i64, i64)>;
 
 #[utoipa::path(get, responses((status = 200)))]
+/// Prices
 #[get("/prices/")]
 async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     let now = utils::now();
@@ -126,6 +127,7 @@ struct SmsData {
     request_body = SmsData,
     responses((status = 200))
 )]
+/// Sms Callback
 #[post("/sms-callback/{pass}/")]
 async fn sms_callback(
     data: Json<SmsData>, path: Path<(String,)>, state: Data<AppState>,
@@ -177,6 +179,7 @@ struct BuyQuery {
     params(BuyQuery),
     responses((status = 200, body = String))
 )]
+/// Buy Number
 #[post("/buy/")]
 async fn vendor_buy(
     user: User, q: Query<BuyQuery>, state: Data<AppState>,
