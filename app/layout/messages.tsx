@@ -10,7 +10,7 @@ import { ChevronLeftIcon, ChevronRightIcon, EyeIcon } from 'icons'
 import { COUNTRY_LIST } from './country-list'
 import { SERVICE_LIST } from './service-list'
 
-const Messages: Component = () => {
+export default () => {
     type State = {
         messages: Message[]
         page: number
@@ -151,5 +151,3 @@ const ServiceDpy: Component<{ d: string }> = P => {
         </Show>
     )
 }
-
-export default Messages

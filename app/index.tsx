@@ -10,6 +10,7 @@ import Alert from 'comps/alert'
 import { Route, Router } from '@solidjs/router'
 import NotFound from 'layout/404'
 import Messages from 'layout/messages'
+import Transactions from 'layout/transactions'
 
 const Root = () => (
     <>
@@ -20,6 +21,11 @@ const Root = () => (
                     <Route path='/profile/' component={Profile} />
                     <Route path='/messages/' component={Messages} />
                     <Route path='/messages/:page' component={Messages} />
+                    <Route path='/transactions/' component={Transactions} />
+                    <Route
+                        path='/transactions/:page'
+                        component={Transactions}
+                    />
                 </Route>
                 <Route path='*path' component={NotFound} />
             </Router>
