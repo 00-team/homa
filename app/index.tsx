@@ -11,6 +11,7 @@ import { Route, Router } from '@solidjs/router'
 import NotFound from 'layout/404'
 import Messages from 'layout/messages'
 import Transactions from 'layout/transactions'
+import Orders from 'layout/orders'
 
 const Root = () => (
     <>
@@ -21,6 +22,8 @@ const Root = () => (
                     <Route path='/profile/' component={Profile} />
                     <Route path='/messages/' component={Messages} />
                     <Route path='/messages/:page' component={Messages} />
+                    <Route path='/orders/' component={Orders} />
+                    <Route path='/orders/:page' component={Orders} />
                     <Route path='/transactions/' component={Transactions} />
                     <Route
                         path='/transactions/:page'

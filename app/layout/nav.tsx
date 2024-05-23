@@ -61,7 +61,7 @@ const Navbar: Component = () => {
                         </span>
                     </Show>
                 </A>
-                <A href='/numbers/'>
+                <A href='/orders/'>
                     <PhoneIcon />
                 </A>
             </div>
