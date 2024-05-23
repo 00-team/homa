@@ -14,15 +14,16 @@ export type UserModel = {
 export type Transaction = {
     id: number
     user: number
-    kind: number // in OR out | withdrawl OR deposit
-    status: number // success | failed | in progress
+    status: 'in_progress' | 'failed' | 'success'
+    kind: 'in' | 'out'
     amount: number
+    timestamp: number
     vendor_order_id: string | null
     vendor_track_id: number | null
-    card_number: string | null
-    hashed_card_number: string | null
-    date: number | null
     bank_track_id: number | null
+    card: string | null
+    card_hash: string | null
+    date: number | null
 }
 
 export type Message = {
