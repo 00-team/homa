@@ -9,7 +9,7 @@ use crate::models::transaction::{
     Transaction, TransactionKind, TransactionStatus,
 };
 use crate::models::user::User;
-use crate::models::{AppErr, ListInput, Response};
+use crate::models::{AppErr, AppErrBadRequest, ListInput, Response};
 use crate::{utils, AppState};
 
 #[derive(OpenApi)]
@@ -48,7 +48,12 @@ struct DepositParams {
 async fn user_deposit(
     user: User, q: Query<DepositParams>, state: Data<AppState>,
 ) -> Response<String> {
-    let amount = q.amount.max(50_000).min(50_000_000);
+    let allowed = 50_000_000 - user.wallet;
+    if allowed < 50_000 {
+        return Err(AppErrBadRequest("wallet is maxed out"))
+    }
+
+    let amount = q.amount.max(50_000).min(allowed);
     let wallet = user.wallet + amount;
     let now = utils::now();
 
