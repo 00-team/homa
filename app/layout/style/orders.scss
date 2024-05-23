@@ -36,31 +36,31 @@
 
     .order {
         border: 2px solid var(--fg-2);
-        font-family: var(--en);
         display: flex;
+        flex-direction: column;
         border-radius: var(--radius);
+        gap: 0.3rem;
+        width: 100%;
+        padding: 1rem;
+        direction: rtl;
+        font-size: 18px;
 
-        .info {
-            padding: 1rem;
+        .datetime {
+            direction: ltr;
+            font-family: var(--en);
+        }
+
+        .row {
             display: flex;
-            flex-direction: column;
             width: 100%;
-            gap: 0.3rem;
 
-            .row {
-                display: flex;
-                width: 100%;
-                gap: 0.5rem;
-                justify-content: space-between;
+            .key {
+                width: 23%;
+                flex-shrink: 0;
             }
 
-            .text {
-                resize: none;
-                border: 0;
-                outline: 0;
-                background-color: transparent;
-                color: var(--white);
-                font-size: 16px;
+            .value {
+                width: 100%;
             }
         }
     }
