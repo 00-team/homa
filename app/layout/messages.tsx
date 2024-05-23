@@ -81,11 +81,11 @@ export default () => {
                             </div>
                             <textarea
                                 class='text'
-                                rows={m.text.split('\\n').length}
+                                rows={m.text.split('\n').length}
                                 disabled
                                 dir='auto'
                             >
-                                {m.text.replaceAll('\\n', '\n')}
+                                {m.text}
                             </textarea>
                             {/*<p class='text'>{m.text}</p>*/}
                             <span class='date'>
