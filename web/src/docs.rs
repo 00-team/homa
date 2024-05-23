@@ -8,7 +8,7 @@ use utoipa::{
 };
 
 use crate::models::{
-    order::Order,
+    order::{Order, OrderStatus},
     transaction::{Transaction, TransactionKind, TransactionStatus},
     user::User,
     message::Message,
@@ -81,7 +81,7 @@ impl Modify for UpdatePaths {
     servers((url = "/")),
     modifiers(&AddSecurity),
     components(schemas(
-        User, Order, Message,
+        User, Order, OrderStatus, Message,
         Transaction, TransactionStatus, TransactionKind
     ))
 )]
