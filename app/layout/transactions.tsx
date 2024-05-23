@@ -3,7 +3,7 @@ import './style/transactions.scss'
 import { useNavigate, useParams } from '@solidjs/router'
 import { createStore } from 'solid-js/store'
 import { createEffect } from 'solid-js'
-import { httpx } from 'shared'
+import { fmt_timestamp, httpx } from 'shared'
 
 export default () => {
     type State = {
@@ -37,11 +37,30 @@ export default () => {
         })
     }
 
+    const KIND_TABLE: { [k in Transaction['kind']]: string } = {
+        in: 'ورودی',
+        out: 'خروجی',
+    }
+    const STATUS_TABLE: { [k in Transaction['status']]: string } = {
+        failed: 'ناموفق',
+        success: 'موفق',
+        in_progress: 'در حال انجام',
+    }
+
     return (
         <div class='transactions-fnd'>
             <div class='transaction-list'>
                 {state.transactions.map(t => (
-                    <div class='transaction'>{t.amount}</div>
+                    <div class='transaction'>
+                        <span>
+                            مبلغ: {(~~(t.amount / 10)).toLocaleString()} تومان
+                        </span>
+                        <span>تاریخ: {fmt_timestamp(t.timestamp)}</span>
+                        <span>نوع: {KIND_TABLE[t.kind]}</span>
+                        <span>وضعیت: {STATUS_TABLE[t.status]}</span>
+                        <span>پیگیری: {t.vendor_track_id || '---'}</span>
+                        <span>پیگیری بانک: {t.bank_track_id || '---'}</span>
+                    </div>
                 ))}
             </div>
         </div>
