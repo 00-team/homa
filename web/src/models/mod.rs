@@ -1,8 +1,8 @@
 pub mod common;
+pub mod message;
 pub mod order;
 pub mod transaction;
 pub mod user;
-pub mod message;
 
 mod error;
 

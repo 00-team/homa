@@ -31,7 +31,7 @@ pub struct Order {
     pub operator: String,
     pub datetime: String,
     pub country: String,
-    pub service: String
+    pub service: String,
 }
 
 impl FromRequest for Order {

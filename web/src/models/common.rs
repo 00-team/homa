@@ -109,4 +109,3 @@ macro_rules! sql_enum {
 
 pub(crate) use sql_enum;
 use utoipa::IntoParams;
-

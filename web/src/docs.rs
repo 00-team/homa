@@ -1,3 +1,4 @@
+use awc::ws::Message;
 use utoipa::{
     openapi::{
         self,
@@ -5,6 +6,12 @@ use utoipa::{
         Components, SecurityRequirement,
     },
     Modify, OpenApi,
+};
+
+use crate::models::{
+    order::Order,
+    transaction::{Transaction, TransactionKind, TransactionStatus},
+    user::User,
 };
 
 pub struct AddSecurity;
@@ -72,6 +79,10 @@ impl Modify for UpdatePaths {
 #[derive(OpenApi)]
 #[openapi(
     servers((url = "/")),
-    modifiers(&AddSecurity)
+    modifiers(&AddSecurity),
+    components(schemas(
+        User, Order, Message,
+        Transaction, TransactionStatus, TransactionKind
+    ))
 )]
 pub struct ApiDoc;

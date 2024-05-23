@@ -44,7 +44,7 @@ pub struct LoginTelQuery {
     params(LoginTelQuery),
     responses((status = 302))
 )]
-/// Login with Telegram 
+/// Login with Telegram
 #[get("/login-telegram/")]
 async fn login_telegram(
     q: Query<LoginTelQuery>, state: Data<AppState>,

@@ -5,9 +5,8 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
 use crate::models::message::Message;
-use crate::models::transaction::{
-    Transaction, TransactionKind, TransactionStatus,
-};
+use crate::models::order::Order;
+use crate::models::transaction::{Transaction, TransactionStatus};
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, ListInput, Response};
 use crate::{utils, AppState};
@@ -16,10 +15,10 @@ use crate::{utils, AppState};
 #[openapi(
     tags((name = "api::user")),
     paths(
-        user_get, user_deposit, user_transactions,
-        user_messages, user_message_seen, user_messages_unseen_count
+        user_get, user_deposit, user_transactions, user_orders,
+        user_messages, user_message_seen, user_messages_unseen_count,
     ),
-    components(schemas(User, Transaction, TransactionKind, TransactionStatus, Message)),
+    components(schemas()),
     servers((url = "/user")),
     modifiers(&UpdatePaths)
 )]
@@ -50,7 +49,7 @@ async fn user_deposit(
 ) -> Response<String> {
     let allowed = 50_000_000 - user.wallet;
     if allowed < 50_000 {
-        return Err(AppErrBadRequest("wallet is maxed out"))
+        return Err(AppErrBadRequest("wallet is maxed out"));
     }
 
     let amount = q.amount.max(50_000).min(allowed);
@@ -171,6 +170,28 @@ async fn user_messages_unseen_count(
     Ok(Json(result.count))
 }
 
+#[utoipa::path(
+    get,
+    params(ListInput),
+    responses((status = 200, body = Vec<Order>))
+)]
+/// List Orders
+#[get("/orders/")]
+async fn user_orders(
+    user: User, q: Query<ListInput>, state: Data<AppState>,
+) -> Response<Vec<Order>> {
+    let offset = q.page * 32;
+    let result = sqlx::query_as! {
+        Order,
+        "select * from orders where user = ? order by id desc limit 32 offset ?",
+        user.id, offset
+    }
+    .fetch_all(&state.sql)
+    .await?;
+
+    Ok(Json(result))
+}
+
 pub fn router() -> Scope {
     Scope::new("/user")
         .service(user_get)
@@ -179,4 +200,5 @@ pub fn router() -> Scope {
         .service(user_messages)
         .service(user_message_seen)
         .service(user_messages_unseen_count)
+        .service(user_orders)
 }
