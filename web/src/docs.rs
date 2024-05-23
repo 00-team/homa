@@ -1,4 +1,3 @@
-use awc::ws::Message;
 use utoipa::{
     openapi::{
         self,
@@ -12,6 +11,7 @@ use crate::models::{
     order::Order,
     transaction::{Transaction, TransactionKind, TransactionStatus},
     user::User,
+    message::Message,
 };
 
 pub struct AddSecurity;
