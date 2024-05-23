@@ -12,7 +12,7 @@ pub type Response<T> = Result<Json<T>, super::AppErr>;
 
 #[derive(Deserialize, IntoParams)]
 pub struct ListInput {
-    #[param(default = 0)]
+    #[param(example = 0)]
     pub page: u32,
 }
 
