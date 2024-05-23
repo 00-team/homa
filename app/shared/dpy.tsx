@@ -9,7 +9,7 @@ export const CountryDpy: Component<{ d: string }> = P => {
     return (
         <Show when={country()}>
             <span>
-                {country()[3]} - {country()[4]}
+                {country()[4]} {country()[3]}
             </span>
         </Show>
     )
