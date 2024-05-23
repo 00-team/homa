@@ -10,7 +10,7 @@ use crate::models::transaction::{
 };
 use crate::models::user::User;
 use crate::models::{AppErr, ListInput, Response};
-use crate::AppState;
+use crate::{utils, AppState};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -50,15 +50,15 @@ async fn user_deposit(
 ) -> Response<String> {
     let amount = q.amount.max(50_000).min(50_000_000);
     let wallet = user.wallet + amount;
+    let now = utils::now();
 
     if let Some(true) = q.auto_order {
         todo!("impl this")
     }
 
     let tid = sqlx::query! {
-        "insert into transactions(user, amount) values(?, ?)",
-        user.id,
-        amount
+        "insert into transactions(user, amount, timestamp) values(?, ?, ?)",
+        user.id, amount, now
     }
     .execute(&state.sql)
     .await?
