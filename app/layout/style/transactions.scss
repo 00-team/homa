@@ -1,6 +1,10 @@
 .transactions-fnd {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
 
     .transaction-list {
         display: flex;
@@ -9,6 +13,7 @@
         height: 100%;
         overflow-y: auto;
         padding: 1rem;
+        gap: 1rem;
 
         .transaction {
             border: 2px solid var(--fg-2);
@@ -17,9 +22,8 @@
             flex-direction: column;
             width: 100%;
             direction: rtl;
-            padding: 1rem;
+            padding: 0.5rem;
             font-size: 18px;
-            // font-family: var(--en);
 
             .row {
                 display: flex;
