@@ -38,3 +38,16 @@ export type Message = {
     received_at: string
     timestamp: number
 }
+
+export type Order = {
+    activation_id: number
+    cost: number
+    country: string
+    datetime: string
+    id: number
+    operator: string
+    phone: string
+    service: string
+    status: 'wating' | 'refunded' | 'done'
+    user: number
+}
