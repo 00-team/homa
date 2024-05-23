@@ -59,4 +59,19 @@
             }
         }
     }
+
+    .pagination {
+        width: 100%;
+        display: flex;
+        gap: 1rem;
+        height: max-content;
+        flex-shrink: 0;
+
+        button {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+    }
 }

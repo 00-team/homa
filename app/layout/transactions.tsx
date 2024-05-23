@@ -2,8 +2,9 @@ import { Transaction } from 'models'
 import './style/transactions.scss'
 import { useNavigate, useParams } from '@solidjs/router'
 import { createStore } from 'solid-js/store'
-import { createEffect } from 'solid-js'
+import { Show, createEffect } from 'solid-js'
 import { fmt_timestamp, httpx } from 'shared'
+import { ChevronLeftIcon, ChevronRightIcon } from 'icons'
 
 export default () => {
     type State = {
@@ -87,6 +88,24 @@ export default () => {
                         </div>
                     </div>
                 ))}
+            </div>
+            <div class='pagination'>
+                <Show when={state.page > 0}>
+                    <button
+                        class='styled'
+                        onClick={() => nav('/transactions/' + (state.page - 1))}
+                    >
+                        <ChevronLeftIcon />
+                    </button>
+                </Show>
+                <Show when={state.transactions.length >= 32}>
+                    <button
+                        class='styled'
+                        onClick={() => nav('/transactions/' + (state.page + 1))}
+                    >
+                        <ChevronRightIcon />
+                    </button>
+                </Show>
             </div>
         </div>
     )
