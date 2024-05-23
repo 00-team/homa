@@ -19,7 +19,40 @@
             direction: rtl;
             padding: 1rem;
             font-size: 18px;
-            font-family: var(--en);
+            // font-family: var(--en);
+
+            .row {
+                display: flex;
+                width: 100%;
+                justify-content: space-between;
+                align-items: center;
+
+                .key {
+                    flex-shrink: 0;
+                    width: 30%;
+                }
+
+                .value {
+                    text-align: center;
+                    width: 70%;
+                }
+            }
+
+            .datetime {
+                direction: ltr;
+            }
+
+            &.failed {
+                border-color: var(--red);
+            }
+
+            &.success {
+                border-color: var(--green);
+            }
+
+            &.in_progress {
+                border-color: var(--yellow);
+            }
         }
     }
 }

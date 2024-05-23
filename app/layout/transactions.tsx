@@ -51,15 +51,40 @@ export default () => {
         <div class='transactions-fnd'>
             <div class='transaction-list'>
                 {state.transactions.map(t => (
-                    <div class='transaction'>
-                        <span>
-                            مبلغ: {(~~(t.amount / 10)).toLocaleString()} تومان
-                        </span>
-                        <span>تاریخ: {fmt_timestamp(t.timestamp)}</span>
-                        <span>نوع: {KIND_TABLE[t.kind]}</span>
-                        <span>وضعیت: {STATUS_TABLE[t.status]}</span>
-                        <span>پیگیری: {t.vendor_track_id || '---'}</span>
-                        <span>پیگیری بانک: {t.bank_track_id || '---'}</span>
+                    <div class='transaction' classList={{ [t.status]: true }}>
+                        <div class='row'>
+                            <span class='key'>مبلغ:</span>
+                            <span class='value'>
+                                {(~~(t.amount / 10)).toLocaleString()} تومان
+                            </span>
+                        </div>
+                        <div class='row'>
+                            <span class='key'>تاریخ:</span>
+                            <span class='value datetime'>
+                                {fmt_timestamp(t.timestamp)}
+                            </span>
+                        </div>
+
+                        <div class='row'>
+                            <span class='key'>نوع:</span>
+                            <span class='value'>{KIND_TABLE[t.kind]}</span>
+                        </div>
+                        <div class='row'>
+                            <span class='key'>وضعیت:</span>
+                            <span class='value'>{STATUS_TABLE[t.status]}</span>
+                        </div>
+                        <div class='row'>
+                            <span class='key'>پیگیری:</span>
+                            <span class='value'>
+                                {t.vendor_track_id || '---'}
+                            </span>
+                        </div>
+                        <div class='row'>
+                            <span class='key'>پیگیری بانک:</span>
+                            <span class='value'>
+                                {t.bank_track_id || '---'}
+                            </span>
+                        </div>
                     </div>
                 ))}
             </div>
