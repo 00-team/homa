@@ -258,6 +258,8 @@ async fn vendor_buy(
     price.cost_buy = new_cost_rub;
     price.timestamp = now;
 
+    general_set(&state.sql, &general).await?;
+
     log::info!("{:#?}", result);
 
     sqlx::query! {
