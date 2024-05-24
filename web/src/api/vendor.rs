@@ -11,6 +11,7 @@ use crate::general::{general_get, general_set, PriceValue};
 use crate::models::order::Order;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
+use crate::utils::send_message;
 use crate::vendor::{self, rub_irr_price};
 use crate::{utils, AppState};
 
@@ -149,6 +150,8 @@ async fn sms_callback(
         return Ok(HttpResponse::Ok().finish());
     }
     let order = order.unwrap();
+
+    send_message(order.user, &data.text).await;
 
     sqlx::query! {
         "insert into messages(user, activation_id, timestamp, text, code,
