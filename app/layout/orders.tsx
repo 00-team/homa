@@ -1,14 +1,12 @@
-import { Component, Show, createEffect, createMemo } from 'solid-js'
+import { Show, createEffect } from 'solid-js'
 
 import './style/orders.scss'
 
-import { createStore, produce } from 'solid-js/store'
+import { createStore } from 'solid-js/store'
 import { CountryDpy, ServiceDpy, httpx } from 'shared'
 import { Order } from 'models'
 import { useNavigate, useParams } from '@solidjs/router'
-import { ChevronLeftIcon, ChevronRightIcon, EyeIcon } from 'icons'
-import { COUNTRY_LIST } from './country-list'
-import { SERVICE_LIST } from './service-list'
+import { ChevronLeftIcon, ChevronRightIcon } from 'icons'
 
 export default () => {
     type State = {
@@ -52,7 +50,7 @@ export default () => {
         <div class='orders-fnd'>
             <Show when={state.orders.length == 0}>
                 <div class='order-empty'>
-                    <h2>پیامی یافت نشد</h2>
+                    <h2>سفارشی یافت نشد</h2>
                     <span>صفحه: {state.page}</span>
                 </div>
             </Show>

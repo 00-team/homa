@@ -50,6 +50,12 @@ export default () => {
 
     return (
         <div class='transactions-fnd'>
+            <Show when={state.transactions.length == 0}>
+                <div class='empty'>
+                    <h2>تراکنشی یافت نشد</h2>
+                    <span>صفحه: {state.page}</span>
+                </div>
+            </Show>
             <div class='transaction-list'>
                 {state.transactions.map(t => (
                     <div class='transaction' classList={{ [t.status]: true }}>
