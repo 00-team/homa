@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{get, post, HttpResponse, Scope};
 use serde::Deserialize;
+use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::config::{config, Config};
@@ -111,7 +112,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     Ok(Json(prices))
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, Debug)]
 #[serde(rename_all = "camelCase")]
 struct SmsData {
     activation_id: i64,
@@ -131,12 +132,15 @@ struct SmsData {
 /// Sms Callback
 #[post("/sms-callback/{pass}/")]
 async fn sms_callback(
-    data: Json<SmsData>, path: Path<(String,)>, state: Data<AppState>,
+    data: Json<Value>, path: Path<(String,)>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
     if path.0 != config().sms_cb_pass {
         return Err(AppErrForbidden("invalid pass"));
     }
+    log::info!("sms cb: {:#?}", data);
     let now = utils::now();
+    let data = serde_json::from_value::<SmsData>(data.0)?;
+    log::info!("sms cb 2: {:#?}", data);
 
     let order = sqlx::query_as! {
         Order,
