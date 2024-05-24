@@ -24,3 +24,5 @@ package-lock.json
 node_modules/
 dist/
 web/record/
+logs/
+bot/teloxide.db
