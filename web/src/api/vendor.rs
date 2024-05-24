@@ -191,7 +191,7 @@ async fn vendor_buy(
     #[serde(rename_all = "camelCase")]
     struct Answer {
         activation_id: String,
-        phone: String,
+        phone_number: String,
         activation_cost: String,
         activation_time: String,
         activation_operator: String,
@@ -242,6 +242,7 @@ async fn vendor_buy(
         // ("verification", "$verification"),
     ];
     let result = vendor::request("getNumberV2", args).await?;
+    log::info!("result: {:#?}", result);
     let result = serde_json::from_value::<Answer>(result)?;
     let new_cost_rub: f64 = result.activation_cost.parse()?;
 
@@ -263,7 +264,7 @@ async fn vendor_buy(
         "insert into orders(user, activation_id, phone,
         cost, country, operator, datetime, service)
         values(?,?,?,?,?,?,?,?)",
-        user.id, result.activation_id, result.phone, cost_irr, q.country,
+        user.id, result.activation_id, result.phone_number, cost_irr, q.country,
         result.activation_operator, result.activation_time, q.service
     }
     .execute(&state.sql)
