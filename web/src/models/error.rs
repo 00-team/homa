@@ -69,7 +69,7 @@ macro_rules! impl_from_err {
         impl From<$ty> for AppErr {
             fn from(value: $ty) -> Self {
                 let value = value.to_string();
-                log::error!("{}", value);
+                log::error!("err 500: {}", value);
                 Self { status: 500, message: value }
             }
         }
@@ -90,6 +90,7 @@ macro_rules! error_helper {
         #[doc = concat!("Helper function that wraps any error and generates a `", stringify!($status), "` response.")]
         #[allow(non_snake_case)]
         pub fn $name(err: &str) -> AppErr {
+            log::error!("err {} - {}", stringify!($status), err);
             AppErr {
                 status: StatusCode::$status.as_u16(),
                 message: err.to_string()

@@ -190,7 +190,7 @@ async fn vendor_buy(
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
     struct Answer {
-        activation_id: i64,
+        activation_id: String,
         phone: String,
         activation_cost: String,
         activation_time: String,
