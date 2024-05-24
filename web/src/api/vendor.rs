@@ -62,7 +62,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                         let count = vv.get("count").expect("count not found");
                         let count = count.as_i64().expect("count is NaN");
                         let cost = vv.get("cost").expect("cost not found");
-                        let cost = cost.as_f64().expect("cost is NaN");
+                        let cost = cost.as_f64().expect("cost is NaN") + avg_diff;
 
                         if count == 0 {
                             return;
@@ -71,7 +71,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                         let key = format!("{country}-{service}");
                         if let Some(p) = general.prices.get_mut(&key) {
                             p.count = count;
-                            p.cost_api = cost + avg_diff;
+                            p.cost_api = cost;
                         } else {
                             general.prices.insert(
                                 key,
