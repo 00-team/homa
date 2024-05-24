@@ -58,6 +58,23 @@ pub async fn send_webhook(title: &str, desc: &str, color: u32) {
         .await;
 }
 
+pub async fn send_message(chat_id: i64, text: &str) {
+    let client = awc::Client::new();
+    let url = format!(
+        "https://api.telegram.org/bot{}/sendMessage",
+        config().bot_token
+    );
+    let request = client.post(&url);
+
+    #[derive(Serialize, Debug)]
+    struct Body {
+        chat_id: i64,
+        text: String,
+    }
+
+    let _ = request.send_json(&Body { chat_id, text: text.to_string() }).await;
+}
+
 pub trait CutOff {
     fn cut_off(&mut self, len: usize);
 }
