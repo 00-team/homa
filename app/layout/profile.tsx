@@ -1,4 +1,4 @@
-import { Show, createEffect } from 'solid-js'
+import { Show, createEffect, createMemo } from 'solid-js'
 import './style/profile.scss'
 import { self } from 'store'
 import { ChevronDownIcon, ChevronUpIcon, CirclePlusIcon, UserIcon } from 'icons'
@@ -9,8 +9,12 @@ export default () => {
     type State = {
         add_amount: number
     }
-    const [state, setState] = createStore<State>({ add_amount: 50 })
+    const [state, setState] = createStore<State>({ add_amount: 5e5 })
     const [SP, setSP] = useSearchParams()
+
+    let max = createMemo(() => {
+        return 5e7 - self.user.wallet
+    })
 
     createEffect(() => {
         let addx = SP.add
@@ -18,7 +22,7 @@ export default () => {
 
         if (!addx) return
         let add = parseInt(addx)
-        if (isNaN(add) || add < 0 || add > 5000) return
+        if (isNaN(add) || add < 0 || add > max()) return
         setState({ add_amount: add })
     })
 
@@ -26,7 +30,8 @@ export default () => {
         setState(s => {
             let a = s.add_amount + value
             if (a < 0) a = 0
-            if (a > 5000) a = 5000
+            if (a > max()) a = max()
+            a = ~~(a / 1e4) * 1e4
             return { add_amount: a }
         })
     }
@@ -60,20 +65,24 @@ export default () => {
                     در انتظار: {cash(self.user.in_hold)} تومان
                 </span>
             </div>
-            <div class='add-wallet'>
-                <div class='up-down'>
-                    <button class='icon' onclick={() => add_amount(+5)}>
-                        <ChevronUpIcon />
-                    </button>
-                    <button class='icon' onclick={() => add_amount(-5)}>
-                        <ChevronDownIcon />
+            <Show when={max() > 5e4}>
+                <div class='add-wallet'>
+                    <div class='up-down'>
+                        <button class='icon' onclick={() => add_amount(+5e4)}>
+                            <ChevronUpIcon />
+                        </button>
+                        <button class='icon' onclick={() => add_amount(-5e4)}>
+                            <ChevronDownIcon />
+                        </button>
+                    </div>
+                    <span class='amount'>
+                        {state.add_amount / 1e4} هزار تومان
+                    </span>
+                    <button class='icon'>
+                        <CirclePlusIcon />
                     </button>
                 </div>
-                <span class='amount'>{state.add_amount} هزار تومان</span>
-                <button class='icon'>
-                    <CirclePlusIcon />
-                </button>
-            </div>
+            </Show>
         </div>
     )
 }
