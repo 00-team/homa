@@ -3,7 +3,7 @@ SPACER="======================================"
 EG="🔷"
 
 cd /thora/
-export $(cat .secrets.env | xargs)
+export $(head -n 6 .secrets.env | xargs)
 
 OLD_COMMIT=$(git rev-parse HEAD)
 
