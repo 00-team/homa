@@ -23,6 +23,8 @@ export default () => {
         if (!addx) return
         let add = parseInt(addx)
         if (isNaN(add) || add < 0 || add > max()) return
+
+        add = ~~(add / 1e4) * 1e4
         setState({ add_amount: add })
     })
 
