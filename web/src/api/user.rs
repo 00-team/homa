@@ -48,16 +48,9 @@ async fn user_deposit(
     }
 
     let amount = path.0.max(50_000).min(allowed);
-    let wallet = user.wallet + amount;
     let now = utils::now();
 
-    let tid = sqlx::query! {
-        "insert into transactions(user, amount, timestamp) values(?, ?, ?)",
-        user.id, amount, now
-    }
-    .execute(&state.sql)
-    .await?
-    .last_insert_rowid();
+
 
     #[derive(Serialize)]
     struct Data {
@@ -80,6 +73,14 @@ async fn user_deposit(
 
     log::info!("result: {}", result.status());
     log::info!("result: {:?}", result.body().await?);
+
+    // TODO: insert into transactions
+    // sqlx::query! {
+    //     "insert into transactions(user, amount, timestamp, authority) values(?,?,?,?)",
+    //     user.id, amount, now, result.authority
+    // }
+    // .execute(&state.sql)
+    // .await?;
 
     // sqlx::query! {
     //     "update users set wallet = ? where id = ?",
