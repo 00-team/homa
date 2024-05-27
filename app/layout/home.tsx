@@ -3,9 +3,11 @@ import { COUNTRY_LIST, Country } from './country-list'
 import { SERVICE_LIST, Service } from './service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
-import { prices } from 'store'
+import { prices, self } from 'store'
 import { Show, createMemo } from 'solid-js'
 import { RotateCcwIcon } from 'icons'
+import { useNavigate } from '@solidjs/router'
+import { httpx } from 'shared'
 
 // const TIME_LIST: [number, string][] = [
 //     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
@@ -26,11 +28,11 @@ export default () => {
         country: number | null
         service: string | null
     }
-
     const [state, setState] = createStore<State>({
         country: null,
         service: null,
     })
+    const nav = useNavigate()
 
     function filter_country(country: Country) {
         if (!prices.update) return false
@@ -83,6 +85,28 @@ export default () => {
         let a = ~~(cost / count / 1e4) * 1e3
 
         return a.toLocaleString()
+    }
+
+    function buy() {
+        if (selected() > self.user.wallet) {
+            nav('/profile/?add=' + (selected() - self.user.wallet))
+            return
+        }
+
+        httpx({
+            url: '/api/vendor/buy/',
+            method: 'POST',
+            params: {
+                country: state.country,
+                service: state.service,
+            },
+            onLoad(x) {
+                if (x.status == 200) {
+                    nav('/orders/')
+                    return
+                }
+            },
+        })
     }
 
     return (
@@ -141,8 +165,13 @@ export default () => {
                 </Show>
             </div>
             <div class='actions'>
-                <button class='buy' disabled={!selected()}>
-                    {(~~(selected() / 10)).toLocaleString()} تومان
+                <button class='buy' disabled={!selected()} onClick={buy}>
+                    <Show
+                        when={selected() < self.user.wallet}
+                        fallback={'شارژ کیف پول'}
+                    >
+                        {(~~(selected() / 10)).toLocaleString()} تومان
+                    </Show>
                 </button>
                 <button
                     disabled={state.service == null && state.country == null}
