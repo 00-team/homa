@@ -8,6 +8,7 @@ pub struct Config {
     pub discord_webhook: String,
     pub sms_cb_pass: String,
     pub navasan_apikey: String,
+    pub zarinpal: String,
 }
 
 impl Config {
@@ -26,6 +27,7 @@ pub fn config() -> &'static Config {
             discord_webhook: env::var("DISCORD_WEBHOOK").unwrap(),
             sms_cb_pass: env::var("SMS_CB_PASS").unwrap(),
             navasan_apikey: env::var("NAVASAN_APIKEY").unwrap(),
+            zarinpal: env::var("ZARINPAL").unwrap(),
         }
     })
 }
