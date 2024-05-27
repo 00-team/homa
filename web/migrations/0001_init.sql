@@ -22,7 +22,7 @@ create table if not exists transactions (
     authority text not null,
     ref_id integer,
     card text,
-    card_hash text,
+    card_hash text
 );
 
 create table if not exists general (
