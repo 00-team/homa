@@ -1,8 +1,9 @@
-use actix_web::web::{Data, Json, Query};
+use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{get, post, HttpResponse, Scope};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
+use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::message::Message;
 use crate::models::order::Order;
@@ -31,34 +32,24 @@ async fn user_get(user: User) -> Response<User> {
     Ok(Json(user))
 }
 
-#[derive(Deserialize, ToSchema, IntoParams)]
-struct DepositParams {
-    amount: i64,
-    auto_order: Option<bool>,
-}
-
 #[utoipa::path(
     get,
-    params(DepositParams),
+    params(("amount" = u64, Path,)),
     responses((status = 200, body = String))
 )]
 /// Deposit
-#[get("/deposit/")]
+#[get("/deposit/{amount}/")]
 async fn user_deposit(
-    user: User, q: Query<DepositParams>, state: Data<AppState>,
+    user: User, path: Path<(i64,)>, state: Data<AppState>,
 ) -> Response<String> {
     let allowed = 50_000_000 - user.wallet;
     if allowed < 50_000 {
         return Err(AppErrBadRequest("wallet is maxed out"));
     }
 
-    let amount = q.amount.max(50_000).min(allowed);
+    let amount = path.0.max(50_000).min(allowed);
     let wallet = user.wallet + amount;
     let now = utils::now();
-
-    if let Some(true) = q.auto_order {
-        todo!("impl this")
-    }
 
     let tid = sqlx::query! {
         "insert into transactions(user, amount, timestamp) values(?, ?, ?)",
@@ -68,19 +59,41 @@ async fn user_deposit(
     .await?
     .last_insert_rowid();
 
-    sqlx::query! {
-        "update users set wallet = ? where id = ?",
-        wallet, user.id
+    #[derive(Serialize)]
+    struct Data {
+        merchant_id: String,
+        amount: i64,
+        description: String,
+        callback_url: String,
     }
-    .execute(&state.sql)
-    .await?;
 
-    sqlx::query! {
-        "update transactions set status = ? where id = ?",
-        TransactionStatus::Success, tid
-    }
-    .execute(&state.sql)
-    .await?;
+    let client = awc::Client::new();
+    let mut result = client
+        .post("https://sandbox.zarinpal.com/pg/v4/payment/request.json")
+        .send_json(&Data {
+            merchant_id: config().zarinpal.clone(),
+            amount,
+            description: format!("{}", user.name),
+            callback_url: "http://localhost:7200/api/user/zcb/".to_string()
+        })
+        .await?;
+
+    log::info!("result: {}", result.status());
+    log::info!("result: {:?}", result.body().await?);
+
+    // sqlx::query! {
+    //     "update users set wallet = ? where id = ?",
+    //     wallet, user.id
+    // }
+    // .execute(&state.sql)
+    // .await?;
+    //
+    // sqlx::query! {
+    //     "update transactions set status = ? where id = ?",
+    //     TransactionStatus::Success, tid
+    // }
+    // .execute(&state.sql)
+    // .await?;
 
     Ok(Json(format!("amount is {amount}")))
 }
