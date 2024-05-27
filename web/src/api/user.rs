@@ -34,7 +34,7 @@ async fn user_get(user: User) -> Response<User> {
 
 #[utoipa::path(
     get,
-    params(("amount" = u64, Path,)),
+    params(("amount" = u64, Path, example = 1e4)),
     responses((status = 200, body = String))
 )]
 /// Deposit
@@ -69,7 +69,7 @@ async fn user_deposit(
 
     let client = awc::Client::new();
     let mut result = client
-        .post("https://sandbox.zarinpal.com/pg/v4/payment/request.json")
+        .post("https://api.zarinpal.com/pg/v4/payment/request.json")
         .send_json(&Data {
             merchant_id: config().zarinpal.clone(),
             amount,

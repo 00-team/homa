@@ -26,10 +26,8 @@ pub struct Transaction {
     pub status: TransactionStatus,
     pub amount: i64,
     pub timestamp: i64,
-    pub vendor_order_id: Option<String>,
-    pub vendor_track_id: Option<i64>,
+    pub authority: String,
+    pub ref_id: Option<i64>,
     pub card: Option<String>,
     pub card_hash: Option<String>,
-    pub date: Option<i64>,
-    pub bank_track_id: Option<i64>,
 }

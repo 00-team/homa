@@ -19,12 +19,10 @@ create table if not exists transactions (
     status integer not null default 0, -- success | failed | in progress
     timestamp integer not null,
     amount integer not null,
-    vendor_order_id text,
-    vendor_track_id integer,
+    authority text not null,
+    ref_id integer,
     card text,
     card_hash text,
-    date integer,
-    bank_track_id integer
 );
 
 create table if not exists general (
