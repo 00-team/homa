@@ -1,14 +1,26 @@
-import { Show } from 'solid-js'
+import { Show, createEffect } from 'solid-js'
 import './style/profile.scss'
 import { self } from 'store'
 import { ChevronDownIcon, ChevronUpIcon, CirclePlusIcon, UserIcon } from 'icons'
 import { createStore } from 'solid-js/store'
+import { useSearchParams } from '@solidjs/router'
 
 export default () => {
     type State = {
         add_amount: number
     }
     const [state, setState] = createStore<State>({ add_amount: 50 })
+    const [SP, setSP] = useSearchParams()
+
+    createEffect(() => {
+        let addx = SP.add
+        setSP({ add: null })
+
+        if (!addx) return
+        let add = parseInt(addx)
+        if (isNaN(add) || add < 0 || add > 5000) return
+        setState({ add_amount: add })
+    })
 
     function add_amount(value: number) {
         setState(s => {
