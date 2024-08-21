@@ -7,9 +7,9 @@ Type=simple
 Restart=always
 WorkingDirectory=/thora/bot/
 EnvironmentFile=/thora/bot/.env
-ExecStart=/thora/target/release/bot
+ExecStart=/thora/bot/target/release/bot
 KillSignal=SIGQUIT
-StandardError=file:/thora/logs/bot.log
+StandardError=file:/thora/bot/log
 NotifyAccess=all
 
 [Install]

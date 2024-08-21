@@ -7,9 +7,9 @@ Type=simple
 Restart=always
 WorkingDirectory=/thora/web/
 EnvironmentFile=/thora/web/.env
-ExecStart=/thora/target/release/web
+ExecStart=/thora/web/target/release/web
 KillSignal=SIGQUIT
-StandardError=file:/thora/logs/web.log
+StandardError=file:/thora/web/log
 NotifyAccess=all
 
 [Install]
