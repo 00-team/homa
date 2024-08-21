@@ -6,11 +6,10 @@ After=syslog.target
 Type=simple
 Restart=always
 WorkingDirectory=/thora/bot/
-EnvironmentFile=/thora/.secrets.env
+EnvironmentFile=/thora/bot/.env
 ExecStart=/thora/target/release/bot
 KillSignal=SIGQUIT
-StandardError=file:/thora/logs/bot.error.log
-StandardOutput=file:/thora/logs/bot.access.log
+StandardError=file:/thora/logs/bot.log
 NotifyAccess=all
 
 [Install]

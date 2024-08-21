@@ -3,8 +3,7 @@ SPACER="======================================"
 EG="🔷"
 
 cd /thora/
-export $(head -n 6 .secrets.env | xargs)
-
+source bot/.env
 OLD_COMMIT=$(git rev-parse HEAD)
 
 echo "$EG update the source"

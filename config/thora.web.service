@@ -6,11 +6,10 @@ After=syslog.target
 Type=simple
 Restart=always
 WorkingDirectory=/thora/web/
-EnvironmentFile=/thora/.secrets.env
+EnvironmentFile=/thora/web/.env
 ExecStart=/thora/target/release/web
 KillSignal=SIGQUIT
-StandardError=file:/thora/logs/web.error.log
-StandardOutput=file:/thora/logs/web.access.log
+StandardError=file:/thora/logs/web.log
 NotifyAccess=all
 
 [Install]

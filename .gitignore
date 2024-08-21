@@ -26,3 +26,4 @@ dist/
 web/record/
 logs/
 bot/teloxide.db
+.env

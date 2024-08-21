@@ -1,5 +1,5 @@
-use actix_web::web::{Data, Json, Path, Query};
-use actix_web::{get, post, HttpResponse, Scope};
+use actix_web::web::{Data, Json, Path, Query, Redirect};
+use actix_web::{get, post, HttpResponse, Scope, http::header};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
@@ -7,7 +7,7 @@ use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::message::Message;
 use crate::models::order::Order;
-use crate::models::transaction::{Transaction, TransactionStatus};
+use crate::models::transaction::{Transaction, TransactionStatus, TransactionKind};
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, ListInput, Response};
 use crate::{utils, AppState};
@@ -32,25 +32,35 @@ async fn user_get(user: User) -> Response<User> {
     Ok(Json(user))
 }
 
+#[derive(Deserialize, IntoParams)]
+struct DepositQuery {
+    amount: u64,
+}
+
+#[derive(Deserialize, Debug)]
+struct ZarinpalResponse<T> {
+    data: T,
+}
+
 #[utoipa::path(
     get,
-    params(("amount" = u64, Path, example = 1e4)),
+    params(DepositQuery),
     responses((status = 200, body = String))
 )]
 /// Deposit
-#[get("/deposit/{amount}/")]
+#[get("/deposit/")]
 async fn user_deposit(
-    user: User, path: Path<(i64,)>, state: Data<AppState>,
-) -> Response<String> {
+    user: User, q: Query<DepositQuery>, state: Data<AppState>,
+) -> Redirect {
     let allowed = 50_000_000 - user.wallet;
     if allowed < 50_000 {
-        return Err(AppErrBadRequest("wallet is maxed out"));
+        return Redirect::to("/?error=wallet is maxed out");
+        // return Err(AppErrBadRequest("wallet is maxed out"));
     }
 
-    let amount = path.0.max(50_000).min(allowed);
+    let amount = q.amount as i64;
+    let amount = amount.max(50_000).min(allowed);
     let now = utils::now();
-
-
 
     #[derive(Serialize)]
     struct Data {
@@ -61,42 +71,196 @@ async fn user_deposit(
     }
 
     let client = awc::Client::new();
-    let mut result = client
-        .post("https://api.zarinpal.com/pg/v4/payment/request.json")
+    let result = client
+        .post("https://payment.zarinpal.com/pg/v4/payment/request.json")
         .send_json(&Data {
             merchant_id: config().zarinpal.clone(),
             amount,
-            description: format!("{}", user.name),
-            callback_url: "http://localhost:7200/api/user/zcb/".to_string()
+            description: format!("{} deposit", user.name),
+            callback_url: "https://thora.dozar.bid/api/user/zcb/".to_string(),
         })
-        .await?;
+        .await;
 
-    log::info!("result: {}", result.status());
-    log::info!("result: {:?}", result.body().await?);
+    let mut result = if let Ok(r) = result {
+        r
+    } else {
+        log::error!("zarinpal result: {result:?}");
+        return Redirect::to("/?error=zarinpal failed");
+    };
 
-    // TODO: insert into transactions
-    // sqlx::query! {
-    //     "insert into transactions(user, amount, timestamp, authority) values(?,?,?,?)",
-    //     user.id, amount, now, result.authority
-    // }
-    // .execute(&state.sql)
-    // .await?;
+    #[derive(Debug, Deserialize)]
+    struct RsData {
+        code: i64,
+        authority: String,
+    }
 
-    // sqlx::query! {
-    //     "update users set wallet = ? where id = ?",
-    //     wallet, user.id
-    // }
-    // .execute(&state.sql)
-    // .await?;
+    let data = result.json::<ZarinpalResponse<RsData>>().await; //?.data;
+    let data = if let Ok(d) = data {
+        d.data
+    } else {
+        return Redirect::to("/?error=درخواست پرداخت به مشکل خورد");
+    };
+    if data.code != 100 {
+        log::error!("payment failed: {:?}", result.body().await);
+        return Redirect::to("/?error=درخواست پرداخت به مشکل خورد");
+    }
+
+    let dbr = sqlx::query! {
+        "insert into transactions(user, amount, kind, status, timestamp, authority)
+        values(?, ?, ?, ?, ?, ?)",
+        user.id, amount, TransactionKind::In, TransactionStatus::InProgress,
+        now, data.authority
+    }
+    .execute(&state.sql)
+    .await;
+
+    if dbr.is_err() {
+        return Redirect::to("/?error=db error");
+    }
+
+    Redirect::to(format!(
+        "https://www.zarinpal.com/pg/StartPay/{}",
+        data.authority
+    ))
+}
+
+
+#[derive(Deserialize, IntoParams)]
+#[serde(rename_all = "PascalCase")]
+struct ZcbQuery {
+    authority: String,
+    status: String,
+}
+
+#[utoipa::path(get, params(ZcbQuery))]
+/// Zarinpal Callback
+#[get("/zcb/")]
+async fn zcb(
+    user: User, q: Query<ZcbQuery>, state: Data<AppState>,
+) -> Redirect {
+    // let response = HttpResponse::Found()
+    //     .insert_header((header::LOCATION, "/"))
+    //     .finish();
+
+    let response = Redirect::to("/");
+
+    let transaction = sqlx::query_as! {
+        Transaction,
+        "select * from transactions where
+        authority = ? and user = ? and status = ?",
+        q.authority, user.id,
+        TransactionStatus::InProgress
+    }
+    .fetch_one(&state.sql)
+    .await;
+
+    let is_ok = q.status.to_lowercase() == "ok";
+    if !is_ok || transaction.is_err() {
+        return response;
+    }
+    let transaction = transaction.unwrap();
+    let wallet = user.wallet + transaction.amount;
+
+    // if cfg!(debug_assertions) {
+    //     let result = sqlx::query! {
+    //         "update users set wallet = ? where id = ?",
+    //         wallet, user.id
+    //     }
+    //     .execute(&state.sql)
+    //     .await;
     //
-    // sqlx::query! {
-    //     "update transactions set status = ? where id = ?",
-    //     TransactionStatus::Success, tid
+    //     if result.is_err() {
+    //         return response;
+    //     }
+    //
+    //     let _ = sqlx::query! {
+    //         "update transactions set status = ? where id = ?",
+    //         TransactionStatus::Success, transaction.id
+    //     }
+    //     .execute(&state.sql)
+    //     .await;
+    //
+    //     return response;
     // }
-    // .execute(&state.sql)
-    // .await?;
 
-    Ok(Json(format!("amount is {amount}")))
+    #[derive(Serialize)]
+    struct Data {
+        merchant_id: String,
+        amount: i64,
+        authority: String,
+    }
+
+    let client = awc::Client::new();
+    let result = client
+        .post("https://payment.zarinpal.com/pg/v4/payment/verify.json")
+        .send_json(&Data {
+            merchant_id: config().zarinpal.clone(),
+            amount: transaction.amount,
+            authority: q.authority.clone(),
+        })
+        .await;
+
+    let failed = || {
+        sqlx::query! {
+            "update transactions set status = ? where id = ?",
+            TransactionStatus::Failed, transaction.id
+        }
+        .execute(&state.sql)
+    };
+
+    if result.is_err() {
+        let _ = failed().await;
+        return response;
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct RsData {
+        code: i64,
+        ref_id: i64,
+        card_pan: String,
+        card_hash: String,
+    }
+
+    let data = result.unwrap().json::<ZarinpalResponse<RsData>>().await;
+    if data.is_err() {
+        let _ = failed().await;
+        return response;
+    }
+    let data = data.unwrap().data;
+    if data.code != 100 {
+        log::info!("verify data: {data:#?}");
+        let _ = failed().await;
+        return response;
+    }
+
+    let result = sqlx::query! {
+        "update users set wallet = ? where id = ?",
+        wallet, user.id
+    }
+    .execute(&state.sql)
+    .await;
+
+    if result.is_err() {
+        log::error!(
+            "could not update user wallet tid: {} - {}",
+            transaction.id,
+            transaction.amount
+        );
+        let _ = failed().await;
+        return response;
+    }
+
+    let _ = sqlx::query! {
+        "update transactions set
+        status = ?, ref_id = ?, card = ?, card_hash = ?
+        where id = ?",
+        TransactionStatus::Success, data.ref_id, data.card_pan, data.card_hash,
+        transaction.id
+    }
+    .execute(&state.sql)
+    .await;
+
+    response
 }
 
 #[utoipa::path(

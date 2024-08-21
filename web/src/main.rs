@@ -1,4 +1,4 @@
-use std::{fs::read_to_string, os::unix::fs::PermissionsExt};
+use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt};
 
 use actix_files as af;
 use actix_web::{
@@ -81,13 +81,16 @@ fn config_static(app: &mut web::ServiceConfig) {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenvy::from_path("../.secrets.env").expect("could not read .secrets.env");
+    dotenvy::from_path(".env").expect("could not read .env");
     pretty_env_logger::init();
 
     let _ = std::fs::create_dir(Config::RECORD_DIR);
-    let pool = SqlitePool::connect("sqlite://main.db").await.unwrap();
 
-    sqlx::migrate!().run(&pool).await.expect("migration failed");
+    let pool = SqlitePool::connect(
+        &env::var("DATABASE_URL").expect("no DATABASE_URL in env"),
+    )
+    .await
+    .expect("sqlite pool connect failed");
 
     let server = HttpServer::new(move || {
         App::new()
