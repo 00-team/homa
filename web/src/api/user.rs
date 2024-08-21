@@ -16,7 +16,7 @@ use crate::{utils, AppState};
 #[openapi(
     tags((name = "api::user")),
     paths(
-        user_get, user_deposit, user_transactions, user_orders,
+        user_get, deposit, zcb, user_transactions, user_orders,
         user_messages, user_message_seen, user_messages_unseen_count,
     ),
     components(schemas()),
@@ -49,7 +49,7 @@ struct ZarinpalResponse<T> {
 )]
 /// Deposit
 #[get("/deposit/")]
-async fn user_deposit(
+async fn deposit(
     user: User, q: Query<DepositQuery>, state: Data<AppState>,
 ) -> Redirect {
     let allowed = 50_000_000 - user.wallet;
@@ -373,7 +373,8 @@ async fn user_orders(
 pub fn router() -> Scope {
     Scope::new("/user")
         .service(user_get)
-        .service(user_deposit)
+        .service(deposit)
+        .service(zcb)
         .service(user_transactions)
         .service(user_messages)
         .service(user_message_seen)
