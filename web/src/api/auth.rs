@@ -128,7 +128,7 @@ async fn login_telegram(
             // .domain("thora.dozar.bid")
             .path("/")
             .secure(true)
-            .same_site(SameSite::Strict)
+            .same_site(SameSite::Lax)
             .http_only(true)
             .max_age(Duration::weeks(12))
             .finish(),
