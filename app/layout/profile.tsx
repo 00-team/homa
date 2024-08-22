@@ -42,6 +42,10 @@ export default () => {
         return (~~(value / 10)).toLocaleString()
     }
 
+    function deposit() {
+        location.replace('/api/user/deposit/?amount=' + state.add_amount)
+    }
+
     return (
         <div class='profile-fnd'>
             <div class='img'>
@@ -80,7 +84,7 @@ export default () => {
                     <span class='amount'>
                         {state.add_amount / 1e4} هزار تومان
                     </span>
-                    <button class='icon'>
+                    <button class='icon' onclick={deposit}>
                         <CirclePlusIcon />
                     </button>
                 </div>

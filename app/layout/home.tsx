@@ -89,7 +89,10 @@ export default () => {
 
     function buy() {
         if (selected() > self.user.wallet) {
-            nav('/profile/?add=' + (selected() - self.user.wallet + 7e4))
+            location.replace(
+                '/api/user/deposit/?amount=' + (selected() - self.user.wallet)
+            )
+            // nav('/profile/?add=' + (selected() - self.user.wallet + 7e4))
             return
         }
 
