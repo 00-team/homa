@@ -68,7 +68,7 @@ macro_rules! impl_from_err {
     ($ty:path) => {
         impl From<$ty> for AppErr {
             fn from(value: $ty) -> Self {
-                log::error!("err 500 debug: {:?}", value);
+                log::error!("err 500 debug: {} -> {:?}", stringify!($ty), value);
                 let value = value.to_string();
                 log::error!("err 500: {}", value);
                 Self { status: 500, message: value }
