@@ -22,6 +22,8 @@ pub struct General {
     pub money_loss: i64,
     pub rub_irr: i64,
     pub rub_irr_update: i64,
+    pub usd_irr: i64,
+    pub usd_irr_update: i64,
     pub price_diff_total: i64,
     pub price_diff_count: i64,
     pub prices: JsonStr<PriceData>,
@@ -36,6 +38,8 @@ impl Default for General {
             money_loss: 0,
             rub_irr: 0,
             rub_irr_update: 0,
+            usd_irr: 0,
+            usd_irr_update: 0,
             price_diff_total: 0,
             price_diff_count: 0,
             prices: JsonStr(PriceData::new()),
@@ -80,10 +84,11 @@ pub async fn general_set(
         Some(_) => {
             sqlx::query! {
                 "update general set money_total = ?, money_gain = ?, money_loss = ?,
-                rub_irr = ?, rub_irr_update = ?, price_diff_total = ?,
-                price_diff_count = ?, prices = ?, prices_update = ?",
+                rub_irr = ?, rub_irr_update = ?, usd_irr = ?, usd_irr_update = ?,
+                price_diff_total = ?, price_diff_count = ?, prices = ?, prices_update = ?",
                 general.money_total, general.money_gain, general.money_loss,
-                general.rub_irr, general.rub_irr_update, general.price_diff_total,
+                general.rub_irr, general.rub_irr_update, general.usd_irr,
+                general.usd_irr_update, general.price_diff_total,
                 general.price_diff_count, general.prices, general.prices_update
             }
             .execute(pool)

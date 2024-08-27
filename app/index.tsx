@@ -30,7 +30,12 @@ const Root = () => (
                         component={Transactions}
                     />
                 </Route>
-                <Route path='/admin' component={lazy(() => import('admin'))} />
+                <Show when={self.user.admin}>
+                    <Route
+                        path='/admin'
+                        component={lazy(() => import('admin'))}
+                    />
+                </Show>
                 <Route path='*path' component={NotFound} />
             </Router>
         </Show>

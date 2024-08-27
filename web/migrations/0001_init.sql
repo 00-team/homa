@@ -31,6 +31,8 @@ create table if not exists general (
     money_loss integer not null default 0,
     rub_irr integer not null default 0,
     rub_irr_update integer not null default 0,
+    usd_irr integer not null default 0,
+    usd_irr_update integer not null default 0,
     price_diff_total integer not null default 0,
     price_diff_count integer not null default 0,
     prices text not null default '{}',

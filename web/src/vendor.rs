@@ -58,7 +58,6 @@ pub async fn request(
     let response = String::from_utf8(
         awc::Client::new().get(url).send().await?.body().await?.to_vec(),
     )?;
-    log::info!("vendor::request: {response}");
 
     if response.len() <= 25 {
         if let Some(err) = ERRORS.get(response.as_str()) {
