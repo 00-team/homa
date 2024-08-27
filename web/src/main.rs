@@ -34,11 +34,10 @@ async fn index() -> impl Responder {
 #[get("/openapi.json")]
 async fn openapi() -> impl Responder {
     let mut doc = docs::ApiDoc::openapi();
+    doc.merge(api::admin::ApiDoc::openapi());
     doc.merge(api::auth::ApiDoc::openapi());
     doc.merge(api::user::ApiDoc::openapi());
     doc.merge(api::vendor::ApiDoc::openapi());
-    // doc.merge(api::verification::ApiVerificationDoc::openapi());
-    // doc.merge(api::product::Doc::openapi());
 
     // let mut admin_doc = ApiDoc::openapi();
     // admin_doc.merge(admin::user::Doc::openapi());
@@ -104,7 +103,8 @@ async fn main() -> std::io::Result<()> {
                 scope("/api")
                     .service(api::auth::router())
                     .service(api::user::router())
-                    .service(api::vendor::router()),
+                    .service(api::vendor::router())
+                    .service(api::admin::router()),
             )
     });
 

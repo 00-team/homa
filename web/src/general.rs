@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 use sqlx::{Pool, Sqlite};
+use utoipa::ToSchema;
 
 use crate::models::{AppErr, JsonStr};
 
@@ -15,7 +17,7 @@ pub struct PriceValue {
 
 type PriceData = HashMap<String, PriceValue>;
 
-#[derive(sqlx::FromRow)]
+#[derive(Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 pub struct General {
     pub money_total: i64,
     pub money_gain: i64,
@@ -26,6 +28,7 @@ pub struct General {
     pub usd_irr_update: i64,
     pub price_diff_total: i64,
     pub price_diff_count: i64,
+    #[schema(value_type = HashMap<String, (f64, f64, i64, i64)>)]
     pub prices: JsonStr<PriceData>,
     pub prices_update: i64,
 }
