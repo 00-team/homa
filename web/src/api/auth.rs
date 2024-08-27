@@ -71,7 +71,8 @@ async fn login_telegram(
         msg += &("\nusername=".to_string() + username)
     }
 
-    let mut mac = Hmac256::new_from_slice(&config().bot_token_hash).unwrap();
+    let config = config();
+    let mut mac = Hmac256::new_from_slice(&config.bot_token_hash).unwrap();
     mac.update(msg.as_bytes());
     let result = mac.finalize();
 
@@ -91,6 +92,7 @@ async fn login_telegram(
     .await;
 
     let has_photo = q.photo_url.is_some();
+    let is_admin = config.admins.contains(&(q.id as u64));
 
     match result {
         Ok(user) => {
@@ -101,8 +103,9 @@ async fn login_telegram(
             sqlx::query_as! {
                 User,
                 "update users set name = ?, username = ?, auth_date = ?,
-                token = ?, photo = ? where id = ?",
-                name, q.username, q.auth_date, token_hashed, has_photo, user.id
+                token = ?, photo = ?, admin = ? where id = ?",
+                name, q.username, q.auth_date, token_hashed,
+                has_photo, is_admin, user.id,
             }
             .execute(&state.sql)
             .await?;
@@ -110,9 +113,9 @@ async fn login_telegram(
         Err(_) => {
             sqlx::query_as! {
                 User,
-                "insert into users (id, name, username, auth_date, token, photo)
-                values(?, ?, ?, ?, ?, ?)",
-                q.id, name, q.username, q.auth_date, token_hashed, has_photo
+                "insert into users (id, name, username, auth_date, token, photo, admin)
+                values(?, ?, ?, ?, ?, ?, ?)",
+                q.id, name, q.username, q.auth_date, token_hashed, has_photo, is_admin
             }
             .execute(&state.sql)
             .await?;

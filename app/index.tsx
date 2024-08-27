@@ -1,5 +1,4 @@
 import { Show, render } from 'solid-js/web'
-
 import { self } from 'store'
 import 'style/index.scss'
 import Login from 'layout/login'
@@ -12,6 +11,7 @@ import NotFound from 'layout/404'
 import Messages from 'layout/messages'
 import Transactions from 'layout/transactions'
 import Orders from 'layout/orders'
+import { lazy } from 'solid-js'
 
 const Root = () => (
     <>
@@ -30,6 +30,7 @@ const Root = () => (
                         component={Transactions}
                     />
                 </Route>
+                <Route path='/admin' component={lazy(() => import('admin'))} />
                 <Route path='*path' component={NotFound} />
             </Router>
         </Show>

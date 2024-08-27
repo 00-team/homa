@@ -1,15 +1,17 @@
-use actix_web::web::{Data, Json, Path, Query, Redirect};
-use actix_web::{get, post, HttpResponse, Scope, http::header};
+use actix_web::web::{Data, Json, Query, Redirect};
+use actix_web::{get, post, HttpResponse, Scope};
 use serde::{Deserialize, Serialize};
-use utoipa::{IntoParams, OpenApi, ToSchema};
+use utoipa::{IntoParams, OpenApi};
 
 use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::message::Message;
 use crate::models::order::Order;
-use crate::models::transaction::{Transaction, TransactionStatus, TransactionKind};
+use crate::models::transaction::{
+    Transaction, TransactionKind, TransactionStatus,
+};
 use crate::models::user::User;
-use crate::models::{AppErr, AppErrBadRequest, ListInput, Response};
+use crate::models::{AppErr, ListInput, Response};
 use crate::{utils, AppState};
 
 #[derive(OpenApi)]
@@ -123,7 +125,6 @@ async fn deposit(
         data.authority
     ))
 }
-
 
 #[derive(Deserialize, IntoParams)]
 #[serde(rename_all = "PascalCase")]
