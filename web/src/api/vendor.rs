@@ -6,7 +6,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
-use crate::config::{config, Config};
+use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::general::{general_get, general_set, PriceValue};
 use crate::models::order::Order;
@@ -103,7 +103,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                 v.cost_api
             };
 
-            let p = cost * general.rub_irr as f64 * Config::TAX;
+            let p = cost * general.rub_irr as f64 * general.phone_tax as f64;
             let p = ((p / 1e4).ceil() * 1e4).max(15e4) as i64;
             (k.clone(), (p, v.count))
         })
@@ -220,7 +220,7 @@ async fn vendor_buy(
     } else {
         price.cost_api
     };
-    let cost_irr = cost_rub * general.rub_irr as f64 * Config::TAX;
+    let cost_irr = cost_rub * general.rub_irr as f64 * general.phone_tax as f64;
     let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
 
     if user.wallet < cost_irr {

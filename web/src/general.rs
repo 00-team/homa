@@ -26,6 +26,8 @@ pub struct General {
     pub rub_irr_update: i64,
     pub usd_irr: i64,
     pub usd_irr_update: i64,
+    pub star_tax: i64,
+    pub phone_tax: i64,
     pub price_diff_total: i64,
     pub price_diff_count: i64,
     #[schema(value_type = HashMap<String, (f64, f64, i64, i64)>)]
@@ -43,6 +45,8 @@ impl Default for General {
             rub_irr_update: 0,
             usd_irr: 0,
             usd_irr_update: 0,
+            star_tax: 0,
+            phone_tax: 0,
             price_diff_total: 0,
             price_diff_count: 0,
             prices: JsonStr(PriceData::new()),
@@ -86,13 +90,15 @@ pub async fn general_set(
     match result {
         Some(_) => {
             sqlx::query! {
-                "update general set money_total = ?, money_gain = ?, money_loss = ?,
-                rub_irr = ?, rub_irr_update = ?, usd_irr = ?, usd_irr_update = ?,
-                price_diff_total = ?, price_diff_count = ?, prices = ?, prices_update = ?",
+                "update general set money_total = ?, money_gain = ?,
+                money_loss = ?, rub_irr = ?, rub_irr_update = ?, usd_irr = ?,
+                usd_irr_update = ?, star_tax = ?, phone_tax = ?, prices = ?, 
+                price_diff_total = ?, price_diff_count = ?, prices_update = ?",
                 general.money_total, general.money_gain, general.money_loss,
                 general.rub_irr, general.rub_irr_update, general.usd_irr,
-                general.usd_irr_update, general.price_diff_total,
-                general.price_diff_count, general.prices, general.prices_update
+                general.usd_irr_update, general.star_tax, general.phone_tax,
+                general.prices, general.price_diff_total, general.price_diff_count,
+                general.prices_update
             }
             .execute(pool)
             .await?;
@@ -102,11 +108,12 @@ pub async fn general_set(
         None => {
             sqlx::query! {
                 "insert into general(money_total, money_gain, money_loss, rub_irr,
-                rub_irr_update, price_diff_total, price_diff_count, prices,
-                prices_update) values(?,?,?,?,?,?,?,?,?)",
+                rub_irr_update, star_tax, phone_tax, price_diff_total, prices,
+                price_diff_count, prices_update) values(?,?,?,?,?,?,?,?,?,?,?)",
                 general.money_total, general.money_gain, general.money_loss,
-                general.rub_irr, general.rub_irr_update, general.price_diff_total,
-                general.price_diff_count, general.prices, general.prices_update
+                general.rub_irr, general.rub_irr_update, general.star_tax,
+                general.phone_tax, general.price_diff_total, general.prices,
+                general.price_diff_count, general.prices_update
             }
             .execute(pool)
             .await?;

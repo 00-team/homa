@@ -11,6 +11,7 @@ import {
     UserIcon,
     HomeIcon,
     MailOpenIcon,
+    SwordIcon,
 } from 'icons'
 import { createStore } from 'solid-js/store'
 import { httpx } from 'shared'
@@ -64,6 +65,11 @@ const Navbar: Component = () => {
                 <A href='/orders/'>
                     <PhoneIcon />
                 </A>
+                <Show when={self.user.admin}>
+                    <A href='/admin/'>
+                        <SwordIcon />
+                    </A>
+                </Show>
             </div>
             <div class='right'>
                 <A href='/profile/' class='money'>

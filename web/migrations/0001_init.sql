@@ -33,6 +33,8 @@ create table if not exists general (
     rub_irr_update integer not null default 0,
     usd_irr integer not null default 0,
     usd_irr_update integer not null default 0,
+    star_tax integer not null default 0,
+    phone_tax integer not null default 0,
     price_diff_total integer not null default 0,
     price_diff_count integer not null default 0,
     prices text not null default '{}',

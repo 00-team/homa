@@ -7,7 +7,7 @@ pub struct Config {
     pub bot_token_hash: [u8; 32],
     pub discord_webhook: String,
     pub sms_cb_pass: String,
-    pub navasan_apikey: String,
+    // pub navasan_apikey: String,
     pub zarinpal: String,
     pub admins: HashSet<u64>,
 }
@@ -15,7 +15,7 @@ pub struct Config {
 impl Config {
     pub const RECORD_DIR: &'static str = "./record/";
     pub const TOKEN_ABC: &'static [u8] = b"!@#$%^&*_+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_+";
-    pub const TAX: f64 = 3.0; // 300%
+    // pub const TAX: f64 = 3.0; // 300%
 }
 
 pub fn config() -> &'static Config {
@@ -35,7 +35,7 @@ pub fn config() -> &'static Config {
             bot_token,
             discord_webhook: env::var("DISCORD_WEBHOOK").expect("env"),
             sms_cb_pass: env::var("SMS_CB_PASS").expect("env"),
-            navasan_apikey: env::var("NAVASAN_APIKEY").expect("env"),
+            // navasan_apikey: env::var("NAVASAN_APIKEY").expect("env"),
             zarinpal: env::var("ZARINPAL").expect("env"),
         }
     })
