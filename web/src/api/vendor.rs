@@ -190,93 +190,95 @@ struct BuyQuery {
 #[post("/buy/")]
 async fn vendor_buy(
     user: User, q: Query<BuyQuery>, state: Data<AppState>,
-) -> Response<String> {
-    #[derive(Deserialize, Debug)]
-    #[serde(rename_all = "camelCase")]
-    struct Answer {
-        activation_id: String,
-        phone_number: String,
-        activation_cost: String,
-        activation_time: String,
-        activation_operator: String,
-    }
+) -> Result<HttpResponse, AppErr> {
+    return Ok(HttpResponse::Ok().finish());
 
-    let now = utils::now();
-    let key = format!("{}-{}", q.country, q.service);
-    let mut general = general_get(&state.sql).await?;
-    let price = general.prices.get_mut(&key);
-    if price.is_none() {
-        return Err(AppErrBadRequest("not found"));
-    }
-    let price = price.unwrap();
-
-    // if general.rub_irr_update + 86400 < now {
-    //     general.rub_irr_update = now;
-    //     general.rub_irr = rub_irr_price().await?;
+    // #[derive(Deserialize, Debug)]
+    // #[serde(rename_all = "camelCase")]
+    // struct Answer {
+    //     activation_id: String,
+    //     phone_number: String,
+    //     activation_cost: String,
+    //     activation_time: String,
+    //     activation_operator: String,
     // }
-
-    let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
-        price.cost_buy
-    } else {
-        price.cost_api
-    };
-    let cost_irr = cost_rub * general.rub_irr as f64 * general.phone_tax as f64;
-    let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
-
-    if user.wallet < cost_irr {
-        return Err(AppErrBadRequest("not enough in the wallet"));
-    }
-
-    let wallet = user.wallet - cost_irr;
-    sqlx::query! {
-        "update users set wallet = ? where id = ?",
-        wallet, user.id
-    }
-    .execute(&state.sql)
-    .await?;
-
-    let args = vec![
-        ("service", q.service.as_str()),
-        ("country", q.country.as_str()),
-        // ("forward", "$forward"),
-        // ("operator", "$operator"),
-        // ("ref", "$ref"),
-        // ("phoneException", "$phoneException"),
-        // ("maxPrice", "1"),
-        // ("verification", "$verification"),
-    ];
-    let result = vendor::request("getNumberV2", args).await?;
-    log::info!("result: {:#?}", result);
-    let result = serde_json::from_value::<Answer>(result)?;
-    let new_cost_rub: f64 = result.activation_cost.parse()?;
-
-    let new_cost_irr = new_cost_rub * general.rub_irr as f64;
-    let profit = cost_irr - new_cost_irr as i64;
-
-    if profit < 0 {
-        general.money_loss += profit * -1;
-    } else {
-        general.money_gain += profit;
-    }
-
-    price.cost_buy = new_cost_rub;
-    price.timestamp = now;
-
-    general_set(&state.sql, &general).await?;
-
-    log::info!("{:#?}", result);
-
-    sqlx::query! {
-        "insert into orders(user, activation_id, phone,
-        cost, country, operator, datetime, service)
-        values(?,?,?,?,?,?,?,?)",
-        user.id, result.activation_id, result.phone_number, cost_irr, q.country,
-        result.activation_operator, result.activation_time, q.service
-    }
-    .execute(&state.sql)
-    .await?;
-
-    Ok(Json("ok".to_string()))
+    //
+    // let now = utils::now();
+    // let key = format!("{}-{}", q.country, q.service);
+    // let mut general = general_get(&state.sql).await?;
+    // let price = general.prices.get_mut(&key);
+    // if price.is_none() {
+    //     return Err(AppErrBadRequest("not found"));
+    // }
+    // let price = price.unwrap();
+    //
+    // // if general.rub_irr_update + 86400 < now {
+    // //     general.rub_irr_update = now;
+    // //     general.rub_irr = rub_irr_price().await?;
+    // // }
+    //
+    // let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
+    //     price.cost_buy
+    // } else {
+    //     price.cost_api
+    // };
+    // let cost_irr = cost_rub * general.rub_irr as f64 * general.phone_tax as f64;
+    // let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
+    //
+    // if user.wallet < cost_irr {
+    //     return Err(AppErrBadRequest("not enough in the wallet"));
+    // }
+    //
+    // let wallet = user.wallet - cost_irr;
+    // sqlx::query! {
+    //     "update users set wallet = ? where id = ?",
+    //     wallet, user.id
+    // }
+    // .execute(&state.sql)
+    // .await?;
+    //
+    // let args = vec![
+    //     ("service", q.service.as_str()),
+    //     ("country", q.country.as_str()),
+    //     // ("forward", "$forward"),
+    //     // ("operator", "$operator"),
+    //     // ("ref", "$ref"),
+    //     // ("phoneException", "$phoneException"),
+    //     // ("maxPrice", "1"),
+    //     // ("verification", "$verification"),
+    // ];
+    // let result = vendor::request("getNumberV2", args).await?;
+    // log::info!("result: {:#?}", result);
+    // let result = serde_json::from_value::<Answer>(result)?;
+    // let new_cost_rub: f64 = result.activation_cost.parse()?;
+    //
+    // let new_cost_irr = new_cost_rub * general.rub_irr as f64;
+    // let profit = cost_irr - new_cost_irr as i64;
+    //
+    // if profit < 0 {
+    //     general.money_loss += profit * -1;
+    // } else {
+    //     general.money_gain += profit;
+    // }
+    //
+    // price.cost_buy = new_cost_rub;
+    // price.timestamp = now;
+    //
+    // general_set(&state.sql, &general).await?;
+    //
+    // log::info!("{:#?}", result);
+    //
+    // sqlx::query! {
+    //     "insert into orders(user, activation_id, phone,
+    //     cost, country, operator, datetime, service)
+    //     values(?,?,?,?,?,?,?,?)",
+    //     user.id, result.activation_id, result.phone_number, cost_irr, q.country,
+    //     result.activation_operator, result.activation_time, q.service
+    // }
+    // .execute(&state.sql)
+    // .await?;
+    //
+    // Ok(Json("ok".to_string()))
 }
 
 pub fn router() -> Scope {
