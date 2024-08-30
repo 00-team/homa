@@ -65,7 +65,7 @@ fi
 if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build web"
     send_message "building web"
-    DATABASE_URL=sqlite://web/main.db cargo build -r
+    cargo build -r
     [[ $? = 0 ]] && e="✅" || e="❌"
     send_message "web build status: $e"
     systemctl restart thora.web
@@ -91,13 +91,14 @@ fi
 if check_diff "src/* Cargo.toml"; then
     echo "$EG cargo build bot"
     send_message "building bot"
-    DATABASE_URL=sqlite://bot/main.db cargo build -r
+    cargo build -r
     [[ $? = 0 ]] && e="✅" || e="❌"
     send_message "bot build status: $e"
     echo $SPACER
 
     echo "🧹 removing the teloxide database"
-    rm -rf /thora/bot/teloxide.db
+    rm -f log
+    rm -rf teloxide.db
     echo $SPACER
 
     echo "🔥 restart thora bot"
