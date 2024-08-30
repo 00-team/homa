@@ -13,7 +13,7 @@ use crate::models::order::Order;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
 use crate::utils::send_message;
-use crate::vendor::{self, rub_irr_price};
+use crate::vendor;
 use crate::{utils, AppState};
 
 #[derive(OpenApi)]
