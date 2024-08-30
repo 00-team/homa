@@ -5,8 +5,7 @@ on:
     branches:
       - master
     paths:
-      - bot/Cargo.toml
-      - web/Cargo.toml
+      - VERSION
 
 jobs:
   deploy:
