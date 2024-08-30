@@ -90,18 +90,18 @@ pub async fn request(
     }
 }
 
-pub async fn rub_irr_price() -> Result<i64, AppErr> {
-    if cfg!(debug_assertions) {
-        return Ok(6710);
-    }
-
-    let result = awc::Client::new().get(format!(
-        "http://api.navasan.tech/latest/?item=rub&api_key={}",
-        config().navasan_apikey
-    ));
-    let result = result.send().await?.json::<Value>().await?;
-
-    let result = result.as_object().unwrap().get("rub").unwrap().as_object();
-    let result = result.unwrap().get("value").unwrap().as_str().unwrap();
-    Ok(result.parse::<i64>()? * 10)
-}
+// pub async fn rub_irr_price() -> Result<i64, AppErr> {
+//     if cfg!(debug_assertions) {
+//         return Ok(6710);
+//     }
+//
+//     let result = awc::Client::new().get(format!(
+//         "http://api.navasan.tech/latest/?item=rub&api_key={}",
+//         config().navasan_apikey
+//     ));
+//     let result = result.send().await?.json::<Value>().await?;
+//
+//     let result = result.as_object().unwrap().get("rub").unwrap().as_object();
+//     let result = result.unwrap().get("value").unwrap().as_str().unwrap();
+//     Ok(result.parse::<i64>()? * 10)
+// }

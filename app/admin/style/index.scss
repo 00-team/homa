@@ -1,0 +1,22 @@
+.admin-fnd {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    .input {
+        display: flex;
+        gap: 1rem;
+
+        input {
+            border-radius: var(--radius);
+            border: 2px solid var(--fg-2);
+            font-size: 16px;
+        }
+    }
+
+    .save-btn {
+        display: flex;
+    }
+}

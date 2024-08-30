@@ -36,11 +36,11 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     let mut general = general_get(&state.sql).await?;
     let mut update_general = false;
 
-    if general.rub_irr_update + 86400 < now {
-        update_general = true;
-        general.rub_irr_update = now;
-        general.rub_irr = rub_irr_price().await?;
-    }
+    // if general.rub_irr_update + 86400 < now {
+    //     update_general = true;
+    //     general.rub_irr_update = now;
+    //     general.rub_irr = rub_irr_price().await?;
+    // }
 
     if general.prices_update + 600 < now {
         update_general = true;
@@ -210,10 +210,10 @@ async fn vendor_buy(
     }
     let price = price.unwrap();
 
-    if general.rub_irr_update + 86400 < now {
-        general.rub_irr_update = now;
-        general.rub_irr = rub_irr_price().await?;
-    }
+    // if general.rub_irr_update + 86400 < now {
+    //     general.rub_irr_update = now;
+    //     general.rub_irr = rub_irr_price().await?;
+    // }
 
     let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
         price.cost_buy

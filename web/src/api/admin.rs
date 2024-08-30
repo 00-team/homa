@@ -24,7 +24,7 @@ pub struct ApiDoc;
 
 #[utoipa::path(get, responses((status = 200, body = General)))]
 /// Get General
-#[get("/")]
+#[get("/general/")]
 async fn get_general(_: Admin, state: Data<AppState>) -> Response<General> {
     let general = general_get(&state.sql).await?;
     Ok(Json(general))
@@ -42,7 +42,7 @@ struct UpdateGeneralBody {
     responses((status = 200))
 )]
 /// Update General
-#[patch("/")]
+#[patch("/general/")]
 async fn update_general(
     _: Admin, body: Json<UpdateGeneralBody>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
