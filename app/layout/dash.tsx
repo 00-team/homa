@@ -7,9 +7,7 @@ const Dash: Component<RouteSectionProps> = P => {
     return (
         <div class='dash-fnd'>
             <Navbar />
-            <div class='sec-bottom'>
-                <div class='sec-content'>{P.children}</div>
-            </div>
+            <div class='sec-bottom'>{P.children}</div>
         </div>
     )
 }

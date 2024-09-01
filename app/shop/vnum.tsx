@@ -1,13 +1,13 @@
 import './style/vnum.scss'
-import { COUNTRY_LIST, Country } from 'data/country-list'
-import { SERVICE_LIST, Service } from 'data/service-list'
+import { COUNTRY_LIST, Country } from 'shared/country-list'
+import { SERVICE_LIST, Service } from 'shared/service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
 import { prices, self } from 'store'
-import { Show, createMemo } from 'solid-js'
+import { Match, Show, Switch, createEffect, createMemo } from 'solid-js'
 import { RotateCcwIcon } from 'icons'
 import { useNavigate } from '@solidjs/router'
-import { httpx } from 'shared'
+import { TomanDpy, httpx } from 'shared'
 
 // const TIME_LIST: [number, string][] = [
 //     20, 4, 12, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336,
@@ -62,6 +62,10 @@ export default () => {
         let value = prices.data[key]
         if (!value) return null
         return value[0]
+    })
+
+    createEffect(() => {
+        console.log(selected())
     })
 
     const service = createMemo(() => {
@@ -134,7 +138,7 @@ export default () => {
                         </span>,
                     ])}
                     onChange={v => setState({ service: v[0] })}
-                    placeholder='سرویس'
+                    placeholder='انتخاب سرویس'
                     selected={state.service ? [state.service] : []}
                 />
             </div>
@@ -149,7 +153,7 @@ export default () => {
                         </div>,
                     ])}
                     onChange={v => setState({ country: v[0] })}
-                    placeholder='کشور'
+                    placeholder='انتخاب کشور'
                     selected={state.country != null ? [state.country] : []}
                 />
             </div>
@@ -169,12 +173,19 @@ export default () => {
             </div>
             <div class='actions'>
                 <button class='buy' disabled={!selected()} onClick={buy}>
-                    <Show
-                        when={selected() < self.user.wallet}
-                        fallback={'شارژ کیف پول'}
-                    >
-                        {(~~(selected() / 10)).toLocaleString()} تومان
-                    </Show>
+                    <Switch>
+                        <Match when={selected() == null}>
+                            سرویس و کشور را انتخاب کنید
+                        </Match>
+                        <Match when={selected() > self.user.wallet}>
+                            شارژ کیف پول{' '}
+                            <TomanDpy irr={selected() - self.user.wallet} />{' '}
+                            تومان
+                        </Match>
+                        <Match when={selected() <= self.user.wallet}>
+                            خرید <TomanDpy irr={selected()} /> تومان
+                        </Match>
+                    </Switch>
                 </button>
                 <button
                     disabled={state.service == null && state.country == null}

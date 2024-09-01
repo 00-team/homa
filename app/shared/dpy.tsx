@@ -1,5 +1,5 @@
-import { COUNTRY_LIST } from 'data/country-list'
-import { SERVICE_LIST } from 'data/service-list'
+import { COUNTRY_LIST } from './country-list'
+import { SERVICE_LIST } from './service-list'
 import { Component, Show, createMemo } from 'solid-js'
 
 export const CountryDpy: Component<{ d: string }> = P => {
@@ -25,3 +25,7 @@ export const ServiceDpy: Component<{ d: string }> = P => {
         </Show>
     )
 }
+
+export const TomanDpy: Component<{ irr: number }> = P => (
+    <>{(~~(P.irr / 10)).toLocaleString()}</>
+)
