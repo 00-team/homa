@@ -63,7 +63,8 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                         let count = vv.get("count").expect("count not found");
                         let count = count.as_i64().expect("count is NaN");
                         let cost = vv.get("cost").expect("cost not found");
-                        let cost = cost.as_f64().expect("cost is NaN") + avg_diff;
+                        let cost =
+                            cost.as_f64().expect("cost is NaN") + avg_diff;
 
                         if count == 0 {
                             return;
@@ -93,6 +94,8 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
         general_set(&state.sql, &general).await?;
     }
 
+    let tax = 1.0 + general.phone_tax as f64 / 100.0;
+
     let prices: Prices = general
         .prices
         .iter()
@@ -103,7 +106,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                 v.cost_api
             };
 
-            let p = cost * general.rub_irr as f64 * general.phone_tax as f64;
+            let p = cost * general.rub_irr as f64 * tax;
             let p = ((p / 1e4).ceil() * 1e4).max(15e4) as i64;
             (k.clone(), (p, v.count))
         })
@@ -222,7 +225,8 @@ async fn vendor_buy(
     // } else {
     //     price.cost_api
     // };
-    // let cost_irr = cost_rub * general.rub_irr as f64 * general.phone_tax as f64;
+    // let tax = 1.0 + general.phone_tax as f64 / 100.0;
+    // let cost_irr = cost_rub * general.rub_irr as f64 * tax;
     // let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
     //
     // if user.wallet < cost_irr {
