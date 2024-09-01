@@ -107,6 +107,7 @@ const NumberInput: Component<NumberInputProps> = P => {
     return (
         <>
             <input
+                class='styled'
                 type='number'
                 value={P.value}
                 min={P.min}
