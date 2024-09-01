@@ -3,15 +3,9 @@ import { self } from 'store'
 import 'style/index.scss'
 import Login from 'layout/login'
 import Dash from 'layout/dash'
-import Home from 'layout/home'
 import Shop from 'layout/shop'
-import Profile from 'layout/profile'
 import Alert from 'comps/alert'
 import { Route, Router } from '@solidjs/router'
-import NotFound from 'layout/404'
-import Messages from 'layout/messages'
-import Transactions from 'layout/transactions'
-import Orders from 'layout/orders'
 import { lazy } from 'solid-js'
 
 const Root = () => (
@@ -20,15 +14,37 @@ const Root = () => (
             <Router>
                 <Route path='/' component={Dash}>
                     <Route path='/' component={Shop} />
-                    <Route path='/profile/' component={Profile} />
-                    <Route path='/messages/' component={Messages} />
-                    <Route path='/messages/:page' component={Messages} />
-                    <Route path='/orders/' component={Orders} />
-                    <Route path='/orders/:page' component={Orders} />
-                    <Route path='/transactions/' component={Transactions} />
+                    <Route
+                        path='/shop/stars/'
+                        component={lazy(() => import('shop/stars'))}
+                    />
+                    <Route
+                        path='/profile/'
+                        component={lazy(() => import('layout/profile'))}
+                    />
+                    <Route
+                        path='/messages/'
+                        component={lazy(() => import('layout/messages'))}
+                    />
+                    <Route
+                        path='/messages/:page'
+                        component={lazy(() => import('layout/messages'))}
+                    />
+                    <Route
+                        path='/orders/'
+                        component={lazy(() => import('layout/orders'))}
+                    />
+                    <Route
+                        path='/orders/:page'
+                        component={lazy(() => import('layout/orders'))}
+                    />
+                    <Route
+                        path='/transactions/'
+                        component={lazy(() => import('layout/transactions'))}
+                    />
                     <Route
                         path='/transactions/:page'
-                        component={Transactions}
+                        component={lazy(() => import('layout/transactions'))}
                     />
                     <Show when={self.user.admin}>
                         <Route
@@ -37,7 +53,10 @@ const Root = () => (
                         />
                     </Show>
                 </Route>
-                <Route path='*path' component={NotFound} />
+                <Route
+                    path='*path'
+                    component={lazy(() => import('layout/404'))}
+                />
             </Router>
         </Show>
         <Alert />

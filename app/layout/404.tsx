@@ -2,7 +2,7 @@ import { A } from '@solidjs/router'
 
 import './style/404.scss'
 
-const NotFound = () => {
+export default () => {
     return (
         <div class='not-found-fnd'>
             <h1>پیدا نشد</h1>
@@ -10,4 +10,3 @@ const NotFound = () => {
         </div>
     )
 }
-export default NotFound

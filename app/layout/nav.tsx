@@ -12,6 +12,7 @@ import {
     HomeIcon,
     MailOpenIcon,
     SwordIcon,
+    ShopIcon,
 } from 'icons'
 import { createStore } from 'solid-js/store'
 import { httpx } from 'shared'
@@ -37,7 +38,7 @@ const Navbar: Component = () => {
         <nav class='nav-fnd'>
             <div class='left'>
                 <A href='/'>
-                    <HomeIcon />
+                    <ShopIcon />
                 </A>
                 <A href='/profile/' class='avatar'>
                     <Show when={self.user.photo} fallback={<UserIcon />}>
