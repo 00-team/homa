@@ -64,10 +64,6 @@ export default () => {
         return value[0]
     })
 
-    createEffect(() => {
-        console.log(selected())
-    })
-
     const service = createMemo(() => {
         if (state.service == null) return null
         let s = SERVICE_LIST.find(s => s[0] == state.service)
