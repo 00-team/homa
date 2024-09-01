@@ -12,7 +12,7 @@ export default () => {
             <div class='shop-card'>
                 <img src='/static/telegram-stars.png' />
                 <h2>شماره مجازی</h2>
-                <A href='/shop/vnum/'>خرید</A>
+                <A href='/shop/virtual-number/'>خرید</A>
             </div>
             <div class='shop-card'>
                 <img src='/static/telegram-stars.png' />

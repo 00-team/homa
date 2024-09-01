@@ -1,5 +1,5 @@
-import { COUNTRY_LIST } from 'layout/country-list'
-import { SERVICE_LIST } from 'layout/service-list'
+import { COUNTRY_LIST } from 'data/country-list'
+import { SERVICE_LIST } from 'data/service-list'
 import { Component, Show, createMemo } from 'solid-js'
 
 export const CountryDpy: Component<{ d: string }> = P => {

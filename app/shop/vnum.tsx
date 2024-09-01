@@ -1,6 +1,6 @@
-import './style/home.scss'
-import { COUNTRY_LIST, Country } from './country-list'
-import { SERVICE_LIST, Service } from './service-list'
+import './style/vnum.scss'
+import { COUNTRY_LIST, Country } from 'data/country-list'
+import { SERVICE_LIST, Service } from 'data/service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
 import { prices, self } from 'store'
@@ -113,7 +113,7 @@ export default () => {
     }
 
     return (
-        <div class='home-fnd'>
+        <div class='shop-vnum-fnd'>
             <div class='service'>
                 <Select
                     disabled={!prices.update}

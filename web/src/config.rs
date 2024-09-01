@@ -13,6 +13,7 @@ pub struct Config {
 }
 
 impl Config {
+    pub const STAR_COST: f64 = 0.015;
     pub const RECORD_DIR: &'static str = "./record/";
     pub const TOKEN_ABC: &'static [u8] = b"!@#$%^&*_+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_+";
     // pub const TAX: f64 = 3.0; // 300%

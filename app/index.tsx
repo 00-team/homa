@@ -19,6 +19,10 @@ const Root = () => (
                         component={lazy(() => import('shop/stars'))}
                     />
                     <Route
+                        path='/shop/virtual-number/'
+                        component={lazy(() => import('shop/vnum'))}
+                    />
+                    <Route
                         path='/profile/'
                         component={lazy(() => import('layout/profile'))}
                     />
