@@ -9,7 +9,6 @@ import {
     MailWarningIcon,
     PhoneIcon,
     UserIcon,
-    HomeIcon,
     MailOpenIcon,
     SwordIcon,
     ShopIcon,

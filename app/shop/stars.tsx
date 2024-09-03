@@ -2,6 +2,7 @@ import { createStore } from 'solid-js/store'
 import './style/stars.scss'
 import { TomanDpy, httpx } from 'shared'
 import { onMount } from 'solid-js'
+import { TelegramStarIcon } from 'icons'
 
 export default () => {
     type State = {
@@ -26,9 +27,10 @@ export default () => {
 
     return (
         <div class='shop-stars-fnd'>
-            {[50, 75, 100, 150, 250, 350, 500, 750, 1000, 1500, 2500].map(s => (
-                <div>
-                    {s} | <TomanDpy irr={s * state.price} /> تومان
+            {[50, 75, 100, 150, 250, 350, 2500, 4000].map(s => (
+                <div class='row'>
+                    <TelegramStarIcon /> {s} |{' '}
+                    <TomanDpy irr={s * state.price} /> تومان
                 </div>
             ))}
         </div>
