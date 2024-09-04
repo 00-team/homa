@@ -17,14 +17,14 @@ export default defineConfig(env => {
         root: 'app',
         server: {
             https: false,
-            port: 8200,
+            port: 8000,
             proxy: {
                 '/api/': {
-                    target: 'http://127.0.0.1:7200',
+                    target: 'http://127.0.0.1:7000',
                     changeOrigin: true,
                 },
                 '/record/': {
-                    target: 'http://127.0.0.1:7200',
+                    target: 'http://127.0.0.1:7000',
                     changeOrigin: true,
                 },
             },
