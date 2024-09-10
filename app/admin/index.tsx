@@ -108,12 +108,11 @@ const NumberInput: Component<NumberInputProps> = P => {
         <>
             <input
                 class='styled'
-                type='number'
-                value={P.value}
-                min={P.min}
-                max={P.max}
-                onChange={e => {
-                    let v = parseInt(e.currentTarget.value) || 0
+                type='text'
+                value={P.value.toLocaleString()}
+                onInput={e => {
+                    let s = e.currentTarget.value.replaceAll(',', '')
+                    let v = parseInt(s) || 0
                     if (P.min != undefined && v < P.min) v = P.min
                     if (P.max != undefined && v > P.max) v = P.max
                     e.currentTarget.value = v.toString()
