@@ -41,7 +41,7 @@ create table if not exists general (
     prices_update integer not null default 0
 );
 
-create table if not exists orders (
+create table if not exists phone_orders (
     id integer primary key not null,
     user integer not null references users(id) on delete cascade,
     status integer not null default 0,
@@ -53,8 +53,18 @@ create table if not exists orders (
     country text not null,
     service text not null
 );
-create index if not exists orders_activation_id on orders(activation_id);
-create index if not exists orders_user on orders(user);
+create index if not exists phone_orders_aid on phone_orders(activation_id);
+create index if not exists phone_orders_user on phone_orders(user);
+
+create table if not exists star_orders (
+    id integer primary key not null,
+    user integer not null references users(id) on delete cascade,
+    status integer not null default 0,
+    stars integer not null,
+    cost integer not null,
+    timestamp integer not null
+);
+create index if not exists star_orders_user on star_orders(user);
 
 create table if not exists messages (
     id integer primary key not null,

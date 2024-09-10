@@ -9,7 +9,7 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::general::{general_get, general_set, PriceValue};
-use crate::models::order::Order;
+use crate::models::order::PhoneOrder;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
 use crate::utils::send_message;
@@ -146,8 +146,8 @@ async fn sms_callback(
     log::info!("sms cb 2: {:#?}", data);
 
     let order = sqlx::query_as! {
-        Order,
-        "select * from orders where activation_id = ?",
+        PhoneOrder,
+        "select * from phone_orders where activation_id = ?",
         data.activation_id
     }
     .fetch_one(&state.sql)

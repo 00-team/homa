@@ -37,7 +37,7 @@ async fn price(_: User, state: Data<AppState>) -> Response<f64> {
 /// Buy
 #[post("/buy/")]
 async fn buy(user: User, state: Data<AppState>) -> Response<String> {
-
+    Ok(Json("buying stars".to_string()))
 }
 
 pub fn router() -> Scope {

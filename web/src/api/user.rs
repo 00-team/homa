@@ -6,7 +6,7 @@ use utoipa::{IntoParams, OpenApi};
 use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::message::Message;
-use crate::models::order::Order;
+use crate::models::order::{StarOrder, PhoneOrder};
 use crate::models::transaction::{
     Transaction, TransactionKind, TransactionStatus,
 };
@@ -18,8 +18,8 @@ use crate::{utils, AppState};
 #[openapi(
     tags((name = "api::user")),
     paths(
-        user_get, deposit, zcb, user_transactions, user_orders,
-        user_messages, user_message_seen, user_messages_unseen_count,
+        user_get, deposit, zcb, user_transactions, user_messages,
+        user_message_seen, user_messages_unseen_count, phone_orders, star_orders
     ),
     components(schemas()),
     servers((url = "/user")),
@@ -352,17 +352,39 @@ async fn user_messages_unseen_count(
 #[utoipa::path(
     get,
     params(ListInput),
-    responses((status = 200, body = Vec<Order>))
+    responses((status = 200, body = Vec<PhoneOrder>))
 )]
-/// List Orders
-#[get("/orders/")]
-async fn user_orders(
+/// Phone Orders
+#[get("/phone-orders/")]
+async fn phone_orders(
     user: User, q: Query<ListInput>, state: Data<AppState>,
-) -> Response<Vec<Order>> {
+) -> Response<Vec<PhoneOrder>> {
     let offset = q.page * 32;
     let result = sqlx::query_as! {
-        Order,
-        "select * from orders where user = ? order by id desc limit 32 offset ?",
+        PhoneOrder,
+        "select * from phone_orders where user = ? order by id desc limit 32 offset ?",
+        user.id, offset
+    }
+    .fetch_all(&state.sql)
+    .await?;
+
+    Ok(Json(result))
+}
+
+#[utoipa::path(
+    get,
+    params(ListInput),
+    responses((status = 200, body = Vec<StarOrder>))
+)]
+/// Star Orders
+#[get("/star-orders/")]
+async fn star_orders(
+    user: User, q: Query<ListInput>, state: Data<AppState>,
+) -> Response<Vec<StarOrder>> {
+    let offset = q.page * 32;
+    let result = sqlx::query_as! {
+        StarOrder,
+        "select * from star_orders where user = ? order by id desc limit 32 offset ?",
         user.id, offset
     }
     .fetch_all(&state.sql)
@@ -380,5 +402,6 @@ pub fn router() -> Scope {
         .service(user_messages)
         .service(user_message_seen)
         .service(user_messages_unseen_count)
-        .service(user_orders)
+        .service(phone_orders)
+        .service(star_orders)
 }
