@@ -114,9 +114,6 @@ export const NavBottom = () => {
 
     return (
         <nav class='nav-fnd nav-bottom-fnd'>
-            <A href='/'>
-                <ShopIcon />
-            </A>
             <A href='/profile/' class='avatar'>
                 <Show when={self.user.photo} fallback={<UserIcon />}>
                     <img
@@ -127,6 +124,9 @@ export const NavBottom = () => {
             </A>
             <A href='/transactions/'>
                 <HistoryIcon />
+            </A>
+            <A href='/'>
+                <ShopIcon />
             </A>
             <A href='/messages/'>
                 <Show when={state.messages} fallback={<MailOpenIcon />}>
@@ -139,18 +139,6 @@ export const NavBottom = () => {
                         <MailWarningIcon />
                     </span>
                 </Show>
-            </A>
-            <A href='/orders/'>
-                <PhoneIcon />
-            </A>
-            <A href='/orders/'>
-                <PhoneIcon />
-            </A>
-            <A href='/orders/'>
-                <PhoneIcon />
-            </A>
-            <A href='/orders/'>
-                <PhoneIcon />
             </A>
             <A href='/orders/'>
                 <PhoneIcon />
