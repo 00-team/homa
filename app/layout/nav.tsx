@@ -14,7 +14,7 @@ import {
     ShopIcon,
 } from 'icons'
 import { createStore } from 'solid-js/store'
-import { httpx } from 'shared'
+import { TomanDpy, httpx } from 'shared'
 
 export const Navbar = () => {
     type State = {
@@ -73,7 +73,9 @@ export const Navbar = () => {
             </div>
             <div class='right'>
                 <A href='/profile/' class='money'>
-                    <span>{(~~(self.user.wallet / 10)).toLocaleString()}</span>
+                    <span>
+                        <TomanDpy irr={self.user.wallet} />
+                    </span>
                     <CirclePlusIcon />
                 </A>
             </div>
@@ -84,10 +86,15 @@ export const Navbar = () => {
 export const NavTop = () => {
     return (
         <nav class='nav-fnd navbar-fnd'>
-            <div class='left'>Thora</div>
+            <div class='left '>
+                <h2 class='nav-title'>تورا</h2>
+            </div>
+
             <div class='right'>
                 <A href='/profile/' class='money'>
-                    <span>{(~~(self.user.wallet / 10)).toLocaleString()}</span>
+                    <span>
+                        <TomanDpy irr={self.user.wallet} />
+                    </span>
                     <CirclePlusIcon />
                 </A>
             </div>
