@@ -74,17 +74,23 @@ export default () => {
             <Show when={max() > 5e4}>
                 <div class='add-wallet'>
                     <div class='up-down'>
-                        <button class='icon' onclick={() => add_amount(+5e4)}>
+                        <button
+                            class='styled icon'
+                            onclick={() => add_amount(+5e4)}
+                        >
                             <ChevronUpIcon />
                         </button>
-                        <button class='icon' onclick={() => add_amount(-5e4)}>
+                        <button
+                            class='styled icon'
+                            onclick={() => add_amount(-5e4)}
+                        >
                             <ChevronDownIcon />
                         </button>
                     </div>
                     <span class='amount'>
                         {state.add_amount / 1e4} هزار تومان
                     </span>
-                    <button class='icon' onclick={deposit}>
+                    <button class='styled icon' onclick={deposit}>
                         <CirclePlusIcon />
                     </button>
                 </div>

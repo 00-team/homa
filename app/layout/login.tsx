@@ -8,6 +8,7 @@ export default () => {
                 <h1>شماره مجازی تورا</h1>
                 <span>ابتدا وارد شوید</span>
                 <button
+                    class='styled'
                     onclick={() => open('https://t.me/Thorabot?start=login')}
                 >
                     ورود با تلگرام

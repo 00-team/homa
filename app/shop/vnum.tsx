@@ -168,7 +168,7 @@ export default () => {
                 </Show>
             </div>
             <div class='actions'>
-                <button class='buy' disabled={!selected()} onClick={buy}>
+                <button class='styled buy' disabled={!selected()} onClick={buy}>
                     <Switch>
                         <Match when={selected() == null}>
                             سرویس و کشور را انتخاب کنید
@@ -185,7 +185,7 @@ export default () => {
                 </button>
                 <button
                     disabled={state.service == null && state.country == null}
-                    class='reset'
+                    class='styled reset'
                     onclick={() => setState({ service: null, country: null })}
                 >
                     <RotateCcwIcon />

@@ -88,7 +88,7 @@ export default () => {
                 />
             </div>
             <Show when={!state.loading}>
-                <button class='save-btn' onClick={save}>
+                <button class='styled save-btn' onClick={save}>
                     ذخیره
                 </button>
             </Show>
