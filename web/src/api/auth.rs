@@ -1,5 +1,4 @@
 use actix_web::cookie::{time::Duration, Cookie, SameSite};
-use actix_web::http::header;
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Query};
 use actix_web::{get, HttpResponse, Scope};
@@ -124,19 +123,16 @@ async fn login_telegram(
 
     Ok(HttpResponse::build(StatusCode::FOUND)
         .cookie(
-            Cookie::build(
-                header::AUTHORIZATION.to_string(),
-                format!("Bearer {}:{token}", q.id),
-            )
-            // .domain("thora.dozar.bid")
-            .path("/")
-            .secure(true)
-            .same_site(SameSite::Lax)
-            .http_only(true)
-            .max_age(Duration::weeks(12))
-            .finish(),
+            Cookie::build("authorization", format!("Bearer {}:{token}", q.id))
+                // .domain("thora.dozar.bid")
+                .path("/")
+                .secure(true)
+                .same_site(SameSite::Lax)
+                .http_only(true)
+                .max_age(Duration::weeks(12))
+                .finish(),
         )
-        .insert_header((header::LOCATION, "/"))
+        .insert_header(("location", "/"))
         .finish())
 }
 

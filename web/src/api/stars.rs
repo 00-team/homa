@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use actix_web::web::{Data, Json};
-use actix_web::{get, Scope};
+use actix_web::{get, post, Scope};
 use utoipa::OpenApi;
 
 use crate::config::Config;
@@ -30,6 +30,14 @@ async fn price(_: User, state: Data<AppState>) -> Response<f64> {
     let price = Config::STAR_COST * tax * general.usd_irr as f64;
 
     Ok(Json(price))
+}
+
+
+#[utoipa::path(post, responses((status = 200)))]
+/// Buy
+#[post("/buy/")]
+async fn buy(user: User, state: Data<AppState>) -> Response<String> {
+
 }
 
 pub fn router() -> Scope {
