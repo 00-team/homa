@@ -24,6 +24,13 @@ impl AppErr {
         Self { status, message: message.to_string() }
     }
 
+    pub fn too_poor() -> Self {
+        Self {
+            status: 400,
+            message: "ابتدا کیف پول خود را شارژ کنید".to_string(),
+        }
+    }
+
     // pub fn default() -> Self {
     //     Self { status: 500, message: "Internal Server Error".to_string() }
     // }
@@ -68,7 +75,11 @@ macro_rules! impl_from_err {
     ($ty:path) => {
         impl From<$ty> for AppErr {
             fn from(value: $ty) -> Self {
-                log::error!("err 500 debug: {} -> {:?}", stringify!($ty), value);
+                log::error!(
+                    "err 500 debug: {} -> {:?}",
+                    stringify!($ty),
+                    value
+                );
                 let value = value.to_string();
                 log::error!("err 500: {}", value);
                 Self { status: 500, message: value }

@@ -17,7 +17,7 @@ sql_enum! {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema, Default)]
 pub struct PhoneOrder {
     pub id: i64,
     pub user: i64,
@@ -59,12 +59,12 @@ impl FromRequest for PhoneOrder {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema, Default)]
 pub struct StarOrder {
     pub id: i64,
     pub user: i64,
     pub status: OrderStatus,
-    pub stars: i64,
+    pub amount: i64,
     pub cost: i64,
     pub timestamp: i64,
 }

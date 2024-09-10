@@ -60,7 +60,7 @@ create table if not exists star_orders (
     id integer primary key not null,
     user integer not null references users(id) on delete cascade,
     status integer not null default 0,
-    stars integer not null,
+    amount integer not null,
     cost integer not null,
     timestamp integer not null
 );
