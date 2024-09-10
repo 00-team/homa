@@ -111,7 +111,7 @@ async fn main() -> std::io::Result<()> {
     });
 
     let server = if cfg!(debug_assertions) {
-        server.bind(("127.0.0.1", 7000)).unwrap()
+        server.bind(("0.0.0.0", 7000)).unwrap()
     } else {
         const PATH: &'static str = "/usr/share/nginx/sockets/thora.web.sock";
         let s = server.bind_uds(PATH).unwrap();

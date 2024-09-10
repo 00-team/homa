@@ -11,4 +11,8 @@
         width: 100%;
         justify-content: center;
     }
+
+    &.mobile .sec-bottom {
+        height: calc(100% - (var(--nav-height) * 2));
+    }
 }

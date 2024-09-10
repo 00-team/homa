@@ -17,6 +17,7 @@ export default defineConfig(env => {
         root: 'app',
         server: {
             https: false,
+            host: '0.0.0.0',
             port: 8000,
             proxy: {
                 '/api/': {
