@@ -21,11 +21,15 @@ export default defineConfig(env => {
             port: 8000,
             proxy: {
                 '/api/': {
-                    target: 'http://127.0.0.1:7000',
+                    target: 'http://0.0.0.0:7000',
                     changeOrigin: true,
                 },
                 '/record/': {
-                    target: 'http://127.0.0.1:7000',
+                    target: 'http://0.0.0.0:7000',
+                    changeOrigin: true,
+                },
+                '/static/': {
+                    target: 'http://0.0.0.0:7000',
                     changeOrigin: true,
                 },
             },
