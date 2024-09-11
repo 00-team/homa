@@ -62,3 +62,35 @@ export type StarOrder = {
     cost: number
     timestamp: number
 }
+
+export type GeneralModel = {
+    money_gain: number
+    money_loss: number
+    money_total: number
+    phone_tax: number
+    price_diff_count: number
+    price_diff_total: number
+    prices: { [key: string]: [number, number, number, number] }
+    prices_update: number
+    rub_irr: number
+    rub_irr_update: number
+    star_tax: number
+    usd_irr: number
+    usd_irr_update: number
+}
+
+export const GENERAL_DEFAULT: GeneralModel = {
+    money_gain: 0,
+    money_loss: 0,
+    money_total: 0,
+    phone_tax: 0,
+    price_diff_count: 0,
+    price_diff_total: 0,
+    prices: {},
+    prices_update: 0,
+    rub_irr: 0,
+    rub_irr_update: 0,
+    star_tax: 0,
+    usd_irr: 0,
+    usd_irr_update: 0,
+}

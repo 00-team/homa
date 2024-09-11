@@ -1,22 +1,17 @@
-import { createStore } from 'solid-js/store'
+import { createStore, produce } from 'solid-js/store'
 import './style/index.scss'
 import { httpx } from 'shared'
-import { Component, Show, onMount } from 'solid-js'
+import { Component, Show, createMemo, onMount } from 'solid-js'
+import { GENERAL_DEFAULT, GeneralModel } from 'models'
 
 export default () => {
     type State = {
-        usd_irr: number
-        rub_irr: number
-        star_tax: number
-        phone_tax: number
         loading: boolean
+        G: GeneralModel
     }
     const [state, setState] = createStore<State>({
         loading: true,
-        usd_irr: 1,
-        rub_irr: 1,
-        star_tax: 0,
-        phone_tax: 0,
+        G: GENERAL_DEFAULT,
     })
 
     onMount(() => {
@@ -30,7 +25,7 @@ export default () => {
             method: 'GET',
             onLoad(x) {
                 if (x.status != 200) return
-                setState({ ...x.response, loading: false })
+                setState({ G: x.response, loading: false })
             },
         })
     }
@@ -42,10 +37,10 @@ export default () => {
             url: '/api/admin/general/',
             method: 'PATCH',
             json: {
-                rub_irr: state.rub_irr,
-                usd_irr: state.usd_irr,
-                star_tax: state.star_tax,
-                phone_tax: state.phone_tax,
+                rub_irr: state.G.rub_irr,
+                usd_irr: state.G.usd_irr,
+                star_tax: state.G.star_tax,
+                phone_tax: state.G.phone_tax,
             },
             onLoad(x) {
                 if (x.status != 200) return
@@ -53,6 +48,21 @@ export default () => {
             },
         })
     }
+
+    function uG(value: Partial<GeneralModel>) {
+        setState(
+            produce(s => {
+                s.G = { ...s.G, ...value }
+            })
+        )
+    }
+
+    const avg_diff = createMemo(() => {
+        if (state.G.price_diff_count == 0 || state.G.price_diff_total == 0) {
+            return 10
+        }
+        return state.G.price_diff_total / state.G.price_diff_count
+    })
 
     return (
         <div class='admin-fnd' classList={{ loading: state.loading }}>
@@ -63,28 +73,28 @@ export default () => {
                 <NumberInput
                     min={1}
                     label='قیمت دلار به ریال'
-                    value={state.usd_irr}
-                    onUpdate={v => setState({ usd_irr: v })}
+                    value={state.G.usd_irr}
+                    onUpdate={v => uG({ usd_irr: v })}
                 />
                 <NumberInput
                     min={1}
                     label='قیمت روبل به ریال'
-                    value={state.rub_irr}
-                    onUpdate={v => setState({ rub_irr: v })}
+                    value={state.G.rub_irr}
+                    onUpdate={v => uG({ rub_irr: v })}
                 />
                 <NumberInput
                     min={0}
                     max={999}
                     label='کارمزد استار'
-                    value={state.star_tax}
-                    onUpdate={v => setState({ star_tax: v })}
+                    value={state.G.star_tax}
+                    onUpdate={v => uG({ star_tax: v })}
                 />
                 <NumberInput
                     min={0}
                     max={999}
                     label='کارمزد شماره مجازی'
-                    value={state.phone_tax}
-                    onUpdate={v => setState({ phone_tax: v })}
+                    value={state.G.phone_tax}
+                    onUpdate={v => uG({ phone_tax: v })}
                 />
             </div>
             <Show when={!state.loading}>
@@ -92,6 +102,16 @@ export default () => {
                     ذخیره
                 </button>
             </Show>
+            <div class='info'>
+                <span>سود: </span>
+                <span>{state.G.money_gain}</span>
+                <span>ضرر: </span>
+                <span>{state.G.money_loss}</span>
+                <span>مجموع: </span>
+                <span>{state.G.money_total}</span>
+                <span>میانگین تغییر قیمت: </span>
+                <span>{avg_diff()}</span>
+            </div>
         </div>
     )
 }
