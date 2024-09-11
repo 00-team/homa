@@ -39,7 +39,9 @@ export type Message = {
     timestamp: number
 }
 
-export type Order = {
+export type OrderStatus = 'wating' | 'refunded' | 'done'
+
+export type PhoneOrder = {
     activation_id: number
     cost: number
     country: string
@@ -48,6 +50,15 @@ export type Order = {
     operator: string
     phone: string
     service: string
-    status: 'wating' | 'refunded' | 'done'
+    status: OrderStatus
     user: number
+}
+
+export type StarOrder = {
+    id: number
+    user: number
+    status: OrderStatus
+    amount: number
+    cost: number
+    timestamp: number
 }

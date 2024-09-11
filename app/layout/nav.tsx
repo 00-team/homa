@@ -7,11 +7,11 @@ import {
     CirclePlusIcon,
     HistoryIcon,
     MailWarningIcon,
-    PhoneIcon,
     UserIcon,
     MailOpenIcon,
     SwordIcon,
     ShopIcon,
+    ShoppingBasketIcon,
 } from 'icons'
 import { createStore } from 'solid-js/store'
 import { TomanDpy, httpx } from 'shared'
@@ -63,7 +63,7 @@ export const Navbar = () => {
                     </Show>
                 </A>
                 <A href='/orders/'>
-                    <PhoneIcon />
+                    <ShoppingBasketIcon />
                 </A>
                 <Show when={self.user.admin}>
                     <A href='/admin/'>
@@ -148,7 +148,7 @@ export const NavBottom = () => {
                 </Show>
             </A>
             <A href='/orders/'>
-                <PhoneIcon />
+                <ShoppingBasketIcon />
             </A>
             <Show when={self.user.admin}>
                 <A href='/admin/'>

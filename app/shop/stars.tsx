@@ -28,8 +28,8 @@ export default () => {
         })
     }
 
-    function buy(stars: number) {
-        let price = stars * state.price
+    function buy(amount: number) {
+        let price = amount * state.price
         if (price > self.user.wallet) {
             location.replace(
                 '/api/user/deposit/?amount=' + (price - self.user.wallet)
@@ -38,21 +38,19 @@ export default () => {
             return
         }
 
-        alert('buying ...')
-        // httpx({
-        //     url: '/api/vendor/buy/',
-        //     method: 'POST',
-        //     params: {
-        //         country: state.country,
-        //         service: state.service,
-        //     },
-        //     onLoad(x) {
-        //         if (x.status == 200) {
-        //             nav('/orders/')
-        //             return
-        //         }
-        //     },
-        // })
+        httpx({
+            url: '/api/stars/buy/',
+            method: 'POST',
+            json: {
+                amount,
+            },
+            onLoad(x) {
+                if (x.status == 200) {
+                    nav('/orders/')
+                    return
+                }
+            },
+        })
     }
 
     return (
