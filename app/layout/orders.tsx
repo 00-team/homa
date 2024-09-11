@@ -90,6 +90,7 @@ export default () => {
                     <ChevronLeftIcon />
                 </button>
                 <button
+                    disabled={state.count < 32}
                     class='styled'
                     onClick={() => nav('/orders/' + (state.page + 1))}
                 >
