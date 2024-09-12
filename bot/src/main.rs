@@ -123,11 +123,11 @@ async fn handle_commands(
             ];
 
             bot.send_message(msg.chat.id, "Welcome")
-                .reply_markup(KeyboardMarkup::new(keyboard))
+                // .reply_markup(KeyboardMarkup::new(keyboard))
                 .await?;
 
             bot.send_message(msg.chat.id, "متن استارت")
-                .reply_markup(InlineKeyboardMarkup::new(inline))
+                // .reply_markup(InlineKeyboardMarkup::new(inline))
                 .await?;
 
             // let arg = parse_start_args(&arg);
