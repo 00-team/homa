@@ -35,17 +35,17 @@ async fn index() -> impl Responder {
 
 #[get("/openapi.json")]
 async fn openapi() -> impl Responder {
+    let mut admin_doc = docs::ApiDoc::openapi();
+    admin_doc.merge(admin::general::ApiDoc::openapi());
+    admin_doc.merge(admin::stars::ApiDoc::openapi());
+    docs::doc_add_prefix(&mut admin_doc, "/admin", false);
+
     let mut doc = docs::ApiDoc::openapi();
+    doc.merge(admin_doc);
     doc.merge(api::auth::ApiDoc::openapi());
     doc.merge(api::user::ApiDoc::openapi());
     doc.merge(api::vendor::ApiDoc::openapi());
     doc.merge(api::stars::ApiDoc::openapi());
-
-    let mut admin_doc = docs::ApiDoc::openapi();
-    admin_doc.merge(admin::general::ApiDoc::openapi());
-
-    docs::doc_add_prefix(&mut admin_doc, "/admin", false);
-    doc.merge(admin_doc);
     docs::doc_add_prefix(&mut doc, "/api", false);
 
     HttpResponse::Ok().json(doc)
@@ -109,7 +109,11 @@ async fn main() -> std::io::Result<()> {
                     .service(api::user::router())
                     .service(api::vendor::router())
                     .service(api::stars::router())
-                    .service(scope("/admin").service(admin::general::router())),
+                    .service(
+                        scope("/admin")
+                            .service(admin::general::router())
+                            .service(admin::stars::router()),
+                    ),
             )
     });
 

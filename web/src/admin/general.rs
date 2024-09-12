@@ -1,14 +1,12 @@
+use crate::docs::UpdatePaths;
+use crate::general::{general_set, General};
+use crate::models::user::Admin;
+use crate::models::{AppErr, Response};
+use crate::AppState;
 use actix_web::web::{Data, Json};
 use actix_web::{get, patch, HttpResponse, Scope};
 use serde::Deserialize;
 use utoipa::{OpenApi, ToSchema};
-
-use crate::docs::UpdatePaths;
-use crate::general::{general_set, General};
-
-use crate::models::user::Admin;
-use crate::models::{AppErr, Response};
-use crate::AppState;
 
 #[derive(OpenApi)]
 #[openapi(

@@ -26,7 +26,7 @@ export const Phones: Component<Props> = P => {
     function fetch_orders(page: number) {
         P.update(true, 0)
         httpx({
-            url: '/api/user/orders/?page=' + page,
+            url: '/api/user/phone-orders/?page=' + page,
             method: 'GET',
             type: 'json',
             onLoad(x) {
