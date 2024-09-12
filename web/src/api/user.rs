@@ -5,8 +5,9 @@ use utoipa::{IntoParams, OpenApi};
 
 use crate::config::config;
 use crate::docs::UpdatePaths;
+use crate::general::general_get;
 use crate::models::message::Message;
-use crate::models::order::{StarOrder, PhoneOrder};
+use crate::models::order::{PhoneOrder, StarOrder};
 use crate::models::transaction::{
     Transaction, TransactionKind, TransactionStatus,
 };
@@ -54,6 +55,16 @@ struct ZarinpalResponse<T> {
 async fn deposit(
     user: User, q: Query<DepositQuery>, state: Data<AppState>,
 ) -> Redirect {
+    let general = if let Ok(g) = general_get(&state.sql).await {
+        g
+    } else {
+        return Redirect::to("/?error=database error");
+    };
+
+    if general.disable_wallet {
+        return Redirect::to("/?error=wallet is disabled");
+    }
+
     let allowed = 50_000_000 - user.wallet;
     if allowed < 50_000 {
         return Redirect::to("/?error=wallet is maxed out");

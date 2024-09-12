@@ -33,6 +33,9 @@ pub struct General {
     #[schema(value_type = HashMap<String, (f64, f64, i64, i64)>)]
     pub prices: JsonStr<PriceData>,
     pub prices_update: i64,
+    pub disable_wallet: bool,
+    pub disable_stars: bool,
+    pub disable_phone: bool,
 }
 
 impl Default for General {
@@ -51,6 +54,9 @@ impl Default for General {
             price_diff_count: 0,
             prices: JsonStr(PriceData::new()),
             prices_update: 0,
+            disable_wallet: false,
+            disable_stars: false,
+            disable_phone: false,
         }
     }
 }
@@ -93,12 +99,14 @@ pub async fn general_set(
                 "update general set money_total = ?, money_gain = ?,
                 money_loss = ?, rub_irr = ?, rub_irr_update = ?, usd_irr = ?,
                 usd_irr_update = ?, star_tax = ?, phone_tax = ?, prices = ?, 
-                price_diff_total = ?, price_diff_count = ?, prices_update = ?",
+                price_diff_total = ?, price_diff_count = ?, prices_update = ?,
+                disable_wallet = ?, disable_stars = ?, disable_phone = ?",
                 general.money_total, general.money_gain, general.money_loss,
                 general.rub_irr, general.rub_irr_update, general.usd_irr,
                 general.usd_irr_update, general.star_tax, general.phone_tax,
                 general.prices, general.price_diff_total, general.price_diff_count,
-                general.prices_update
+                general.prices_update,
+                general.disable_wallet, general.disable_stars, general.disable_phone
             }
             .execute(pool)
             .await?;
@@ -109,11 +117,13 @@ pub async fn general_set(
             sqlx::query! {
                 "insert into general(money_total, money_gain, money_loss, rub_irr,
                 rub_irr_update, star_tax, phone_tax, price_diff_total, prices,
-                price_diff_count, prices_update) values(?,?,?,?,?,?,?,?,?,?,?)",
+                price_diff_count, prices_update, disable_wallet, disable_stars, disable_phone)
+                values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 general.money_total, general.money_gain, general.money_loss,
                 general.rub_irr, general.rub_irr_update, general.star_tax,
                 general.phone_tax, general.price_diff_total, general.prices,
-                general.price_diff_count, general.prices_update
+                general.price_diff_count, general.prices_update,
+                general.disable_wallet, general.disable_stars, general.disable_phone
             }
             .execute(pool)
             .await?;

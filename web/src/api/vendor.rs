@@ -194,6 +194,13 @@ struct BuyQuery {
 async fn vendor_buy(
     user: User, q: Query<BuyQuery>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
+    let general = general_get(&state.sql).await?;
+    if general.disable_phone {
+        return Err(AppErrBadRequest(
+            "خرید شماره مجازی درحال حاظر دردسترس نمی باشد",
+        ));
+    }
+
     return Ok(HttpResponse::Ok().finish());
 
     // #[derive(Deserialize, Debug)]
