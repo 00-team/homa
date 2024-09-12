@@ -77,6 +77,9 @@ export type GeneralModel = {
     star_tax: number
     usd_irr: number
     usd_irr_update: number
+    disable_wallet: boolean
+    disable_stars: boolean
+    disable_phone: boolean
 }
 
 export const GENERAL_DEFAULT: GeneralModel = {
@@ -93,4 +96,7 @@ export const GENERAL_DEFAULT: GeneralModel = {
     star_tax: 0,
     usd_irr: 0,
     usd_irr_update: 0,
+    disable_wallet: false,
+    disable_stars: false,
+    disable_phone: false,
 }

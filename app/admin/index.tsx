@@ -41,6 +41,9 @@ export default () => {
                 usd_irr: state.G.usd_irr,
                 star_tax: state.G.star_tax,
                 phone_tax: state.G.phone_tax,
+                disable_wallet: state.G.disable_wallet,
+                disable_stars: state.G.disable_stars,
+                disable_phone: state.G.disable_phone,
             },
             onLoad(x) {
                 if (x.status != 200) return
@@ -96,6 +99,21 @@ export default () => {
                     value={state.G.phone_tax}
                     onUpdate={v => uG({ phone_tax: v })}
                 />
+                <BoolInput
+                    value={state.G.disable_wallet}
+                    label='غیرفعال کردن کیف پول'
+                    onUpdate={v => uG({ disable_wallet: v })}
+                />
+                <BoolInput
+                    value={state.G.disable_stars}
+                    label='غیرفعال کردن استار'
+                    onUpdate={v => uG({ disable_stars: v })}
+                />
+                <BoolInput
+                    value={state.G.disable_phone}
+                    label='غیرفعال کردن شماره مجازی'
+                    onUpdate={v => uG({ disable_phone: v })}
+                />
             </div>
             <Show when={!state.loading}>
                 <button class='styled save-btn' onClick={save}>
@@ -137,6 +155,27 @@ const NumberInput: Component<NumberInputProps> = P => {
                     if (P.max != undefined && v > P.max) v = P.max
                     e.currentTarget.value = v.toString()
                     P.onUpdate(v)
+                }}
+            />
+            <span>{P.label}</span>
+        </>
+    )
+}
+
+type BoolInputProps = {
+    value: boolean
+    onUpdate(value: boolean): void
+    label: string
+}
+const BoolInput: Component<BoolInputProps> = P => {
+    return (
+        <>
+            <input
+                class='styled'
+                type='checkbox'
+                checked={P.value}
+                onChange={e => {
+                    P.onUpdate(e.currentTarget.checked)
                 }}
             />
             <span>{P.label}</span>

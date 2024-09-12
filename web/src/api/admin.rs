@@ -36,6 +36,9 @@ struct UpdateGeneralBody {
     usd_irr: i64,
     star_tax: i64,
     phone_tax: i64,
+    disable_wallet: bool,
+    disable_stars: bool,
+    disable_phone: bool,
 }
 
 #[utoipa::path(
@@ -54,6 +57,9 @@ async fn update_general(
     general.usd_irr = body.usd_irr;
     general.star_tax = body.star_tax;
     general.phone_tax = body.phone_tax;
+    general.disable_wallet = body.disable_wallet;
+    general.disable_stars = body.disable_stars;
+    general.disable_phone = body.disable_phone;
 
     general_set(&state.sql, &general).await?;
 
