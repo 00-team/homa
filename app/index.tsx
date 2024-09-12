@@ -3,7 +3,7 @@ import { self } from 'store'
 import 'style/index.scss'
 import Login from 'layout/login'
 import Dash from 'layout/dash'
-import Shop from 'layout/shop'
+import Shop from 'pages/shop'
 import Alert from 'comps/alert'
 import { Route, Router } from '@solidjs/router'
 import { lazy } from 'solid-js'
@@ -17,11 +17,11 @@ const Root = () => {
                         <Route path='/' component={Shop} />
                         <Route
                             path='/shop/stars/'
-                            component={lazy(() => import('shop/stars'))}
+                            component={lazy(() => import('pages/shop/stars'))}
                         />
                         <Route
                             path='/shop/virtual-number/'
-                            component={lazy(() => import('shop/vnum'))}
+                            component={lazy(() => import('pages/shop/vnum'))}
                         />
                         <Route
                             path='/profile/'
@@ -37,11 +37,11 @@ const Root = () => {
                         />
                         <Route
                             path='/orders/'
-                            component={lazy(() => import('layout/orders'))}
+                            component={lazy(() => import('pages/orders'))}
                         />
                         <Route
                             path='/orders/:page'
-                            component={lazy(() => import('layout/orders'))}
+                            component={lazy(() => import('pages/orders'))}
                         />
                         <Route
                             path='/transactions/'

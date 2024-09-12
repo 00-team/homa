@@ -1,12 +1,11 @@
 import { Component, Show, createEffect } from 'solid-js'
-
-import './style/orders.scss'
-
 import { createStore } from 'solid-js/store'
 import { TomanDpy, fmt_timestamp, httpx } from 'shared'
 import { OrderStatus, PhoneOrder, StarOrder } from 'models'
 import { useNavigate, useParams } from '@solidjs/router'
 import { ChevronLeftIcon, ChevronRightIcon } from 'icons'
+
+import './style/index.scss'
 
 const STATUS_TABLE: { [k in OrderStatus]: string } = {
     done: 'تکمیل',

@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router'
-import './style/shop.scss'
+
+import './style/index.scss'
 
 export default () => {
     return (
