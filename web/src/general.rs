@@ -17,7 +17,7 @@ pub struct PriceValue {
 
 type PriceData = HashMap<String, PriceValue>;
 
-#[derive(Serialize, Deserialize, sqlx::FromRow, ToSchema)]
+#[derive(Serialize, Deserialize, sqlx::FromRow, ToSchema, Clone)]
 pub struct General {
     pub money_total: i64,
     pub money_gain: i64,
@@ -62,22 +62,15 @@ impl Default for General {
 }
 
 pub async fn general_get(pool: &Pool<Sqlite>) -> Result<General, AppErr> {
-    let result = sqlx::query_as! {
-        General,
-        "select * from general"
-    }
-    .fetch_optional(pool)
-    .await?;
-
-    match result {
+    match sqlx::query_as!(General, "select * from general")
+        .fetch_optional(pool)
+        .await?
+    {
         Some(v) => Ok(v),
         None => {
-            let _ = sqlx::query! {
-                "insert into general default values"
-            }
-            .execute(pool)
-            .await;
-
+            sqlx::query! {"insert into general default values"}
+                .execute(pool)
+                .await?;
             Ok(General::default())
         }
     }

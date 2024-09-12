@@ -4,7 +4,7 @@ use serde::Deserialize;
 use utoipa::{OpenApi, ToSchema};
 
 use crate::docs::UpdatePaths;
-use crate::general::{general_get, general_set, General};
+use crate::general::{general_set, General};
 
 use crate::models::user::Admin;
 use crate::models::{AppErr, Response};
@@ -12,22 +12,19 @@ use crate::AppState;
 
 #[derive(OpenApi)]
 #[openapi(
-    tags((name = "api::admin")),
-    paths(
-        get_general, update_general
-    ),
+    tags((name = "admin::general")),
+    paths(get_general, update_general),
     components(schemas(General, UpdateGeneralBody)),
-    servers((url = "/admin")),
+    servers((url = "/general")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
 
 #[utoipa::path(get, responses((status = 200, body = General)))]
-/// Get General
-#[get("/general/")]
+/// Get
+#[get("/")]
 async fn get_general(_: Admin, state: Data<AppState>) -> Response<General> {
-    let general = general_get(&state.sql).await?;
-    Ok(Json(general))
+    Ok(Json(state.general.lock()?.clone()))
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -46,12 +43,12 @@ struct UpdateGeneralBody {
     request_body = UpdateGeneralBody,
     responses((status = 200))
 )]
-/// Update General
-#[patch("/general/")]
+/// Update
+#[patch("/")]
 async fn update_general(
     _: Admin, body: Json<UpdateGeneralBody>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
-    let mut general = general_get(&state.sql).await?;
+    let mut general = state.general.lock()?;
 
     general.rub_irr = body.rub_irr;
     general.usd_irr = body.usd_irr;
@@ -67,5 +64,5 @@ async fn update_general(
 }
 
 pub fn router() -> Scope {
-    Scope::new("/admin").service(get_general).service(update_general)
+    Scope::new("/general").service(get_general).service(update_general)
 }

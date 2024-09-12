@@ -8,7 +8,7 @@ use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::config::config;
 use crate::docs::UpdatePaths;
-use crate::general::{general_get, general_set, PriceValue};
+use crate::general::{general_set, PriceValue};
 use crate::models::order::PhoneOrder;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, AppErrForbidden, Response};
@@ -33,7 +33,7 @@ type Prices = HashMap<String, (i64, i64)>;
 #[get("/prices/")]
 async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     let now = utils::now();
-    let mut general = general_get(&state.sql).await?;
+    let mut general = state.general.lock()?;
     let mut update_general = false;
 
     // if general.rub_irr_update + 86400 < now {
@@ -194,7 +194,7 @@ struct BuyQuery {
 async fn vendor_buy(
     user: User, q: Query<BuyQuery>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
-    let general = general_get(&state.sql).await?;
+    let general = state.general.lock()?;
     if general.disable_phone {
         return Err(AppErrBadRequest(
             "خرید شماره مجازی درحال حاظر دردسترس نمی باشد",

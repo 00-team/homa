@@ -1,6 +1,5 @@
 use crate::config::Config;
 use crate::docs::UpdatePaths;
-use crate::general::general_get;
 use crate::models::order::StarOrder;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, Response};
@@ -24,7 +23,7 @@ pub struct ApiDoc;
 /// Star Price
 #[get("/price/")]
 async fn star_price(_: User, state: Data<AppState>) -> Response<f64> {
-    let general = general_get(&state.sql).await?;
+    let general = state.general.lock()?;
     let tax = 1.0 + general.star_tax as f64 / 100.0;
     let price = Config::STAR_COST * tax * general.usd_irr as f64;
 
@@ -42,7 +41,7 @@ struct StarBuyBody {
 async fn buy(
     user: User, body: Json<StarBuyBody>, state: Data<AppState>,
 ) -> Response<StarOrder> {
-    let general = general_get(&state.sql).await?;
+    let general = state.general.lock()?;
     if general.disable_stars {
         return Err(AppErrBadRequest("خرید استار درحال حاظر دردسترس نمی باشد"));
     }

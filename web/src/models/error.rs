@@ -2,6 +2,7 @@ use std::{
     fmt,
     num::{ParseFloatError, ParseIntError},
     string::FromUtf8Error,
+    sync::PoisonError,
 };
 
 use actix_web::{
@@ -68,6 +69,14 @@ impl From<actix_web::error::Error> for AppErr {
     fn from(value: actix_web::error::Error) -> Self {
         let r = value.error_response();
         Self { status: r.status().as_u16(), message: value.to_string() }
+    }
+}
+
+impl<T> From<PoisonError<T>> for AppErr {
+    fn from(value: PoisonError<T>) -> Self {
+        let value = value.to_string();
+        log::error!("err poision: {}", value);
+        Self { status: 500, message: value }
     }
 }
 

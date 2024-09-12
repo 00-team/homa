@@ -5,7 +5,6 @@ use utoipa::{IntoParams, OpenApi};
 
 use crate::config::config;
 use crate::docs::UpdatePaths;
-use crate::general::general_get;
 use crate::models::message::Message;
 use crate::models::order::{PhoneOrder, StarOrder};
 use crate::models::transaction::{
@@ -55,7 +54,7 @@ struct ZarinpalResponse<T> {
 async fn deposit(
     user: User, q: Query<DepositQuery>, state: Data<AppState>,
 ) -> Redirect {
-    let general = if let Ok(g) = general_get(&state.sql).await {
+    let general = if let Ok(g) = state.general.lock() {
         g
     } else {
         return Redirect::to("/?error=database error");

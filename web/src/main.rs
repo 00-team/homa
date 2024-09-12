@@ -1,5 +1,3 @@
-use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt};
-
 use actix_files as af;
 use actix_web::{
     get,
@@ -9,9 +7,12 @@ use actix_web::{
     App, HttpResponse, HttpServer, Responder,
 };
 use config::Config;
+use general::{general_get, General};
 use sqlx::{Pool, Sqlite, SqlitePool};
+use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt, sync::Mutex};
 use utoipa::OpenApi;
 
+mod admin;
 mod api;
 mod config;
 mod docs;
@@ -22,6 +23,7 @@ mod vendor;
 
 pub struct AppState {
     pub sql: Pool<Sqlite>,
+    pub general: Mutex<General>,
 }
 
 #[get("/")]
@@ -34,20 +36,16 @@ async fn index() -> impl Responder {
 #[get("/openapi.json")]
 async fn openapi() -> impl Responder {
     let mut doc = docs::ApiDoc::openapi();
-    doc.merge(api::admin::ApiDoc::openapi());
     doc.merge(api::auth::ApiDoc::openapi());
     doc.merge(api::user::ApiDoc::openapi());
     doc.merge(api::vendor::ApiDoc::openapi());
     doc.merge(api::stars::ApiDoc::openapi());
 
-    // let mut admin_doc = ApiDoc::openapi();
-    // admin_doc.merge(admin::user::Doc::openapi());
-    // admin_doc.merge(admin::product::Doc::openapi());
-    //
-    // doc_add_prefix(&mut admin_doc, "/admin", false);
-    //
-    // doc.merge(admin_doc);
+    let mut admin_doc = docs::ApiDoc::openapi();
+    admin_doc.merge(admin::general::ApiDoc::openapi());
 
+    docs::doc_add_prefix(&mut admin_doc, "/admin", false);
+    doc.merge(admin_doc);
     docs::doc_add_prefix(&mut doc, "/api", false);
 
     HttpResponse::Ok().json(doc)
@@ -92,10 +90,15 @@ async fn main() -> std::io::Result<()> {
     .await
     .expect("sqlite pool connect failed");
 
+    let general = general_get(&pool).await.expect("general get failed");
+
     let server = HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::new("%s %r %Ts"))
-            .app_data(Data::new(AppState { sql: pool.clone() }))
+            .app_data(Data::new(AppState {
+                sql: pool.clone(),
+                general: Mutex::new(general.clone()),
+            }))
             .configure(config_static)
             .service(openapi)
             .service(rapidoc)
@@ -106,7 +109,7 @@ async fn main() -> std::io::Result<()> {
                     .service(api::user::router())
                     .service(api::vendor::router())
                     .service(api::stars::router())
-                    .service(api::admin::router()),
+                    .service(scope("/admin").service(admin::general::router())),
             )
     });
 
