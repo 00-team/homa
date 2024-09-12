@@ -95,18 +95,41 @@ pub async fn general_set(
 
     match result {
         Some(_) => {
-            sqlx::query! {
-                "update general set money_total = ?, money_gain = ?,
-                money_loss = ?, rub_irr = ?, rub_irr_update = ?, usd_irr = ?,
-                usd_irr_update = ?, star_tax = ?, phone_tax = ?, prices = ?, 
-                price_diff_total = ?, price_diff_count = ?, prices_update = ?,
-                disable_wallet = ?, disable_stars = ?, disable_phone = ?",
-                general.money_total, general.money_gain, general.money_loss,
-                general.rub_irr, general.rub_irr_update, general.usd_irr,
-                general.usd_irr_update, general.star_tax, general.phone_tax,
-                general.prices, general.price_diff_total, general.price_diff_count,
+            sqlx::query! {"
+                update general set
+                money_total = ?,
+                money_gain = ?,
+                money_loss = ?,
+                rub_irr = ?,
+                rub_irr_update = ?,
+                usd_irr = ?,
+                usd_irr_update = ?,
+                star_tax = ?,
+                phone_tax = ?,
+                prices = ?,
+                price_diff_total = ?,
+                price_diff_count = ?,
+                prices_update = ?,
+                disable_wallet = ?,
+                disable_stars = ?,
+                disable_phone = ?
+            ",
+                general.money_total,
+                general.money_gain,
+                general.money_loss,
+                general.rub_irr,
+                general.rub_irr_update,
+                general.usd_irr,
+                general.usd_irr_update,
+                general.star_tax,
+                general.phone_tax,
+                general.prices,
+                general.price_diff_total,
+                general.price_diff_count,
                 general.prices_update,
-                general.disable_wallet, general.disable_stars, general.disable_phone
+                general.disable_wallet,
+                general.disable_stars,
+                general.disable_phone
             }
             .execute(pool)
             .await?;
@@ -114,16 +137,42 @@ pub async fn general_set(
             Ok(())
         }
         None => {
-            sqlx::query! {
-                "insert into general(money_total, money_gain, money_loss, rub_irr,
-                rub_irr_update, star_tax, phone_tax, price_diff_total, prices,
-                price_diff_count, prices_update, disable_wallet, disable_stars, disable_phone)
-                values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                general.money_total, general.money_gain, general.money_loss,
-                general.rub_irr, general.rub_irr_update, general.star_tax,
-                general.phone_tax, general.price_diff_total, general.prices,
-                general.price_diff_count, general.prices_update,
-                general.disable_wallet, general.disable_stars, general.disable_phone
+            sqlx::query! {"
+                insert into general(
+                    money_total,
+                    money_gain,
+                    money_loss,
+                    rub_irr,
+                    rub_irr_update,
+                    usd_irr,
+                    usd_irr_update,
+                    star_tax,
+                    phone_tax,
+                    prices,
+                    price_diff_total,
+                    price_diff_count,
+                    prices_update,
+                    disable_wallet,
+                    disable_stars,
+                    disable_phone
+                ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ",
+                general.money_total,
+                general.money_gain,
+                general.money_loss,
+                general.rub_irr,
+                general.rub_irr_update,
+                general.usd_irr,
+                general.usd_irr_update,
+                general.star_tax,
+                general.phone_tax,
+                general.prices,
+                general.price_diff_total,
+                general.price_diff_count,
+                general.prices_update,
+                general.disable_wallet,
+                general.disable_stars,
+                general.disable_phone
             }
             .execute(pool)
             .await?;
