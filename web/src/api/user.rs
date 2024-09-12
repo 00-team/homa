@@ -62,7 +62,7 @@ async fn deposit(
     };
 
     if general.disable_wallet {
-        return Redirect::to("/?error=wallet is disabled");
+        return Redirect::to("/?error=کیف پول غیرفعال است");
     }
 
     let allowed = 50_000_000 - user.wallet;

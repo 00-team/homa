@@ -30,7 +30,7 @@
         border-radius: var(--radius);
         padding: 1rem;
         position: relative;
-        background-color: var(--slate-4);
+        background-color: var(--bg-2);
         cursor: pointer;
 
         ::-webkit-scrollbar {
@@ -71,7 +71,6 @@
             span {
                 text-transform: capitalize;
                 font-size: 18px;
-                font-weight: bold;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -91,7 +90,7 @@
                 svg {
                     height: 24px;
                     width: 24px;
-                    stroke: var(--slate-8);
+                    stroke: var(--fg-1);
                     transition: 200ms;
                 }
 
