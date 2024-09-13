@@ -1,5 +1,6 @@
 use actix_files as af;
 use actix_web::{
+    dev::ServiceRequest,
     get,
     http::header::ContentType,
     middleware,
@@ -9,7 +10,7 @@ use actix_web::{
 use config::Config;
 use general::{general_get, General};
 use sqlx::{Pool, Sqlite, SqlitePool};
-use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt, sync::Mutex};
+use std::{env, os::unix::fs::PermissionsExt, sync::Mutex};
 use utoipa::OpenApi;
 
 mod admin;
@@ -26,11 +27,11 @@ pub struct AppState {
     pub general: Mutex<General>,
 }
 
+const INDEX: &'static str = include_str!("../dist/index.html");
+
 #[get("/")]
-async fn index() -> impl Responder {
-    let result = read_to_string("dist/index.html")
-        .unwrap_or("err reading index.html".to_string());
-    HttpResponse::Ok().content_type(ContentType::html()).body(result)
+async fn index() -> HttpResponse {
+    HttpResponse::Ok().content_type(ContentType::html()).body(INDEX)
 }
 
 #[get("/openapi.json")]
@@ -115,6 +116,15 @@ async fn main() -> std::io::Result<()> {
                             .service(admin::stars::router()),
                     ),
             )
+            .default_service(|r: ServiceRequest| {
+                actix_utils::future::ok(
+                    r.into_response(
+                        HttpResponse::Ok()
+                            .content_type(ContentType::html())
+                            .body(INDEX),
+                    ),
+                )
+            })
     });
 
     let server = if cfg!(debug_assertions) {
