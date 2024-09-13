@@ -3,8 +3,8 @@ import { COUNTRY_LIST, Country } from 'shared/country-list'
 import { SERVICE_LIST, Service } from 'shared/service-list'
 import { Select } from 'comps'
 import { createStore } from 'solid-js/store'
-import { prices, self } from 'store'
-import { Match, Show, Switch, createMemo } from 'solid-js'
+import { prices, self, setPrices } from 'store'
+import { Match, Show, Switch, createMemo, onMount } from 'solid-js'
 import { RotateCcwIcon } from 'icons'
 import { useNavigate } from '@solidjs/router'
 import { TomanDpy, httpx } from 'shared'
@@ -33,6 +33,9 @@ export default () => {
         service: null,
     })
     const nav = useNavigate()
+    onMount(() => {
+        setPrices({ update: performance.now() })
+    })
 
     function filter_country(country: Country) {
         if (!prices.update) return false

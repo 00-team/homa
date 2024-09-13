@@ -169,12 +169,6 @@ async fn sms_callback(
     .execute(&state.sql)
     .await?;
 
-    let desc = format! {
-        "id: {}\nservice: {}\ntext: `{}`\ncode: `{}`\ncountry: {}\nreceivedAt: {}",
-        data.activation_id, data.service, data.text, data.code, data.country, data.received_at
-    };
-
-    utils::send_webhook("Sms", &desc, 13868854).await;
     Ok(HttpResponse::Ok().finish())
 }
 
@@ -194,102 +188,99 @@ struct BuyQuery {
 async fn vendor_buy(
     user: User, q: Query<BuyQuery>, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
-    let general = state.general.lock()?;
+    let mut general = state.general.lock()?;
     if general.disable_phone {
         return Err(AppErrBadRequest(
             "خرید شماره مجازی درحال حاظر دردسترس نمی باشد",
         ));
     }
 
-    return Ok(HttpResponse::Ok().finish());
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct Answer {
+        activation_id: String,
+        phone_number: String,
+        activation_cost: String,
+        activation_time: String,
+        activation_operator: String,
+    }
 
-    // #[derive(Deserialize, Debug)]
-    // #[serde(rename_all = "camelCase")]
-    // struct Answer {
-    //     activation_id: String,
-    //     phone_number: String,
-    //     activation_cost: String,
-    //     activation_time: String,
-    //     activation_operator: String,
+    let now = utils::now();
+    let key = format!("{}-{}", q.country, q.service);
+    let rub_irr = general.rub_irr as f64;
+    let phone_tax = general.phone_tax as f64;
+    let price =
+        general.prices.get(&key).ok_or(AppErrBadRequest("not found"))?;
+
+    // if general.rub_irr_update + 86400 < now {
+    //     general.rub_irr_update = now;
+    //     general.rub_irr = rub_irr_price().await?;
     // }
-    //
-    // let now = utils::now();
-    // let key = format!("{}-{}", q.country, q.service);
-    // let mut general = general_get(&state.sql).await?;
-    // let price = general.prices.get_mut(&key);
-    // if price.is_none() {
-    //     return Err(AppErrBadRequest("not found"));
-    // }
-    // let price = price.unwrap();
-    //
-    // // if general.rub_irr_update + 86400 < now {
-    // //     general.rub_irr_update = now;
-    // //     general.rub_irr = rub_irr_price().await?;
-    // // }
-    //
-    // let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
-    //     price.cost_buy
-    // } else {
-    //     price.cost_api
-    // };
-    // let tax = 1.0 + general.phone_tax as f64 / 100.0;
-    // let cost_irr = cost_rub * general.rub_irr as f64 * tax;
-    // let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
-    //
-    // if user.wallet < cost_irr {
-    //     return Err(AppErrBadRequest("not enough in the wallet"));
-    // }
-    //
-    // let wallet = user.wallet - cost_irr;
-    // sqlx::query! {
-    //     "update users set wallet = ? where id = ?",
-    //     wallet, user.id
-    // }
-    // .execute(&state.sql)
-    // .await?;
-    //
-    // let args = vec![
-    //     ("service", q.service.as_str()),
-    //     ("country", q.country.as_str()),
-    //     // ("forward", "$forward"),
-    //     // ("operator", "$operator"),
-    //     // ("ref", "$ref"),
-    //     // ("phoneException", "$phoneException"),
-    //     // ("maxPrice", "1"),
-    //     // ("verification", "$verification"),
-    // ];
-    // let result = vendor::request("getNumberV2", args).await?;
-    // log::info!("result: {:#?}", result);
-    // let result = serde_json::from_value::<Answer>(result)?;
-    // let new_cost_rub: f64 = result.activation_cost.parse()?;
-    //
-    // let new_cost_irr = new_cost_rub * general.rub_irr as f64;
-    // let profit = cost_irr - new_cost_irr as i64;
-    //
-    // if profit < 0 {
-    //     general.money_loss += profit * -1;
-    // } else {
-    //     general.money_gain += profit;
-    // }
-    //
-    // price.cost_buy = new_cost_rub;
-    // price.timestamp = now;
-    //
-    // general_set(&state.sql, &general).await?;
-    //
-    // log::info!("{:#?}", result);
-    //
-    // sqlx::query! {
-    //     "insert into orders(user, activation_id, phone,
-    //     cost, country, operator, datetime, service)
-    //     values(?,?,?,?,?,?,?,?)",
-    //     user.id, result.activation_id, result.phone_number, cost_irr, q.country,
-    //     result.activation_operator, result.activation_time, q.service
-    // }
-    // .execute(&state.sql)
-    // .await?;
-    //
-    // Ok(Json("ok".to_string()))
+
+    let cost_rub = if price.cost_buy > 0.0 && price.timestamp + 864000 > now {
+        price.cost_buy
+    } else {
+        price.cost_api
+    };
+    let tax = 1.0 + phone_tax / 100.0;
+    let cost_irr = cost_rub * rub_irr * tax;
+    let cost_irr = ((cost_irr / 1e4).ceil() * 1e4).max(15e4) as i64;
+
+    if user.wallet < cost_irr {
+        return Err(AppErrBadRequest("not enough in the wallet"));
+    }
+
+    let wallet = user.wallet - cost_irr;
+    sqlx::query! {
+        "update users set wallet = ? where id = ?",
+        wallet, user.id
+    }
+    .execute(&state.sql)
+    .await?;
+
+    let args = vec![
+        ("service", q.service.as_str()),
+        ("country", q.country.as_str()),
+        // ("forward", "$forward"),
+        // ("operator", "$operator"),
+        // ("ref", "$ref"),
+        // ("phoneException", "$phoneException"),
+        // ("maxPrice", "1"),
+        // ("verification", "$verification"),
+    ];
+    let result = vendor::request("getNumberV2", args).await?;
+    log::info!("result: {:#?}", result);
+    let result = serde_json::from_value::<Answer>(result)?;
+    let new_cost_rub: f64 = result.activation_cost.parse()?;
+
+    let new_cost_irr = new_cost_rub * rub_irr;
+    let profit = cost_irr - new_cost_irr as i64;
+
+    if profit < 0 {
+        general.money_loss += profit * -1;
+    } else {
+        general.money_gain += profit;
+    }
+
+    let price = general.prices.get_mut(&key).unwrap();
+    price.cost_buy = new_cost_rub;
+    price.timestamp = now;
+
+    general_set(&state.sql, &general).await?;
+
+    log::info!("{:#?}", result);
+
+    sqlx::query! {
+        "insert into phone_orders(user, activation_id, phone,
+        cost, country, operator, datetime, service)
+        values(?,?,?,?,?,?,?,?)",
+        user.id, result.activation_id, result.phone_number, cost_irr, q.country,
+        result.activation_operator, result.activation_time, q.service
+    }
+    .execute(&state.sql)
+    .await?;
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 pub fn router() -> Scope {

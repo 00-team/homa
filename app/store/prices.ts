@@ -54,9 +54,9 @@ createRoot(() => {
                     },
                 })
             },
-            { defer: false }
+            { defer: true }
         )
     )
 })
 
-export { prices }
+export { prices, setPrices }

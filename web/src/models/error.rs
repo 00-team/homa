@@ -32,9 +32,9 @@ impl AppErr {
         }
     }
 
-    // pub fn default() -> Self {
-    //     Self { status: 500, message: "Internal Server Error".to_string() }
-    // }
+    pub fn default() -> Self {
+        Self { status: 500, message: "Internal Server Error".to_string() }
+    }
 }
 
 impl fmt::Display for AppErr {

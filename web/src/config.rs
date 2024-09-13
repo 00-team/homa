@@ -5,7 +5,6 @@ use std::{collections::HashSet, env, sync::OnceLock};
 pub struct Config {
     pub bot_token: String,
     pub bot_token_hash: [u8; 32],
-    pub discord_webhook: String,
     pub sms_cb_pass: String,
     // pub navasan_apikey: String,
     pub zarinpal: String,
@@ -34,7 +33,6 @@ pub fn config() -> &'static Config {
             admins,
             bot_token_hash: Sha256::digest(&bot_token).into(),
             bot_token,
-            discord_webhook: env::var("DISCORD_WEBHOOK").expect("env"),
             sms_cb_pass: env::var("SMS_CB_PASS").expect("env"),
             // navasan_apikey: env::var("NAVASAN_APIKEY").expect("env"),
             zarinpal: env::var("ZARINPAL").expect("env"),

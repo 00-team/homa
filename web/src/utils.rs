@@ -31,33 +31,6 @@ pub async fn save_photo(url: &str, id: i64) -> Result<(), AppErr> {
     Ok(())
 }
 
-pub async fn send_webhook(title: &str, desc: &str, color: u32) {
-    let client = awc::Client::new();
-    let request = client.post(&config().discord_webhook);
-
-    #[derive(Serialize, Debug)]
-    struct Embed {
-        title: String,
-        description: String,
-        color: u32,
-    }
-
-    #[derive(Serialize, Debug)]
-    struct Data {
-        embeds: [Embed; 1],
-    }
-
-    let _ = request
-        .send_json(&Data {
-            embeds: [Embed {
-                title: title.to_string(),
-                description: desc.to_string(),
-                color,
-            }],
-        })
-        .await;
-}
-
 pub async fn send_message(chat_id: i64, text: &str) {
     let client = awc::Client::new();
     let url = format!(
