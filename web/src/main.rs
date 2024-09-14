@@ -10,7 +10,7 @@ use actix_web::{
 use config::Config;
 use general::{general_get, General};
 use sqlx::{Pool, Sqlite, SqlitePool};
-use std::{env, os::unix::fs::PermissionsExt, sync::Mutex};
+use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt, sync::Mutex};
 use utoipa::OpenApi;
 
 mod admin;
@@ -27,11 +27,11 @@ pub struct AppState {
     pub general: Mutex<General>,
 }
 
-const INDEX: &'static str = include_str!("../dist/index.html");
-
 #[get("/")]
 async fn index() -> HttpResponse {
-    HttpResponse::Ok().content_type(ContentType::html()).body(INDEX)
+    HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(read_to_string("dist/index.html").expect("no index.html"))
 }
 
 #[get("/openapi.json")]
@@ -121,7 +121,10 @@ async fn main() -> std::io::Result<()> {
                     r.into_response(
                         HttpResponse::Ok()
                             .content_type(ContentType::html())
-                            .body(INDEX),
+                            .body(
+                                read_to_string("dist/index.html")
+                                    .expect("no index.html"),
+                            ),
                     ),
                 )
             })
