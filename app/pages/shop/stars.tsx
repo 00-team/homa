@@ -5,6 +5,7 @@ import { onMount } from 'solid-js'
 import { TelegramStarIcon } from 'icons'
 import { self } from 'store'
 import { useNavigate } from '@solidjs/router'
+import { addAlert } from 'comps/alert'
 
 export default () => {
     type State = {
@@ -29,6 +30,15 @@ export default () => {
     }
 
     function buy(amount: number) {
+        if (!self.user.username) {
+            addAlert({
+                type: 'error',
+                timeout: 7,
+                content: '',
+                subject: 'بدون یوزرنیم خرید استار امکان پذیر نمی باشد',
+            })
+            return
+        }
         let price = amount * state.price
         if (price > self.user.wallet) {
             location.replace(
