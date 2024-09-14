@@ -57,9 +57,22 @@ const Root = () => {
                         />
                         <Show when={self.user.admin}>
                             <Route
-                                path='/admin'
+                                path='/admin/'
                                 component={lazy(() => import('admin'))}
-                            />
+                            >
+                                <Route
+                                    path='/'
+                                    component={lazy(
+                                        () => import('admin/general')
+                                    )}
+                                />
+                                <Route
+                                    path='/stars/'
+                                    component={lazy(
+                                        () => import('admin/stars')
+                                    )}
+                                />
+                            </Route>
                         </Show>
                     </Route>
                     <Route
