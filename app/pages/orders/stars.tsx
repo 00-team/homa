@@ -1,13 +1,7 @@
 import { Component, createEffect } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { TomanDpy, fmt_timestamp, httpx } from 'shared'
-import { OrderStatus, StarOrder } from 'models'
-
-const STATUS_TABLE: { [k in OrderStatus]: string } = {
-    done: 'تکمیل',
-    wating: 'درحال تکمیل',
-    refunded: 'بازپرداخت شد',
-}
+import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
+import { StarOrder } from 'models'
 
 type Props = {
     page: number

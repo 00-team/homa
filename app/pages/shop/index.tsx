@@ -13,12 +13,12 @@ export default () => {
             <div class='shop-card'>
                 <img src='/static/vnum.png' />
                 <h2>شماره مجازی</h2>
-                <A href='/shop/virtual-number/'>خرید</A>
+                <A href='#'>به زودی</A>
             </div>
             <div class='shop-card'>
                 <img src='/static/telegram-premium.png' />
                 <h2>تلگرام پریمیوم</h2>
-                <A href='/shop/premium/'>خرید</A>
+                <A href='#'>به زودی</A>
             </div>
         </div>
     )

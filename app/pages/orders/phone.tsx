@@ -1,15 +1,9 @@
-import { CountryDpy, ServiceDpy } from 'shared'
+import { CountryDpy, STATUS_TABLE, ServiceDpy } from 'shared'
 import { Component, createEffect } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { httpx } from 'shared'
-import { OrderStatus, PhoneOrder } from 'models'
+import { PhoneOrder } from 'models'
 import { COUNTRY_LIST } from 'shared/country-list'
-
-const STATUS_TABLE: { [k in OrderStatus]: string } = {
-    done: 'تکمیل',
-    wating: 'درحال تکمیل',
-    refunded: 'بازپرداخت شد',
-}
 
 type Props = {
     page: number
