@@ -108,7 +108,7 @@ export default () => {
             },
             onLoad(x) {
                 if (x.status == 200) {
-                    nav('/orders/')
+                    nav('/orders/phone/')
                     return
                 }
             },

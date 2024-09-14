@@ -40,7 +40,7 @@ const Root = () => {
                             component={lazy(() => import('pages/orders'))}
                         />
                         <Route
-                            path='/orders/:page'
+                            path='/orders/:tab'
                             component={lazy(() => import('pages/orders'))}
                         />
                         <Route
