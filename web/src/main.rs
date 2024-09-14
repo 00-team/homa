@@ -44,6 +44,7 @@ async fn openapi() -> impl Responder {
     let mut admin_doc = docs::ApiDoc::openapi();
     admin_doc.merge(admin::general::ApiDoc::openapi());
     admin_doc.merge(admin::stars::ApiDoc::openapi());
+    admin_doc.merge(admin::users::ApiDoc::openapi());
     docs::doc_add_prefix(&mut admin_doc, "/admin", false);
 
     let mut doc = docs::ApiDoc::openapi();
@@ -121,7 +122,8 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         scope("/admin")
                             .service(admin::general::router())
-                            .service(admin::stars::router()),
+                            .service(admin::stars::router())
+                            .service(admin::users::router()),
                     ),
             )
             .default_service(|r: ServiceRequest| {
