@@ -8,9 +8,12 @@ use actix_web::{
     App, HttpResponse, HttpServer, Responder,
 };
 use config::Config;
-use general::{general_get, General};
+use general::{general_get, General, PriceValue};
 use sqlx::{Pool, Sqlite, SqlitePool};
-use std::{env, fs::read_to_string, os::unix::fs::PermissionsExt, sync::Mutex};
+use std::{
+    collections::HashMap, env, fs::read_to_string,
+    os::unix::fs::PermissionsExt, sync::Mutex,
+};
 use utoipa::OpenApi;
 
 mod admin;
@@ -25,6 +28,8 @@ mod vendor;
 pub struct AppState {
     pub sql: Pool<Sqlite>,
     pub general: Mutex<General>,
+    pub prices: Mutex<HashMap<String, PriceValue>>,
+    pub prices_update: Mutex<i64>,
 }
 
 #[get("/")]
@@ -92,14 +97,17 @@ async fn main() -> std::io::Result<()> {
     .expect("sqlite pool connect failed");
 
     let general = general_get(&pool).await.expect("general get failed");
+    let data = Data::new(AppState {
+        sql: pool,
+        general: Mutex::new(general),
+        prices: Default::default(),
+        prices_update: Mutex::new(0),
+    });
 
     let server = HttpServer::new(move || {
         App::new()
             .wrap(middleware::Logger::new("%s %r %Ts"))
-            .app_data(Data::new(AppState {
-                sql: pool.clone(),
-                general: Mutex::new(general.clone()),
-            }))
+            .app_data(data.clone())
             .configure(config_static)
             .service(openapi)
             .service(rapidoc)

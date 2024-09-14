@@ -37,8 +37,6 @@ create table if not exists general (
     phone_tax integer not null default 0,
     price_diff_total integer not null default 0,
     price_diff_count integer not null default 0,
-    prices text not null default '{}',
-    prices_update integer not null default 0,
     disable_wallet boolean not null default false,
     disable_stars boolean not null default false,
     disable_phone boolean not null default false

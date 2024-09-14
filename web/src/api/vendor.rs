@@ -19,7 +19,7 @@ use crate::{utils, AppState};
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "api::vendor")),
-    paths(prices, sms_callback, vendor_buy),
+    paths(prices_get, sms_callback, vendor_buy),
     components(schemas(SmsData)),
     servers((url = "/vendor")),
     modifiers(&UpdatePaths)
@@ -31,10 +31,12 @@ type Prices = HashMap<String, (i64, i64)>;
 #[utoipa::path(get, responses((status = 200)))]
 /// Prices
 #[get("/prices/")]
-async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
+async fn prices_get(_: User, state: Data<AppState>) -> Response<Prices> {
     let now = utils::now();
-    let mut general = state.general.lock()?;
+    let general = state.general.lock()?;
     let mut update_general = false;
+    let mut prices = state.prices.lock()?;
+    let mut prices_update = state.prices_update.lock()?;
 
     // if general.rub_irr_update + 86400 < now {
     //     update_general = true;
@@ -42,9 +44,9 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
     //     general.rub_irr = rub_irr_price().await?;
     // }
 
-    if general.prices_update + 600 < now {
+    if *prices_update + 600 < now {
         update_general = true;
-        general.prices_update = now;
+        *prices_update = now;
 
         let avg_diff =
             if general.price_diff_count != 0 && general.price_diff_total != 0 {
@@ -71,11 +73,11 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
                         }
 
                         let key = format!("{country}-{service}");
-                        if let Some(p) = general.prices.get_mut(&key) {
+                        if let Some(p) = prices.get_mut(&key) {
                             p.count = count;
                             p.cost_api = cost;
                         } else {
-                            general.prices.insert(
+                            prices.insert(
                                 key,
                                 PriceValue {
                                     cost_api: cost,
@@ -96,8 +98,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
 
     let tax = 1.0 + general.phone_tax as f64 / 100.0;
 
-    let prices: Prices = general
-        .prices
+    let result: Prices = prices
         .iter()
         .map(|(k, v)| {
             let cost = if v.cost_buy > 0.0 && v.timestamp + 864000 > now {
@@ -112,7 +113,7 @@ async fn prices(_: User, state: Data<AppState>) -> Response<Prices> {
         })
         .collect();
 
-    Ok(Json(prices))
+    Ok(Json(result))
 }
 
 #[derive(Deserialize, ToSchema, Debug)]
@@ -205,11 +206,12 @@ async fn vendor_buy(
         activation_operator: String,
     }
 
+    let mut prices = state.prices.lock()?;
     let now = utils::now();
     let key = format!("{}-{}", q.country, q.service);
     let rub_irr = general.rub_irr as f64;
     let phone_tax = general.phone_tax as f64;
-    let price = if let Some(p) = general.prices.get(&key) {
+    let price = if let Some(p) = prices.get(&key) {
         p
     } else {
         return Err(AppErrBadRequest("price not found"));
@@ -265,7 +267,7 @@ async fn vendor_buy(
         general.money_gain += profit;
     }
 
-    let price = general.prices.get_mut(&key).unwrap();
+    let price = prices.get_mut(&key).unwrap();
     price.cost_buy = new_cost_rub;
     price.timestamp = now;
 
@@ -288,7 +290,7 @@ async fn vendor_buy(
 
 pub fn router() -> Scope {
     Scope::new("/vendor")
-        .service(prices)
+        .service(prices_get)
         .service(sms_callback)
         .service(vendor_buy)
 }

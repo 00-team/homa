@@ -1,6 +1,6 @@
 import { createStore, produce } from 'solid-js/store'
 import './style/index.scss'
-import { httpx } from 'shared'
+import { TomanDpy, httpx } from 'shared'
 import { Component, Show, createMemo, onMount } from 'solid-js'
 import { GENERAL_DEFAULT, GeneralModel } from 'models'
 
@@ -24,6 +24,7 @@ export default () => {
             url: '/api/admin/general/',
             method: 'GET',
             onLoad(x) {
+                setState({ loading: false })
                 if (x.status != 200) return
                 setState({ G: x.response, loading: false })
             },
@@ -122,7 +123,9 @@ export default () => {
             </Show>
             <div class='info'>
                 <span>سود: </span>
-                <span>{state.G.money_gain}</span>
+                <span>
+                    <TomanDpy irr={state.G.money_gain} />
+                </span>
                 <span>ضرر: </span>
                 <span>{state.G.money_loss}</span>
                 <span>مجموع: </span>
