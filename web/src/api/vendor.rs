@@ -209,8 +209,11 @@ async fn vendor_buy(
     let key = format!("{}-{}", q.country, q.service);
     let rub_irr = general.rub_irr as f64;
     let phone_tax = general.phone_tax as f64;
-    let price =
-        general.prices.get(&key).ok_or(AppErrBadRequest("not found"))?;
+    let price = if let Some(p) = general.prices.get(&key) {
+        p
+    } else {
+        return Err(AppErrBadRequest("price not found"));
+    };
 
     // if general.rub_irr_update + 86400 < now {
     //     general.rub_irr_update = now;

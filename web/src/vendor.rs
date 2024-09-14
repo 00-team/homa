@@ -3,7 +3,7 @@ use std::{collections::HashMap, env, str::FromStr};
 use lazy_static::lazy_static;
 use serde_json::{json, Number, Value};
 
-use crate::{config::config, models::AppErr};
+use crate::models::AppErr;
 
 lazy_static! {
     static ref BASE_URL: String = {
