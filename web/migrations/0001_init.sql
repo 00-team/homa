@@ -63,7 +63,8 @@ create table if not exists star_orders (
     status integer not null default 0,
     amount integer not null,
     cost integer not null,
-    timestamp integer not null
+    timestamp integer not null,
+    hash text
 );
 create index if not exists star_orders_user on star_orders(user);
 

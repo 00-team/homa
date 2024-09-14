@@ -61,6 +61,7 @@ export type StarOrder = {
     amount: number
     cost: number
     timestamp: number
+    hash: string | null
 }
 
 export type GeneralModel = {

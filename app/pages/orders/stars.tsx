@@ -1,4 +1,4 @@
-import { Component, createEffect } from 'solid-js'
+import { Component, Show, createEffect } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
 import { StarOrder } from 'models'
@@ -51,18 +51,20 @@ export const Stars: Component<Props> = P => {
                     </div>
                     <div class='row'>
                         <span class='key'>مقدار:</span>
-                        <span class='value'>
-                            {o.amount}
-                            استار
-                        </span>
+                        <span class='value'>{o.amount} استار</span>
                     </div>
                     <div class='row'>
                         <span class='key'>قیمت:</span>
                         <span class='value'>
-                            <TomanDpy irr={o.cost} />
-                            تومان
+                            <TomanDpy irr={o.cost} /> تومان
                         </span>
                     </div>
+                    <Show when={o.status == 'done'}>
+                        <div class='row'>
+                            <span class='key'>هش:</span>
+                            <span class='value'>{o.hash}</span>
+                        </div>
+                    </Show>
                 </div>
             ))}
         </div>

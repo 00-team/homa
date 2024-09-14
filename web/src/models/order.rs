@@ -67,6 +67,7 @@ pub struct StarOrder {
     pub amount: i64,
     pub cost: i64,
     pub timestamp: i64,
+    pub hash: Option<String>,
 }
 
 impl FromRequest for StarOrder {
