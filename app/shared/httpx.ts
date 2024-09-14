@@ -94,21 +94,14 @@ function httpx(P: HttpxProps) {
             if (P.exclude_status && P.exclude_status.includes(this.status))
                 return
 
-            if (this.status == 200 && type == 'json') {
-                if (this.response && this.response.message) {
-                    addAlert({
-                        type: 'success',
-                        timeout: 5,
-                        ...this.response.message,
-                    })
-                }
-            } else if (this.response && this.response.code) {
-                addAlert({
-                    type: 'error',
-                    timeout: 10,
-                    ...this.response,
-                })
-            }
+            if (this.status == 200) return
+
+            addAlert({
+                type: 'error',
+                timeout: 10,
+                subject: this.response.message,
+                content: '',
+            })
         }
     }
     http.onreadystatechange = function () {

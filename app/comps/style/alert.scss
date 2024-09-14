@@ -71,9 +71,10 @@
             span {
                 text-transform: capitalize;
                 font-size: 18px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                text-align: center;
+                /* white-space: nowrap; */
+                /* overflow: hidden; */
+                /* text-overflow: ellipsis; */
             }
 
             button {
