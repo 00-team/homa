@@ -3,6 +3,7 @@ import { Component, createEffect } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { httpx } from 'shared'
 import { OrderStatus, PhoneOrder } from 'models'
+import { COUNTRY_LIST } from 'shared/country-list'
 
 const STATUS_TABLE: { [k in OrderStatus]: string } = {
     done: 'تکمیل',
@@ -39,6 +40,10 @@ export const Phones: Component<Props> = P => {
             },
         })
     }
+    function cc(idx: string): number {
+        let country = COUNTRY_LIST.find(c => c[0].toString() == idx)
+        return country[1]
+    }
 
     return (
         <div class='order-list'>
@@ -57,6 +62,13 @@ export const Phones: Component<Props> = P => {
                         <span class='key'>کشور:</span>
                         <span class='value'>
                             <CountryDpy d={o.country} />
+                        </span>
+                    </div>
+
+                    <div class='row'>
+                        <span class='key'>شماره:</span>
+                        <span class='value'>
+                            +{cc(o.country)} {o.phone}
                         </span>
                     </div>
 
