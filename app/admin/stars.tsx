@@ -1,8 +1,11 @@
-import { TelegramStarIcon } from 'icons'
+import { Confact } from 'comps/confact'
+import { BanIcon, CircleCheckIcon, TelegramStarIcon } from 'icons'
 import { OrderStatus, StarOrder } from 'models'
 import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
-import { Show, onMount } from 'solid-js'
+import { Component, Match, Switch, onMount } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
+
+type Usernames = { [id: string]: string | -1 }
 
 export default () => {
     type State = {
@@ -10,14 +13,14 @@ export default () => {
         loading: boolean
         page: number
         status: OrderStatus
-        users: { [id: string]: string }
+        usernames: Usernames
     }
     const [state, setState] = createStore<State>({
         orders: [],
         loading: false,
         page: 0,
         status: 'wating',
-        users: {},
+        usernames: {},
     })
 
     onMount(load)
@@ -47,7 +50,11 @@ export default () => {
             onLoad(x) {
                 setState(
                     produce(s => {
-                        s.users[id.toString()] = x.response
+                        if (x.response != 200) {
+                            s.usernames[id.toString()] = -1
+                        } else {
+                            s.usernames[id.toString()] = x.response || -1
+                        }
                     })
                 )
             },
@@ -57,39 +64,110 @@ export default () => {
     return (
         <div class='admin admin-stars'>
             <div class='order-list'>
-                {state.orders.map(o => (
-                    <div class='order'>
-                        <span>ایدی:</span>
-                        <span>{o.id}</span>
-                        <span>وضعیت:</span>
-                        <span>{STATUS_TABLE[o.status]}</span>
-                        <span>قیمت:</span>
-                        <span>
-                            <TomanDpy irr={o.cost} /> تومان
-                        </span>
-                        <span>تعداد:</span>
-                        <span class='amount'>
-                            {o.amount}
-                            <TelegramStarIcon />
-                        </span>
-                        <span>تاریخ:</span>
-                        <span class='n'>{fmt_timestamp(o.timestamp)}</span>
-                        <span>کاربر:</span>
-                        <Show
-                            when={state.users[o.user]}
-                            fallback={
-                                <button
-                                    class='styled'
-                                    onClick={() => get_username(o.user)}
-                                >
-                                    {o.user}
-                                </button>
-                            }
-                        >
-                            <span>@{state.users[o.user]}</span>
-                        </Show>
-                    </div>
+                {state.orders.map((o, idx) => (
+                    <Order
+                        o={o}
+                        username={state.usernames[o.user]}
+                        get_username={() => get_username(o.user)}
+                        update={no =>
+                            setState(
+                                produce(s => {
+                                    s.orders[idx] = no
+                                })
+                            )
+                        }
+                    />
                 ))}
+            </div>
+        </div>
+    )
+}
+
+type OrderProps = {
+    o: StarOrder
+    username: string | -1
+    update(order: StarOrder): void
+    get_username(): void
+}
+const Order: Component<OrderProps> = P => {
+    type State = {
+        hash: string
+    }
+    const [state, setState] = createStore<State>({
+        hash: '',
+    })
+
+    type UOA = { hash: string; status: 'done' } | { status: 'refunded' }
+    function update_order(args: UOA) {
+        httpx({
+            url: `/api/admin/stars/${P.o.id}/`,
+            method: 'PATCH',
+            json: args,
+            onLoad(x) {
+                if (x.response != 200) return
+                P.update(x.response)
+            },
+        })
+    }
+
+    return (
+        <div class='order'>
+            <div class='info'>
+                <span>ایدی:</span>
+                <span>{P.o.id}</span>
+                <span>وضعیت:</span>
+                <span>{STATUS_TABLE[P.o.status]}</span>
+                <span>قیمت:</span>
+                <span>
+                    <TomanDpy irr={P.o.cost} /> تومان
+                </span>
+                <span>تعداد:</span>
+                <span class='amount'>
+                    {P.o.amount}
+                    <TelegramStarIcon />
+                </span>
+                <span>تاریخ:</span>
+                <span class='n'>{fmt_timestamp(P.o.timestamp)}</span>
+                <span>کاربر:</span>
+                <Switch>
+                    <Match when={!P.username}>
+                        <button class='styled n' onClick={P.get_username}>
+                            {P.o.user}
+                        </button>
+                    </Match>
+                    <Match when={P.username == -1}>
+                        <span>❌</span>
+                    </Match>
+                    <Match when={P.username}>
+                        <span class='n'>@{P.username}</span>
+                    </Match>
+                </Switch>
+                <span>هش:</span>
+                <textarea
+                    class='styled n'
+                    rows={2}
+                    value={state.hash}
+                    onInput={e => {
+                        setState({ hash: e.currentTarget.value })
+                    }}
+                />
+            </div>
+            <div class='actions'>
+                <Confact
+                    icon={BanIcon}
+                    color='var(--red)'
+                    timer_ms={2000}
+                    onAct={() => update_order({ status: 'refunded' })}
+                />
+                <Confact
+                    icon={CircleCheckIcon}
+                    disabled={!state.hash}
+                    timer_ms={2000}
+                    color='var(--green)'
+                    onAct={() =>
+                        update_order({ status: 'done', hash: state.hash })
+                    }
+                />
             </div>
         </div>
     )
