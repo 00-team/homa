@@ -74,12 +74,16 @@ export default () => {
             <div class='inputs'>
                 <span>سود: </span>
                 <span>
-                    <TomanDpy irr={state.G.money_gain} />
+                    <TomanDpy irr={state.G.money_gain} /> تومان
                 </span>
                 <span>ضرر: </span>
-                <span>{state.G.money_loss}</span>
+                <span>
+                    <TomanDpy irr={state.G.money_loss} /> تومان
+                </span>
                 <span>مجموع: </span>
-                <span>{state.G.money_total}</span>
+                <span>
+                    <TomanDpy irr={state.G.money_total} /> تومان
+                </span>
                 <span>میانگین تغییر قیمت: </span>
                 <span>{avg_diff()}</span>
                 <NumberInput
