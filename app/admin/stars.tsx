@@ -1,8 +1,15 @@
+import { useSearchParams } from '@solidjs/router'
 import { Confact } from 'comps/confact'
-import { BanIcon, CircleCheckIcon, TelegramStarIcon } from 'icons'
+import {
+    BanIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    CircleCheckIcon,
+    TelegramStarIcon,
+} from 'icons'
 import { OrderStatus, StarOrder } from 'models'
 import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
-import { Component, Match, Switch, onMount } from 'solid-js'
+import { Component, Match, Switch, createEffect, onMount } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 
 type Usernames = { [id: string]: string | -1 }
@@ -22,22 +29,35 @@ export default () => {
         status: 'wating',
         usernames: {},
     })
+    const [sp, setSp] = useSearchParams()
 
-    onMount(load)
+    onMount(() => {
+        let page = parseInt(sp.page || '0') || 0
+        if (page != state.page) {
+            setState({ page: page })
+        } else {
+            load(page)
+        }
+    })
+    createEffect(() => {
+        setSp({ page: state.page })
+        load(state.page)
+    })
 
-    function load() {
+    function load(page: number) {
         setState({ loading: true })
         httpx({
             url: '/api/admin/stars/',
             method: 'GET',
             params: {
-                page: state.page,
+                page,
                 status: state.status,
             },
             onLoad(x) {
                 setState({ loading: false })
                 if (x.status != 200) return
                 setState({ orders: x.response })
+                document.querySelector('.order-list').scrollTo(0, 0)
             },
         })
     }
@@ -78,6 +98,22 @@ export default () => {
                         }
                     />
                 ))}
+            </div>
+            <div class='pagination'>
+                <button
+                    disabled={state.page < 1}
+                    class='styled'
+                    onClick={() => setState(s => ({ page: s.page - 1 }))}
+                >
+                    <ChevronLeftIcon />
+                </button>
+                <button
+                    disabled={state.orders.length < 32}
+                    class='styled'
+                    onClick={() => setState(s => ({ page: s.page + 1 }))}
+                >
+                    <ChevronRightIcon />
+                </button>
             </div>
         </div>
     )
