@@ -9,7 +9,7 @@ import {
 } from 'icons'
 import { OrderStatus, StarOrder } from 'models'
 import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
-import { Component, Match, Switch, createEffect, onMount } from 'solid-js'
+import { Component, Match, Show, Switch, createEffect, onMount } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 
 type Usernames = { [id: string]: string | -1 }
@@ -83,6 +83,16 @@ export default () => {
 
     return (
         <div class='admin admin-stars'>
+            <div class='order-status'>
+                {Object.entries(STATUS_TABLE).map(([os, label]) => (
+                    <button
+                        onClick={() => setState({ status: os as OrderStatus })}
+                        classList={{ active: state.status == os }}
+                    >
+                        {label}
+                    </button>
+                ))}
+            </div>
             <div class='order-list'>
                 {state.orders.map((o, idx) => (
                     <Order
@@ -140,14 +150,14 @@ const Order: Component<OrderProps> = P => {
             method: 'PATCH',
             json: args,
             onLoad(x) {
-                if (x.response != 200) return
+                if (x.status != 200) return
                 P.update(x.response)
             },
         })
     }
 
     return (
-        <div class='order'>
+        <div class='order' classList={{ [P.o.status]: true }}>
             <div class='info'>
                 <span>ایدی:</span>
                 <span>{P.o.id}</span>
@@ -178,33 +188,42 @@ const Order: Component<OrderProps> = P => {
                         <span class='n'>@{P.username}</span>
                     </Match>
                 </Switch>
-                <span>هش:</span>
-                <textarea
-                    class='styled n'
-                    rows={2}
-                    value={state.hash}
-                    onInput={e => {
-                        setState({ hash: e.currentTarget.value })
-                    }}
-                />
+                <Show when={P.o.status != 'refunded'}>
+                    <span>هش:</span>
+                    <Show
+                        when={P.o.status == 'wating'}
+                        fallback={<span>{P.o.hash}</span>}
+                    >
+                        <textarea
+                            class='styled n'
+                            rows={2}
+                            value={state.hash}
+                            onInput={e => {
+                                setState({ hash: e.currentTarget.value })
+                            }}
+                        />
+                    </Show>
+                </Show>
             </div>
-            <div class='actions'>
-                <Confact
-                    icon={BanIcon}
-                    color='var(--red)'
-                    timer_ms={2000}
-                    onAct={() => update_order({ status: 'refunded' })}
-                />
-                <Confact
-                    icon={CircleCheckIcon}
-                    disabled={!state.hash}
-                    timer_ms={2000}
-                    color='var(--green)'
-                    onAct={() =>
-                        update_order({ status: 'done', hash: state.hash })
-                    }
-                />
-            </div>
+            <Show when={P.o.status == 'wating'}>
+                <div class='actions'>
+                    <Confact
+                        icon={BanIcon}
+                        color='var(--red)'
+                        timer_ms={1300}
+                        onAct={() => update_order({ status: 'refunded' })}
+                    />
+                    <Confact
+                        icon={CircleCheckIcon}
+                        disabled={!state.hash}
+                        timer_ms={1400}
+                        color='var(--green)'
+                        onAct={() =>
+                            update_order({ status: 'done', hash: state.hash })
+                        }
+                    />
+                </div>
+            </Show>
         </div>
     )
 }
