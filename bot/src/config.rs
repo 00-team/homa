@@ -1,35 +1,56 @@
 use core::panic;
 use std::{env, sync::OnceLock};
 
-use teloxide::types::UserId;
+use reqwest::Url;
+use teloxide::types::{LoginUrl, UserId};
 
 #[derive(Debug)]
 pub struct Config {
     pub dev: UserId,
     pub admins: Vec<UserId>,
-    pub bot_username: String
+    pub bot_username: String,
+    pub login_url: LoginUrl,
+}
+
+impl Config {
+    pub const API: &'static str = "https://thora.dozar.bid";
+}
+
+macro_rules! env_num {
+    ($name:literal, $ty:ty) => {
+        env::var($name)
+            .expect(concat!($name, " was not found in env"))
+            .parse::<$ty>()
+            .expect(concat!($name, " is not a number"))
+    };
 }
 
 pub fn config() -> &'static Config {
     static STATE: OnceLock<Config> = OnceLock::new();
     STATE.get_or_init(|| {
-        let dev = UserId(
-            env::var("TELOXIDE_DEVELOPER")
-                .unwrap()
-                .parse::<u64>()
-                .unwrap(),
-        );
+        let login_url = LoginUrl {
+            url: Url::parse("https://thora.dozar.bid/api/auth/login-telegram/")
+                .expect("invalid login url"),
+            forward_text: Some("some forward text".to_string()),
+            bot_username: None,
+            request_write_access: Some(true),
+        };
 
-        let mut admins: Vec<UserId> =
-            serde_json::from_str(&env::var("TELOXIDE_ADMINS").unwrap())
-                .unwrap();
-        admins.push(dev);
+        let dev = UserId(env_num!("DEVELOPER", u64));
 
-        let bot_username = env::var("TELOXIDE_BOT_USERNAME").unwrap();
+        let bot_username = env::var("BOT_USERNAME").expect("env BOT_USERNAME");
         if bot_username.starts_with("@") {
-            panic!("bot_username must NOT start with @");
+            panic!("BOT_USERNAME must NOT start with @");
         }
 
-        Config { dev, admins, bot_username }
+        Config {
+            login_url,
+            dev,
+            admins: serde_json::from_str(
+                &env::var("ADMINS").expect(".env: ADMINS"),
+            )
+            .expect("bad ADMINS"),
+            bot_username,
+        }
     })
 }

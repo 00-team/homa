@@ -1,26 +1,14 @@
-use reqwest::Url;
-use sqlx::SqlitePool;
 use std::env;
 use std::sync::Arc;
 use teloxide::dispatching::dialogue::serializer::Json;
 use teloxide::dispatching::dialogue::{ErasedStorage, SqliteStorage, Storage};
 use teloxide::dispatching::{HandlerExt, UpdateFilterExt};
-use teloxide::payloads::SendMessageSetters;
 use teloxide::prelude::*;
-use tools::StartArg;
-// use teloxide::types::ParseMode::MarkdownV2;
-use teloxide::types::{
-    InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, KeyboardMarkup,
-    LoginUrl,
-};
-use teloxide::utils::command::BotCommands;
 
-mod config;
-mod state;
-mod tools;
-mod types;
-mod commands;
 mod callback;
+mod commands;
+mod config;
+mod types;
 
 use config::config;
 use types::*;
@@ -46,8 +34,7 @@ async fn main() -> anyhow::Result<()> {
                     dptree::entry()
                         .filter_command::<Command>()
                         .endpoint(commands::handle_commands),
-                )
-            ,
+                ),
         )
         .branch(
             Update::filter_callback_query()
@@ -63,4 +50,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-

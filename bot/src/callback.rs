@@ -1,6 +1,7 @@
-async fn callback_query(
-    bot: Bot, chit: ChitChat, pool: &SqlitePool, q: CallbackQuery,
-) -> HR {
+use crate::{KeyData, State, Store, HR};
+use teloxide::prelude::*;
+
+pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
     bot.answer_callback_query(q.id).await?;
     if q.message.is_none() || q.data.is_none() {
         return Ok(());
@@ -10,21 +11,23 @@ async fn callback_query(
     let data = q.data.unwrap();
     let key: KeyData = data.into();
 
-    let state = chit.get_or_default().await?;
+    let state = store.get_or_default().await?;
     match state {
         State::Start => match key {
-            KeyData::Buy => {
-                chit.update(State::SelectService {
-                    purchase_kind: PurchaseKind::Buy,
-                })
-                .await?
-            }
-            KeyData::Rent => {
-                chit.update(State::SelectService {
-                    purchase_kind: PurchaseKind::Rent,
-                })
-                .await?
-            }
+            // KeyData::Buy => {
+            //     store
+            //         .update(State::SelectService {
+            //             purchase_kind: PurchaseKind::Buy,
+            //         })
+            //         .await?
+            // }
+            // KeyData::Rent => {
+            //     store
+            //         .update(State::SelectService {
+            //             purchase_kind: PurchaseKind::Rent,
+            //         })
+            //         .await?
+            // }
             _ => (),
         },
         _ => (),
