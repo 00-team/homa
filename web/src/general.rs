@@ -1,11 +1,8 @@
-use std::collections::HashMap;
-
+use crate::models::AppErr;
 use serde::{Deserialize, Serialize};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 use sqlx::{Pool, Sqlite};
 use utoipa::ToSchema;
-
-use crate::models::AppErr;
 
 #[derive(Serialize_tuple, Deserialize_tuple, Default, Clone, Debug)]
 pub struct PriceValue {
