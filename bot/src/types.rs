@@ -3,10 +3,11 @@ use teloxide::dispatching::dialogue;
 use teloxide::dispatching::dialogue::ErasedStorage;
 use teloxide::utils::command::BotCommands;
 
-pub type ChitChat = dialogue::Dialogue<State, ErasedStorage<State>>;
+pub type Store = dialogue::Dialogue<State, ErasedStorage<State>>;
 pub type HR = Result<(), Box<dyn Error + Send + Sync>>;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum KeyData {
     Unknown,
     Tutorial,
@@ -28,6 +29,7 @@ impl From<String> for KeyData {
 }
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[command(rename_rule = "snake_case")]
 pub enum PurchaseKind {
     #[default]
     Buy,
@@ -35,6 +37,7 @@ pub enum PurchaseKind {
 }
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+#[command(rename_rule = "snake_case")]
 pub enum State {
     #[default]
     Start,
