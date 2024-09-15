@@ -1,6 +1,8 @@
+use crate::config::Config;
 use crate::docs::UpdatePaths;
+use crate::general::general_set;
 use crate::models::order::{OrderStatus, StarOrder};
-use crate::models::user::Admin;
+use crate::models::user::{Admin, User};
 use crate::models::{AppErrBadRequest, Response};
 use crate::AppState;
 use actix_web::web::{Data, Json, Query};
@@ -69,12 +71,30 @@ async fn update(
     if !matches!(order.status, OrderStatus::Wating) {
         return Err(AppErrBadRequest("order is already finished"));
     }
+
     match body.0 {
         StarOrderUpdateBody::Done { hash } => {
+            let mut general = state.general.lock()?;
+            general.money_total += order.cost;
+
+            let raw = order.amount as f64
+                * Config::STAR_COST
+                * general.usd_irr as f64;
+
+            general.money_gain += order.cost - raw as i64;
+            general_set(&state.sql, &general).await?;
+
             order.status = OrderStatus::Done;
             order.hash = Some(hash);
         }
         StarOrderUpdateBody::Refunded => {
+            sqlx::query! {
+                "update users set wallet = wallet + ? where id = ?",
+                order.cost, order.user
+            }
+            .execute(&state.sql)
+            .await?;
+
             order.status = OrderStatus::Refunded;
         }
     }
