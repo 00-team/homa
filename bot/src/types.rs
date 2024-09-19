@@ -10,6 +10,7 @@ pub type HR = Result<(), Box<dyn Error + Send + Sync>>;
 #[serde(rename_all = "snake_case")]
 pub enum KeyData {
     Unknown,
+    Menu,
 }
 
 impl From<KeyData> for String {

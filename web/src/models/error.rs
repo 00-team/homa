@@ -6,7 +6,7 @@ use std::{
 };
 
 use actix_web::{
-    body::BoxBody, error::PayloadError, http::StatusCode, HttpResponse,
+    body::BoxBody, error::PayloadError, http::{header::ToStrError, StatusCode}, HttpResponse,
     ResponseError,
 };
 use awc::error::{JsonPayloadError, SendRequestError};
@@ -103,6 +103,7 @@ impl_from_err!(ParseFloatError);
 impl_from_err!(ParseIntError);
 impl_from_err!(JsonPayloadError);
 impl_from_err!(SendRequestError);
+impl_from_err!(ToStrError);
 impl_from_err!(FromUtf8Error);
 impl_from_err!(serde_json::Error);
 

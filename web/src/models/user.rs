@@ -1,18 +1,74 @@
-use std::{future::Future, ops, pin::Pin};
-
-use actix_web::{
-    dev::Payload,
-    http::header::{self, AUTHORIZATION},
-    web::Data,
-    FromRequest, HttpRequest,
-};
+use super::{AppErr, AppErrForbidden};
+use crate::{config::config, utils::CutOff, AppState};
+use actix_web::{dev::Payload, web::Data, FromRequest, HttpRequest};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
+use std::{future::Future, ops, pin::Pin};
 use utoipa::ToSchema;
 
-use crate::{utils::CutOff, AppState};
+enum Authorization {
+    Bot { id: i64, token: String },
+    User { id: i64, token: String },
+}
 
-use super::{AppErr, AppErrForbidden};
+impl TryFrom<&str> for Authorization {
+    type Error = AppErr;
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let mut tokens = value.splitn(2, ' ');
+        let key = tokens.next();
+        let tokens = tokens.next().and_then(|v| Some(v.splitn(2, ':')));
+
+        if key.is_none() || tokens.is_none() {
+            return Err(AppErrForbidden("invalid authorization"));
+        }
+
+        let key = key.unwrap().to_string();
+        let mut tokens = tokens.unwrap();
+        let id = tokens.next().and_then(|v| v.parse::<i64>().ok());
+        let token = tokens.next().and_then(|v| Some(v.to_string()));
+
+        if id.is_none() || token.is_none() {
+            return Err(AppErrForbidden("bad authorization"));
+        }
+
+        let id = id.unwrap();
+        let token = token.unwrap();
+
+        match key.as_str() {
+            "bot" => Ok(Authorization::Bot { id, token }),
+            "user" => Ok(Authorization::User { id, token }),
+            _ => Err(AppErrForbidden("unknown authorization")),
+        }
+    }
+}
+
+impl TryFrom<&HttpRequest> for Authorization {
+    type Error = AppErr;
+
+    fn try_from(rq: &HttpRequest) -> Result<Self, Self::Error> {
+        if let Some(value) = rq.headers().get("authorization") {
+            return Authorization::try_from(value.to_str()?);
+        }
+
+        for hdr in rq.headers().get_all("cookie") {
+            for cookie in hdr.as_bytes().split(|v| *v == b';') {
+                let mut s = cookie.splitn(2, |v| *v == b'=');
+
+                let k = s.next().and_then(|v| String::from_utf8(v.into()).ok());
+                let v = s.next().and_then(|v| String::from_utf8(v.into()).ok());
+                if k.is_none() || v.is_none() {
+                    continue;
+                }
+
+                if k.unwrap().trim().to_lowercase() == "authorization" {
+                    return Authorization::try_from(v.unwrap().as_str());
+                }
+            }
+        }
+
+        Err(AppErrForbidden("no authorization"))
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema, Default)]
 pub struct User {
@@ -44,76 +100,6 @@ impl ops::DerefMut for Admin {
     }
 }
 
-fn parse_token(token: &str) -> Option<(i64, String)> {
-    let mut token = token.splitn(2, ':');
-    let id = match token.next() {
-        Some(s) => match s.parse::<i64>() {
-            Ok(v) => v,
-            Err(_) => return None,
-        },
-        None => return None,
-    };
-
-    let token = match token.next() {
-        Some(s) => s.to_string(),
-        None => return None,
-    };
-
-    Some((id, token))
-}
-
-fn extract_token(request: &HttpRequest) -> Option<String> {
-    let mut bearer_token: Option<String> = None;
-    if let Some(value) = request.headers().get(AUTHORIZATION) {
-        bearer_token = value.to_str().map_or(None, |v| Some(v.to_string()));
-    }
-
-    if bearer_token.is_none() {
-        for hdr in request.headers().get_all(header::COOKIE) {
-            for cookie in hdr.as_bytes().split(|v| *v == b';') {
-                let mut s = cookie.splitn(2, |v| *v == b'=');
-
-                let key = s.next();
-                let val = s.next();
-                if key.is_none() || val.is_none() {
-                    continue;
-                }
-
-                let key = key.unwrap();
-                let val = val.unwrap();
-
-                if let Ok(key) = String::from_utf8(key.into()) {
-                    if key.trim().to_lowercase() == "authorization" {
-                        if let Ok(v) = String::from_utf8(val.into()) {
-                            bearer_token = Some(v);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    let bearer_token = if let Some(v) = bearer_token {
-        v
-    } else {
-        return None;
-    };
-
-    let mut tokens = bearer_token.splitn(2, ' ');
-    let key = tokens.next();
-    let token = tokens.next();
-    if key.is_none() || token.is_none() {
-        return None;
-    }
-
-    if key.unwrap().to_lowercase() != "bearer" {
-        return None;
-    }
-
-    Some(token.unwrap().to_string())
-}
-
 impl FromRequest for User {
     type Error = AppErr;
     type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
@@ -121,28 +107,33 @@ impl FromRequest for User {
     fn from_request(req: &HttpRequest, _pl: &mut Payload) -> Self::Future {
         let state = req.app_data::<Data<AppState>>().unwrap();
         let pool = state.sql.clone();
-        let token = extract_token(req);
+        let auth = Authorization::try_from(req);
         // let token = BearerAuth::from_request(req, pl);
 
         Box::pin(async move {
-            if token.is_none() {
-                return Err(AppErrForbidden("token was not found"));
-            }
+            let mut user = match auth? {
+                Authorization::Bot { id, token } => {
+                    if config().bot_auth != token {
+                        return Err(AppErrForbidden("bad auth"));
+                    }
 
-            let (id, token) = match parse_token(&token.unwrap()) {
-                Some(t) => t,
-                None => return Err(AppErrForbidden("invalid token")),
+                    sqlx::query_as! {
+                        User, "select * from users where id = ?", id
+                    }
+                    .fetch_one(&pool)
+                    .await?
+                }
+                Authorization::User { id, token } => {
+                    let token = hex::encode(sha2::Sha512::digest(&token));
+                    sqlx::query_as! {
+                        User,
+                        "select * from users where id = ? and token = ?",
+                        id, token
+                    }
+                    .fetch_one(&pool)
+                    .await?
+                }
             };
-
-            let token = hex::encode(sha2::Sha512::digest(&token));
-
-            let mut user = sqlx::query_as! {
-                User,
-                "select * from users where id = ? and token = ?",
-                id, token
-            }
-            .fetch_one(&pool)
-            .await?;
 
             if user.banned {
                 return Err(AppErrForbidden("banned"));

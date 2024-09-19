@@ -1,8 +1,9 @@
 use sha2::{Digest, Sha256};
-use std::{collections::HashSet, env, sync::OnceLock};
+use std::{collections::HashSet, sync::OnceLock};
 
 #[derive(Debug)]
 pub struct Config {
+    pub bot_auth: String,
     pub bot_token: String,
     pub bot_token_hash: [u8; 32],
     pub sms_cb_pass: String,
@@ -18,14 +19,18 @@ impl Config {
     // pub const TAX: f64 = 3.0; // 300%
 }
 
+macro_rules! evar {
+    ($name:literal) => {
+        std::env::var($name).expect(concat!($name, " was not found in env"))
+    };
+}
+
 pub fn config() -> &'static Config {
     static STATE: OnceLock<Config> = OnceLock::new();
     STATE.get_or_init(|| {
-        let bot_token = env::var("TELOXIDE_TOKEN").expect("env: T_TOKEN");
-        let admins = serde_json::from_str::<Vec<u64>>(
-            &env::var("ADMINS").expect("env: ADMINS"),
-        )
-        .expect("invalid ADMINS in .env");
+        let bot_token = evar!("TELOXIDE_TOKEN");
+        let admins = serde_json::from_str::<Vec<u64>>(&evar!("ADMINS"))
+            .expect("invalid ADMINS in .env");
 
         let admins = HashSet::<u64>::from_iter(admins);
 
@@ -33,9 +38,10 @@ pub fn config() -> &'static Config {
             admins,
             bot_token_hash: Sha256::digest(&bot_token).into(),
             bot_token,
-            sms_cb_pass: env::var("SMS_CB_PASS").expect("env"),
+            sms_cb_pass: evar!("SMS_CB_PASS"),
+            bot_auth: evar!("BOT_AUTH"),
             // navasan_apikey: env::var("NAVASAN_APIKEY").expect("env"),
-            zarinpal: env::var("ZARINPAL").expect("env"),
+            zarinpal: evar!("ZARINPAL"),
         }
     })
 }

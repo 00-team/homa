@@ -1,4 +1,4 @@
-use crate::{config::config, Command, StartArgs, State, Store, HR};
+use crate::{config::config, Command, KeyData, StartArgs, State, Store, HR};
 use teloxide::{
     prelude::*,
     types::{InlineKeyboardButton, InlineKeyboardMarkup},
@@ -8,11 +8,9 @@ use teloxide::{
 pub async fn handle_commands(
     bot: Bot, store: Store, msg: Message, cmd: Command,
 ) -> HR {
-    let login_keyboard =
-        InlineKeyboardMarkup::new([[InlineKeyboardButton::login(
-            "🪪 ورود",
-            config().login_url.clone(),
-        )]]);
+    let login_button =
+        InlineKeyboardButton::login("🪪 ورود", config().login_url.clone());
+    let login_keyboard = InlineKeyboardMarkup::new([[login_button.clone()]]);
 
     match cmd {
         Command::Start(_) => {
@@ -28,9 +26,17 @@ pub async fn handle_commands(
                 _ => {}
             }
 
-            bot.send_message(msg.chat.id, "متن استارت")
-                // .reply_markup(InlineKeyboardMarkup::new(inline))
-                .await?;
+            bot.send_message(
+                msg.chat.id,
+                indoc::indoc! {"
+                    توضیحات درباره تورا
+                "},
+            )
+            .reply_markup(InlineKeyboardMarkup::new([[
+                InlineKeyboardButton::callback("منو", KeyData::Menu),
+                login_button,
+            ]]))
+            .await?;
 
             store.update(State::Menu).await?;
         }
