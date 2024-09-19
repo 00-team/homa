@@ -123,7 +123,7 @@ async fn login_telegram(
 
     Ok(HttpResponse::build(StatusCode::FOUND)
         .cookie(
-            Cookie::build("authorization", format!("Bearer {}:{token}", q.id))
+            Cookie::build("authorization", format!("user {}:{token}", q.id))
                 // .domain("thora.dozar.bid")
                 .path("/")
                 .secure(true)

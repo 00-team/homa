@@ -1,17 +1,16 @@
-use utoipa::{
-    openapi::{
-        self,
-        security::{Http, HttpAuthScheme, SecurityScheme},
-        Components, SecurityRequirement,
-    },
-    Modify, OpenApi,
-};
-
 use crate::models::{
     message::Message,
     order::{OrderStatus, PhoneOrder, StarOrder},
     transaction::{Transaction, TransactionKind, TransactionStatus},
     user::User,
+};
+use utoipa::{
+    openapi::{
+        self,
+        security::{ApiKey, ApiKeyValue, SecurityScheme},
+        Components, SecurityRequirement,
+    },
+    Modify, OpenApi,
 };
 
 pub struct AddSecurity;
@@ -25,7 +24,10 @@ impl Modify for AddSecurity {
         if let Some(schema) = openapi.components.as_mut() {
             schema.add_security_scheme(
                 "user_token",
-                SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)),
+                // SecurityScheme::Http(Http::new(HttpAuthScheme::Bearer)),
+                SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new(
+                    "authorization",
+                ))),
             )
         }
 
