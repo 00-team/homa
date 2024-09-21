@@ -11,6 +11,9 @@ pub type HR = Result<(), Box<dyn Error + Send + Sync>>;
 pub enum KeyData {
     Unknown,
     Menu,
+    ShopStar,
+    BuyStar(u64),
+    ComingSoon,
 }
 
 impl From<KeyData> for String {
@@ -31,6 +34,7 @@ pub enum State {
     #[default]
     Start,
     Menu,
+    ShopStar
 }
 
 #[derive(BotCommands, Clone)]

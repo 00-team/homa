@@ -10,13 +10,12 @@ pub struct ThoraUser {
     pub admin: bool,
 }
 
-pub async fn user_get(user_id: u64) -> anyhow::Result<Option<ThoraUser>> {
-    let client = reqwest::Client::new();
-    let res = client
-        .get(format!("{}/api/user/", Config::API))
-        .header("authorization", format!("bot {user_id}:{}", config().bot_auth))
-        .send()
-        .await?;
+pub async fn user_get(uid: u64) -> anyhow::Result<Option<ThoraUser>> {
+    let rq = reqwest::Client::new().get(Config::api("/api/user/"));
+    Ok(config().api_auth(rq, uid).send().await?.json::<ThoraUser>().await.ok())
+}
 
-    Ok(res.json::<ThoraUser>().await.ok())
+pub async fn star_price(user_id: u64) -> anyhow::Result<f64> {
+    let rq = reqwest::Client::new().get(Config::api("/api/stars/price/"));
+    Ok(config().api_auth(rq, user_id).send().await?.json::<f64>().await?)
 }

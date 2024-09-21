@@ -1,5 +1,9 @@
 use crate::{menu::menu_send, KeyData, State, Store, HR};
-use teloxide::{dispatching::dialogue::GetChatId, prelude::*};
+use teloxide::{
+    dispatching::dialogue::GetChatId,
+    prelude::*,
+    types::{InlineKeyboardButton, InlineKeyboardMarkup},
+};
 
 pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
     bot.answer_callback_query(&q.id).await?;
@@ -8,7 +12,7 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
         return Ok(());
     }
 
-    let (msg, chat_id) = (q.message.unwrap(), chat_id.unwrap());
+    let (_msg, chat_id) = (q.message.unwrap(), chat_id.unwrap());
     let data = q.data.unwrap();
     let key: KeyData = data.into();
 
@@ -19,6 +23,25 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
 
     let state = store.get_or_default().await?;
     match state {
+        State::Menu => match key {
+            KeyData::ComingSoon => {
+                bot.send_message(chat_id, "به زودی 🌊").await?;
+            }
+            KeyData::ShopStar => {
+                bot.send_message(chat_id, "stars ...")
+                    .reply_markup(InlineKeyboardMarkup::new(
+                        [50, 75, 100, 120, 69].map(|a| {
+                            [InlineKeyboardButton::callback(
+                                format!("{a} stars ⭐"),
+                                KeyData::BuyStar(a),
+                            )]
+                        }),
+                    ))
+                    .await?;
+                store.update(State::ShopStar).await?;
+            }
+            _ => {}
+        },
         State::Start => match key {
             // KeyData::Buy => {
             //     store

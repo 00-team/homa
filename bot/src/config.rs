@@ -1,7 +1,7 @@
 use core::panic;
 use std::{env, sync::OnceLock};
 
-use reqwest::Url;
+use reqwest::{RequestBuilder, Url};
 use teloxide::types::{LoginUrl, UserId};
 
 #[derive(Debug)]
@@ -11,16 +11,27 @@ pub struct Config {
     pub bot_username: String,
     pub login_url: LoginUrl,
     pub bot_auth: String,
+    pub orders_url: Url,
 }
 
 #[cfg(debug_assertions)]
 impl Config {
-    pub const API: &'static str = "http://localhost:7000";
+    pub const HOST: &'static str = "http://localhost:7000";
 }
 
 #[cfg(not(debug_assertions))]
 impl Config {
-    pub const API: &'static str = "https://thora.dozar.bid";
+    pub const HOST: &'static str = "https://thora.dozar.bid";
+}
+
+impl Config {
+    pub fn api(url: &str) -> String {
+        format!("{}{url}", Self::HOST)
+    }
+
+    pub fn api_auth(&self, rq: RequestBuilder, uid: u64) -> RequestBuilder {
+        rq.header("authorization", format!("bot {uid}:{}", self.bot_auth))
+    }
 }
 
 macro_rules! evar {
@@ -41,6 +52,8 @@ macro_rules! env_num {
 pub fn config() -> &'static Config {
     static STATE: OnceLock<Config> = OnceLock::new();
     STATE.get_or_init(|| {
+        let orders_url = Url::parse("https://thora.dozar.bid/orders/")
+            .expect("invalid orders url");
         let login_url = LoginUrl {
             url: Url::parse("https://thora.dozar.bid/api/auth/login-telegram/")
                 .expect("invalid login url"),
@@ -62,6 +75,7 @@ pub fn config() -> &'static Config {
             admins: serde_json::from_str(&evar!("ADMINS")).expect("bad ADMINS"),
             bot_username,
             bot_auth: evar!("BOT_AUTH"),
+            orders_url,
         }
     })
 }
