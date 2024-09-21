@@ -1,4 +1,7 @@
-use crate::{config::config, Command, KeyData, StartArgs, State, Store, HR};
+use crate::{
+    config::config, menu::menu_send, Command, KeyData, StartArgs, State, Store,
+    HR,
+};
 use teloxide::{
     prelude::*,
     types::{InlineKeyboardButton, InlineKeyboardMarkup},
@@ -45,8 +48,7 @@ pub async fn handle_commands(
                 .await?;
         }
         Command::Menu => {
-            store.update(State::Menu).await?;
-            bot.send_message(msg.chat.id, "menu...").await?;
+            menu_send(bot, store, msg.from.expect("msg user")).await?;
         }
         Command::Login => {
             bot.send_message(msg.chat.id, "ورود به سایت")

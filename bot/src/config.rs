@@ -10,10 +10,23 @@ pub struct Config {
     pub admins: Vec<UserId>,
     pub bot_username: String,
     pub login_url: LoginUrl,
+    pub bot_auth: String,
 }
 
+#[cfg(debug_assertions)]
+impl Config {
+    pub const API: &'static str = "http://localhost:7000";
+}
+
+#[cfg(not(debug_assertions))]
 impl Config {
     pub const API: &'static str = "https://thora.dozar.bid";
+}
+
+macro_rules! evar {
+    ($name:literal) => {
+        env::var($name).expect(concat!($name, " was not found in env"))
+    };
 }
 
 macro_rules! env_num {
@@ -38,7 +51,7 @@ pub fn config() -> &'static Config {
 
         let dev = UserId(env_num!("DEVELOPER", u64));
 
-        let bot_username = env::var("BOT_USERNAME").expect("env BOT_USERNAME");
+        let bot_username = evar!("BOT_USERNAME");
         if bot_username.starts_with("@") {
             panic!("BOT_USERNAME must NOT start with @");
         }
@@ -46,11 +59,9 @@ pub fn config() -> &'static Config {
         Config {
             login_url,
             dev,
-            admins: serde_json::from_str(
-                &env::var("ADMINS").expect(".env: ADMINS"),
-            )
-            .expect("bad ADMINS"),
+            admins: serde_json::from_str(&evar!("ADMINS")).expect("bad ADMINS"),
             bot_username,
+            bot_auth: evar!("BOT_AUTH"),
         }
     })
 }

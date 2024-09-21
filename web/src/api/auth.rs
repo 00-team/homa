@@ -1,7 +1,7 @@
 use actix_web::cookie::{time::Duration, Cookie, SameSite};
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Query};
-use actix_web::{get, HttpResponse, Scope};
+use actix_web::{get, FromRequest, HttpRequest, HttpResponse, Scope};
 use hmac::{Hmac, Mac};
 use serde::Deserialize;
 use sha2::{Digest, Sha256, Sha512};
@@ -46,8 +46,10 @@ pub struct LoginTelQuery {
 /// Login with Telegram
 #[get("/login-telegram/")]
 async fn login_telegram(
-    q: Query<LoginTelQuery>, state: Data<AppState>,
+    rq: HttpRequest, state: Data<AppState>,
 ) -> Result<HttpResponse, AppErr> {
+    let q = Query::<LoginTelQuery>::extract(&rq).await?;
+
     if q.auth_date < now() - 6 * 3600 {
         return Err(AppErrBadRequest("login again"));
     }

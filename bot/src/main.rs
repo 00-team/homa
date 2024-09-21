@@ -9,6 +9,9 @@ mod callback;
 mod commands;
 mod config;
 mod types;
+mod api;
+mod menu;
+mod utils;
 
 use config::config;
 use types::*;

@@ -1,9 +1,9 @@
-use crate::{KeyData, State, Store, HR};
+use crate::{menu::menu_send, KeyData, State, Store, HR};
 use teloxide::{dispatching::dialogue::GetChatId, prelude::*};
 
 pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
-    bot.answer_callback_query(q.id).await?;
-    let chat_id = q.chat_id();
+    bot.answer_callback_query(&q.id).await?;
+    let chat_id = q.chat_id().clone();
     if q.message.is_none() || q.data.is_none() || chat_id.is_none() {
         return Ok(());
     }
@@ -12,13 +12,14 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
     let data = q.data.unwrap();
     let key: KeyData = data.into();
 
+    if matches!(key, KeyData::Menu) {
+        menu_send(bot, store, q.from).await?;
+        return Ok(());
+    }
+
     let state = store.get_or_default().await?;
     match state {
         State::Start => match key {
-            KeyData::Menu => {
-                bot.send_message(chat_id, "menu").await?;
-                store.update(State::Menu).await?;
-            }
             // KeyData::Buy => {
             //     store
             //         .update(State::SelectService {
