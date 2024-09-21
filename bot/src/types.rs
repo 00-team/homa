@@ -12,6 +12,7 @@ pub enum KeyData {
     Unknown,
     Menu,
     ShopStar,
+    ChargeWallet,
     BuyStar(u64),
     ComingSoon,
 }

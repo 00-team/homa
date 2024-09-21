@@ -32,6 +32,13 @@ impl Config {
     pub fn api_auth(&self, rq: RequestBuilder, uid: u64) -> RequestBuilder {
         rq.header("authorization", format!("bot {uid}:{}", self.bot_auth))
     }
+
+    pub fn wallet(amount: i64) -> Url {
+        Url::parse(&format!(
+            "https://thora.dozar.bid/api/user/deposit/?amount={amount}"
+        ))
+        .expect("bad wallet url")
+    }
 }
 
 macro_rules! evar {

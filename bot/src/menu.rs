@@ -18,7 +18,8 @@ pub async fn menu_send(bot: Bot, store: Store, user: User) -> HR {
                 نام: {}
                 کیف پول: {} تومان
                 استار: {} ⭐
-                .
+
+                --- thora ---
             ",
                 user.full_name(), utils::toman(tu.wallet),
                 (tu.wallet as f64 / star_price) as i64
@@ -29,10 +30,16 @@ pub async fn menu_send(bot: Bot, store: Store, user: User) -> HR {
                 "ورود مججد",
                 config.login_url.clone(),
             )],
-            vec![InlineKeyboardButton::url(
-                "سفارشات 🛍",
-                config.orders_url.clone(),
-            )],
+            vec![
+                InlineKeyboardButton::url(
+                    "سفارشات 🛍",
+                    config.orders_url.clone(),
+                ),
+                InlineKeyboardButton::callback(
+                    "شارژ کیف پول 💰",
+                    KeyData::ChargeWallet,
+                ),
+            ],
             vec![
                 InlineKeyboardButton::callback(
                     "خرید استارز ⭐",
