@@ -84,7 +84,7 @@ pub async fn send_after_login(chat_id: i64) {
             chat_id,
             reply_markup: Markup {
                 inline_keyboard: [[Btn {
-                    text: "منو 🕯",
+                    text: "منو 📜",
                     callback_data: "\"menu\"",
                 }]],
             },
