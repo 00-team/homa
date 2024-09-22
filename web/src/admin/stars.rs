@@ -41,7 +41,7 @@ async fn list(
     let offset = q.page * 32;
     let result = sqlx::query_as! {
         StarOrder,
-        "select * from star_orders where status = ? order by id desc limit 32 offset ?",
+        "select * from star_orders where status = ? order by id asc limit 32 offset ?",
         q.status, offset
     }
     .fetch_all(&state.sql)
