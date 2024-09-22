@@ -79,10 +79,15 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
     }
 
     #[derive(Serialize, Debug)]
+    struct Markup {
+        inline_keyboard: [[Btn; 1]; 1],
+    }
+
+    #[derive(Serialize, Debug)]
     struct Body {
         chat_id: i64,
         text: String,
-        reply_markup: [[Btn; 1]; 1],
+        reply_markup: Markup,
     }
 
     let status = match order.status {
@@ -94,9 +99,12 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
     let res = request
         .send_json(&Body {
             chat_id: config.trust,
-            reply_markup: [[Btn {
-                text: "خرید", url: config.bot_url.clone()
-            }]],
+            reply_markup: Markup {
+                inline_keyboard: [[Btn {
+                    text: "خرید",
+                    url: config.bot_url.clone(),
+                }]],
+            },
             text: formatdoc! {"
                 سفارش استار ⭐
                 وضعیت سفارش: {}
