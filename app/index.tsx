@@ -72,6 +72,12 @@ const Root = () => {
                                         () => import('admin/stars')
                                     )}
                                 />
+                                <Route
+                                    path='/users/'
+                                    component={lazy(
+                                        () => import('admin/users')
+                                    )}
+                                />
                             </Route>
                         </Show>
                     </Route>

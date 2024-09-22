@@ -1,7 +1,7 @@
 use crate::config::config;
 use crate::docs::UpdatePaths;
 use crate::models::user::{Admin, User};
-use crate::models::Response;
+use crate::models::{ListInput, Response};
 use crate::AppState;
 use actix_web::web::{Data, Json, Query};
 use actix_web::{get, Scope};
@@ -12,12 +12,34 @@ use utoipa::{IntoParams, OpenApi};
 #[derive(OpenApi)]
 #[openapi(
     tags((name = "admin::users")),
-    paths(username),
+    paths(list, username),
     components(schemas()),
     servers((url = "/users")),
     modifiers(&UpdatePaths)
 )]
 pub struct ApiDoc;
+
+#[utoipa::path(
+    get,
+    params(ListInput),
+    responses((status = 200, body = Vec<User>))
+)]
+/// List Of Users
+#[get("/")]
+async fn list(
+    _: Admin, q: Query<ListInput>, state: Data<AppState>,
+) -> Response<Vec<User>> {
+    let offset = q.page * 32;
+    let result = sqlx::query_as! {
+        User,
+        "select * from users order by id desc limit 32 offset ?",
+        offset
+    }
+    .fetch_all(&state.sql)
+    .await?;
+
+    Ok(Json(result))
+}
 
 #[derive(Deserialize, IntoParams)]
 struct UsernameQuery {
@@ -78,5 +100,5 @@ async fn username(
 }
 
 pub fn router() -> Scope {
-    Scope::new("/users").service(username)
+    Scope::new("/users").service(username).service(list)
 }

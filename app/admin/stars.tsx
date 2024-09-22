@@ -12,6 +12,8 @@ import { STATUS_TABLE, TomanDpy, fmt_timestamp, httpx } from 'shared'
 import { Component, Match, Show, Switch, createEffect, onMount } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 
+import './style/stars.scss'
+
 type Usernames = { [id: string]: string | -1 }
 
 export default () => {
@@ -70,7 +72,7 @@ export default () => {
             onLoad(x) {
                 setState(
                     produce(s => {
-                        if (x.response != 200) {
+                        if (x.status != 200) {
                             s.usernames[id.toString()] = -1
                         } else {
                             s.usernames[id.toString()] = x.response || -1

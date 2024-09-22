@@ -13,6 +13,7 @@ const Admin: Component<RouteSectionProps> = P => {
                     تنظیمات
                 </A>
                 <A href='/admin/stars/'>استار</A>
+                <A href='/admin/users/'>کاربران</A>
             </div>
             {P.children}
         </div>

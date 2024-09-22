@@ -43,7 +43,7 @@ export const Navbar = () => {
                     <Show when={self.user.photo} fallback={<UserIcon />}>
                         <img
                             draggable={false}
-                            src={`/record/${self.user.id}.jpg`}
+                            src={`/record/u-${self.user.id}.jpg`}
                         />
                     </Show>
                 </A>
@@ -125,7 +125,7 @@ export const NavBottom = () => {
                 <Show when={self.user.photo} fallback={<UserIcon />}>
                     <img
                         draggable={false}
-                        src={`/record/${self.user.id}.jpg`}
+                        src={`/record/u-${self.user.id}.jpg`}
                     />
                 </Show>
             </A>

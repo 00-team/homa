@@ -24,7 +24,7 @@ pub fn get_random_string(charset: &[u8], len: usize) -> String {
 pub async fn save_photo(url: &str, id: i64) -> Result<(), AppErr> {
     let client = awc::Client::new();
     let mut result = client.get(url).send().await?.body().await?.reader();
-    let mut file = File::create(format!("{}/{id}.jpg", Config::RECORD_DIR))?;
+    let mut file = File::create(format!("{}/u-{id}.jpg", Config::RECORD_DIR))?;
 
     io::copy(&mut result, &mut file)?;
 
