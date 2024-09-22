@@ -42,7 +42,7 @@ pub fn config() -> &'static Config {
             admins,
             bot_token_hash: Sha256::digest(&bot_token).into(),
             bot_token,
-            bot_url: format!("tg://{}", bot_username),
+            bot_url: format!("t.me/{}", bot_username),
             bot_username,
             sms_cb_pass: evar!("SMS_CB_PASS"),
             bot_auth: evar!("BOT_AUTH"),
