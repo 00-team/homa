@@ -4,6 +4,7 @@ use crate::general::general_set;
 use crate::models::order::{OrderStatus, StarOrder};
 use crate::models::user::{Admin, User};
 use crate::models::{AppErrBadRequest, Response};
+use crate::utils::send_star_order;
 use crate::AppState;
 use actix_web::web::{Data, Json, Query};
 use actix_web::{get, patch, Scope};
@@ -105,6 +106,16 @@ async fn update(
     }
     .execute(&state.sql)
     .await?;
+
+    let user = sqlx::query_as! {
+        User,
+        "select * from users where id = ?",
+        order.user
+    }
+    .fetch_one(&state.sql)
+    .await?;
+
+    send_star_order(&user, &order).await;
 
     Ok(Json(order))
 }

@@ -1,8 +1,13 @@
 use crate::{
     config::{config, Config},
-    models::AppErr,
+    models::{
+        order::{OrderStatus, StarOrder},
+        user::User,
+        AppErr,
+    },
 };
 use actix_web::web::Buf;
+use indoc::formatdoc;
 use rand::Rng;
 use serde::Serialize;
 use std::{fs::File, io};
@@ -46,6 +51,65 @@ pub async fn send_message(chat_id: i64, text: &str) {
     }
 
     let _ = request.send_json(&Body { chat_id, text: text.to_string() }).await;
+}
+
+pub fn toman(irr: i64) -> String {
+    (irr / 10)
+        .to_string()
+        .as_bytes()
+        .rchunks(3)
+        .rev()
+        .map(std::str::from_utf8)
+        .collect::<Result<Vec<&str>, _>>()
+        .expect("utils::toman failed")
+        .join(",")
+}
+
+pub async fn send_star_order(user: &User, order: &StarOrder) {
+    let config = config();
+    let client = awc::Client::new();
+    let url =
+        format!("https://api.telegram.org/bot{}/sendMessage", config.bot_token);
+    let request = client.post(&url);
+
+    #[derive(Serialize, Debug)]
+    struct Btn {
+        text: &'static str,
+        url: String,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Body {
+        chat_id: i64,
+        text: String,
+        reply_markup: [[Btn; 1]; 1],
+    }
+
+    let status = match order.status {
+        OrderStatus::Done => "تکمیل شده ✅",
+        OrderStatus::Wating => "درحال تکمیل ⏳",
+        OrderStatus::Refunded => "ریفاند شده ❌",
+    };
+
+    let _ = request
+        .send_json(&Body {
+            chat_id: config.trust,
+            reply_markup: [[Btn {
+                text: "خرید", url: config.bot_url.clone()
+            }]],
+            text: formatdoc! {"
+                سفارش استار ⭐
+                وضعیت سفارش: {}
+                تعداد: {}
+                قیمت: {} تومان
+                خریداد: {}
+
+                --- thora ---
+            ",
+                status, order.amount, toman(order.cost), user.name
+            },
+        })
+        .await;
 }
 
 pub trait CutOff {
