@@ -79,8 +79,6 @@ async fn buy(
     .execute(&state.sql)
     .await?;
 
-    send_star_order(&user, &order).await;
-
     Ok(Json(order))
 }
 
