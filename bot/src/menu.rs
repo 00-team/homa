@@ -57,17 +57,22 @@ pub async fn menu_send(bot: &Bot, store: Store, user: User) -> HR {
         ]))
         .await?;
     } else {
-        bot.send_message(user.id, "please register")
-            .reply_markup(InlineKeyboardMarkup::new([[
-                InlineKeyboardButton::login(
-                    "register",
-                    config.login_url.clone(),
-                ),
-            ]]))
-            .await?;
+        register(bot, &store, user.id).await?;
     }
 
     store.update(State::Menu).await?;
+
+    Ok(())
+}
+
+pub async fn register(bot: &Bot, store: &Store, user_id: UserId) -> HR {
+    bot.send_message(user_id, "ثبت نام در وب سایت تورا الزامی می باشد")
+        .reply_markup(InlineKeyboardMarkup::new([[
+            InlineKeyboardButton::login("ثبت نام", config().login_url.clone()),
+        ]]))
+        .await?;
+
+    store.update(State::Register).await?;
 
     Ok(())
 }

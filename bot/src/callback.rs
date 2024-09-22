@@ -1,6 +1,5 @@
 use crate::{
-    api, config::Config, menu::menu_send, utils::toman, KeyData, State, Store,
-    HR,
+    api, config::Config, menu, utils::toman, KeyData, State, Store, HR,
 };
 use indoc::formatdoc;
 use teloxide::{
@@ -23,15 +22,14 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
 
     match key {
         KeyData::Menu => {
-            menu_send(&bot, store, q.from).await?;
+            menu::menu_send(&bot, store, q.from).await?;
             bot.delete_message(chat_id, msg.id()).await?;
             return Ok(());
         }
         KeyData::ChargeWallet => {
             let user = api::user_get(q.from.id.0).await?;
             if user.is_none() {
-                bot.send_message(chat_id, "register first").await?;
-                store.update(State::Menu).await?;
+                menu::register(&bot, &store, q.from.id).await?;
                 return Ok(());
             }
             let user = user.unwrap();
@@ -70,8 +68,7 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
             KeyData::ShopStar => {
                 let user = api::user_get(q.from.id.0).await?;
                 if user.is_none() {
-                    bot.send_message(chat_id, "register first").await?;
-                    store.update(State::Menu).await?;
+                    menu::register(&bot, &store, q.from.id).await?;
                     return Ok(());
                 }
                 let user = user.unwrap();

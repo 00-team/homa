@@ -35,7 +35,8 @@ pub enum State {
     #[default]
     Start,
     Menu,
-    ShopStar
+    ShopStar,
+    Register,
 }
 
 #[derive(BotCommands, Clone)]
