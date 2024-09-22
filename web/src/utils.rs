@@ -108,7 +108,7 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
             text: formatdoc! {"
                 سفارش استار ⭐
                 وضعیت سفارش: {}
-                تعداد: {}
+                تعداد: {} ⭐
                 قیمت: {} تومان
                 خریداد: {}
 
