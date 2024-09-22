@@ -91,7 +91,7 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
         OrderStatus::Refunded => "ریفاند شده ❌",
     };
 
-    let _ = request
+    let res = request
         .send_json(&Body {
             chat_id: config.trust,
             reply_markup: [[Btn {
@@ -110,6 +110,11 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
             },
         })
         .await;
+
+    log::info!("res: {:?}", res);
+    if let Ok(mut res) = res {
+        log::info!("body: {:?}", res.body().await);
+    }
 }
 
 pub trait CutOff {

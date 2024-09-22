@@ -3,6 +3,7 @@ use crate::docs::UpdatePaths;
 use crate::models::order::StarOrder;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest, Response};
+use crate::utils::send_star_order;
 use crate::{utils, AppState};
 use actix_web::web::{Data, Json};
 use actix_web::{get, post, Scope};
@@ -77,6 +78,8 @@ async fn buy(
     }
     .execute(&state.sql)
     .await?;
+
+    send_star_order(&user, &order).await;
 
     Ok(Json(order))
 }
