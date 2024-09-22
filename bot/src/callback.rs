@@ -75,7 +75,10 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                 let star_price = api::star_price(q.from.id.0).await?;
                 let mut keyboard = [50, 75, 100, 150, 250, 350, 2500, 4000]
                     .iter()
-                    .filter(|a| **a as f64 * star_price < user.wallet as f64)
+                    .filter(|a| {
+                        user.username.is_some()
+                            && **a as f64 * star_price < user.wallet as f64
+                    })
                     .map(|a| {
                         [InlineKeyboardButton::callback(
                             format!(
@@ -97,17 +100,25 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                         KeyData::ChargeWallet,
                     )],
                 );
+                let username_err = if user.username.is_none() {
+                    "\nنام کاربری برای خرید استار الزامی می باشد ❌"
+                } else {
+                    ""
+                };
                 bot.send_message(
                     chat_id,
                     formatdoc! {"
                         خرید استار تلگرام ⭐
                         کیف پول: {} تومان
                         استارز: {} ⭐
+                        نام کاربری: @{}{}
 
                         --- thora ---
                     ",
                         toman(user.wallet),
-                        (user.wallet as f64 / star_price) as i64
+                        (user.wallet as f64 / star_price) as i64,
+                        user.username.unwrap_or("???".to_string()),
+                        username_err
                     },
                 )
                 .reply_markup(InlineKeyboardMarkup::new(keyboard))

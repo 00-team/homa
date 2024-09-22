@@ -31,6 +31,7 @@ pub struct ThoraUser {
     pub wallet: i64,
     pub in_hold: i64,
     pub admin: bool,
+    pub username: Option<String>,
 }
 
 pub async fn user_get(uid: u64) -> anyhow::Result<Option<ThoraUser>> {

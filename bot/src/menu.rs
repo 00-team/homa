@@ -18,11 +18,13 @@ pub async fn menu_send(bot: &Bot, store: Store, user: User) -> HR {
                 نام: {}
                 کیف پول: {} تومان
                 استار: {} ⭐
+                نام کاربری: @{}
 
                 --- thora ---
             ",
                 user.full_name(), utils::toman(tu.wallet),
-                (tu.wallet as f64 / star_price) as i64
+                (tu.wallet as f64 / star_price) as i64,
+                tu.username.unwrap_or("???".to_string())
             },
         )
         .reply_markup(InlineKeyboardMarkup::new(vec![
