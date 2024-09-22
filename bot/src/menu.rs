@@ -8,7 +8,7 @@ use crate::config::config;
 use crate::types::*;
 use crate::{api, utils};
 
-pub async fn menu_send(bot: Bot, store: Store, user: User) -> HR {
+pub async fn menu_send(bot: &Bot, store: Store, user: User) -> HR {
     let config = config();
     if let Some(tu) = api::user_get(user.id.0).await? {
         let star_price = api::star_price(user.id.0).await?;

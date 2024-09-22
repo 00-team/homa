@@ -48,7 +48,7 @@ pub async fn handle_commands(
                 .await?;
         }
         Command::Menu => {
-            menu_send(bot, store, msg.from.expect("msg user")).await?;
+            menu_send(&bot, store, msg.from.expect("msg user")).await?;
         }
         Command::Login => {
             bot.send_message(msg.chat.id, "ورود به سایت")

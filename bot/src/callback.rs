@@ -17,13 +17,14 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
         return Ok(());
     }
 
-    let (_msg, chat_id) = (q.message.unwrap(), chat_id.unwrap());
+    let (msg, chat_id) = (q.message.unwrap(), chat_id.unwrap());
     let data = q.data.unwrap();
     let key: KeyData = data.into();
 
     match key {
         KeyData::Menu => {
-            menu_send(bot, store, q.from).await?;
+            menu_send(&bot, store, q.from).await?;
+            bot.delete_message(chat_id, msg.id()).await?;
             return Ok(());
         }
         KeyData::ChargeWallet => {
@@ -54,6 +55,7 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                 .reply_markup(InlineKeyboardMarkup::new(keyboard))
                 .await?;
 
+            bot.delete_message(chat_id, msg.id()).await?;
             return Ok(());
         }
         _ => {}
@@ -114,6 +116,7 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                 .reply_markup(InlineKeyboardMarkup::new(keyboard))
                 .await?;
                 store.update(State::ShopStar).await?;
+                bot.delete_message(chat_id, msg.id()).await?;
             }
             _ => {}
         },
@@ -125,7 +128,12 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                     Err(e) => String::from(e),
                 };
 
-                bot.send_message(chat_id, dpy).await?;
+                bot.send_message(chat_id, dpy)
+                    .reply_markup(InlineKeyboardMarkup::new([[
+                        InlineKeyboardButton::callback("منو 📜", KeyData::Menu),
+                    ]]))
+                    .await?;
+                bot.delete_message(chat_id, msg.id()).await?;
             }
             _ => {}
         },
