@@ -73,7 +73,7 @@ pub async fn callback_query(bot: Bot, store: Store, q: CallbackQuery) -> HR {
                 }
                 let user = user.unwrap();
                 let star_price = api::star_price(q.from.id.0).await?;
-                let mut keyboard = [50, 75, 100, 150, 250, 350, 2500, 4000]
+                let mut keyboard = [50, 75, 100, 150, 250, 550, 2500, 4000]
                     .iter()
                     .filter(|a| {
                         user.username.is_some()

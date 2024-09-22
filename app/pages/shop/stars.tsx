@@ -65,7 +65,7 @@ export default () => {
 
     return (
         <div class='shop-stars-fnd'>
-            {[50, 75, 100, 150, 250, 350, 2500, 4000].map(s => (
+            {[50, 75, 100, 150, 250, 550, 2500, 4000].map(s => (
                 <button class='styled row-btn' onclick={() => buy(s)}>
                     <span>
                         <TelegramStarIcon /> {s} استار
