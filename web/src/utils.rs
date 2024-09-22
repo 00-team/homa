@@ -53,6 +53,46 @@ pub async fn send_message(chat_id: i64, text: &str) {
     let _ = request.send_json(&Body { chat_id, text: text.to_string() }).await;
 }
 
+pub async fn send_after_login(chat_id: i64) {
+    let client = awc::Client::new();
+    let url = format!(
+        "https://api.telegram.org/bot{}/sendMessage",
+        config().bot_token
+    );
+    let request = client.post(&url);
+
+    #[derive(Serialize, Debug)]
+    struct Btn {
+        text: &'static str,
+        callback_data: &'static str,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Markup {
+        inline_keyboard: [[Btn; 1]; 1],
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Body {
+        chat_id: i64,
+        text: &'static str,
+        reply_markup: Markup,
+    }
+
+    let _ = request
+        .send_json(&Body {
+            chat_id,
+            reply_markup: Markup {
+                inline_keyboard: [[Btn {
+                    text: "منو 🕯",
+                    callback_data: "menu",
+                }]],
+            },
+            text: "به تورا خوش آمدید 🎉",
+        })
+        .await;
+}
+
 pub fn toman(irr: i64) -> String {
     (irr / 10)
         .to_string()
@@ -96,7 +136,7 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
         OrderStatus::Refunded => "ریفاند شده ❌",
     };
 
-    let res = request
+    let _ = request
         .send_json(&Body {
             chat_id: config.trust,
             reply_markup: Markup {
@@ -118,11 +158,6 @@ pub async fn send_star_order(user: &User, order: &StarOrder) {
             },
         })
         .await;
-
-    log::info!("res: {:?}", res);
-    if let Ok(mut res) = res {
-        log::info!("body: {:?}", res.body().await);
-    }
 }
 
 pub trait CutOff {

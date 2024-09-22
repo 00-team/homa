@@ -12,7 +12,7 @@ use crate::config::Config;
 use crate::docs::UpdatePaths;
 use crate::models::user::User;
 use crate::models::{AppErr, AppErrBadRequest};
-use crate::utils::{get_random_string, now, save_photo};
+use crate::utils::{get_random_string, now, save_photo, send_after_login};
 use crate::AppState;
 
 type Hmac256 = Hmac<Sha256>;
@@ -122,6 +122,8 @@ async fn login_telegram(
             .await?;
         }
     };
+
+    send_after_login(q.id).await;
 
     Ok(HttpResponse::build(StatusCode::FOUND)
         .cookie(
